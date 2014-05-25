@@ -1,5 +1,7 @@
 module LSQ
 
-# package code goes here
+include("utilities.jl")
+include("expressions.jl")
+include("add_subtract.jl")
 
 end # module
