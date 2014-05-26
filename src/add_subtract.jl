@@ -12,24 +12,6 @@ function promote_size(x::AbstractExpr, y::AbstractExpr)
   end
 end
 
-function promote_constant(x::AbstractExpr, y::Constant)
-  if y.size == (1, 1) && x.size != (1, 1)
-    return Constant(ones(x.size)*y)
-  else
-    return y
-  end
-end
-
-function reverse_sign(x::AbstractExpr)
-  if x.sign == :pos
-    return :neg
-  elseif x.sign == :neg
-    return :pos
-  else
-    return :any
-  end
-end
-
 function promote_sign(x::AbstractExpr, y::AbstractExpr)
   signs = Set(x.sign, y.sign)
   if :any in signs || signs == Set(:pos,:neg)
@@ -50,7 +32,7 @@ function -(x::AffineExpr)
   for (v, c) in x.varsToCoeffsMap
     varsToCoeffsMap[v] = -c
   end
-  this = AffineExpr(:-, varsToCoeffsMap, -x.constant reverse_sign(x), x.size)
+  this = AffineExpr(:-, varsToCoeffsMap, -x.constant, reverse_sign(x), x.size)
   return this
 end
 

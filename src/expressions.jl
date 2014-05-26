@@ -77,12 +77,8 @@ type SumSquaresExpr <: AbstractExpr
   evaluate::Function
 
   function SumSquaresExpr(head::Symbol, arg::AffineExpr)
-    if !(sign in signs)
-      error("sign must be one of :pos, :neg, :any; got $sign")
-    else
-      this = new(head, nothing, arg, :pos, (1, 1))
-      this.uid = object_id(this)
-      return this
-    end
+    this = new(head, nothing, arg, :pos, (1, 1))
+    this.uid = object_id(this)
+    return this
   end
 end
