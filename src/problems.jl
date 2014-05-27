@@ -1,4 +1,4 @@
-export minimize, is_feasible, solve!
+export minimize, satisfy, solve!
 
 Float64OrNothing = Union(Float64, Nothing)
 SumSquaresExprOrNothing = Union(SumSquaresExpr, Nothing)
@@ -20,8 +20,8 @@ minimize(objective::SumSquaresExpr, constraints::Array{AffineExpr}) = Problem(:m
 minimize(objective::SumSquaresExpr, constraint::AffineExpr) = minimize(objective, [constraint])
 minimize(objective::SumSquaresExpr) = minimize(objective, AffineExpr[])
 
-is_feasible(constraints::Array{AffineExpr}) = Problem(:is_feasible, SumSquaresExpr(:empty, AffineExpr[]), constraints)
-is_feasible(constraint::AffineExpr) = is_feasible([constraint])
+satisfy(constraints::Array{AffineExpr}) = Problem(:satisfy, SumSquaresExpr(:empty, AffineExpr[]), constraints)
+satisfy(constraint::AffineExpr) = satisfy([constraint])
 
 function get_vars_and_vec_sizes(p::Problem)
   vars_to_sizes_map = Dict{Uint64, Int64}()
