@@ -87,3 +87,5 @@ function *(x::Constant, y::SumSquaresExpr)
 end
 
 *(x::SumSquaresExpr, y::Constant) = *(y, x)
+*(x::SumSquaresExpr, y::Value) = *(x, Constant(y))
+*(x::Value, y::SumSquaresExpr) = *(Constant(x), y)
