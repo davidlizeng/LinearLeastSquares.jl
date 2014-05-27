@@ -37,14 +37,14 @@ println(x.value)
 To solve your least-squares problems, lsqpy first converts them to a standard form that looks like
 
 	minimize sum_squares(A * x + b)
-	subject to C*x == d
+	subject to C*x + d == 0
 	
 A and C are matrices formed by stacking together all the equations in the objective and equality constraints respectively. Similarly, b and d are vectors that contain the constant terms in the objective and equality constraints.
 
 In this form, the least-squares problem by solving the following system of equations:
 ```
 	[ 2*A'*A  C' ] [ x ] = [ -2*A*b ]
-	[   C     0  ] [ z ]   [    d   ]
+	[   C     0  ] [ z ]   [   -d   ]
 ```
 This result is derived from the KKT conditions.
 
