@@ -28,11 +28,12 @@ function -(x::Constant)
 end
 
 function -(x::AffineExpr)
-  varsToCoeffsMap = Dict{Uint64, Constant}()
-  for (v, c) in x.varsToCoeffsMap
-    varsToCoeffsMap[v] = -c
+  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  for (v, c) in x.vars_to_coeffs_map
+    vars_to_coeffs_map[v] = -c
   end
-  this = AffineExpr(:-, varsToCoeffsMap, -x.constant, reverse_sign(x), x.size)
+  this = AffineExpr(:-, vars_to_coeffs_map, -x.constant, reverse_sign(x), x.size)
+  #TODO eval
   return this
 end
 
@@ -52,16 +53,18 @@ end
 function +(x::AffineExpr, y::Constant)
   sz = promote_size(x, y)
   if sz == x.size
-    varsToCoeffsMap = copy(x.varsToCoeffsMap)
+    vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
   else
     vec_sz = sz[1]*sz[2]
-    varsToCoeffsMap = Dict{Uint64, Constant}()
-    for (v, c) in x.varsToCoeffsMap
-      varsToCoeffsMap[v] = Constant(repmat([c.value], vec_sz, 1))
+    vars_to_coeffs_map = Dict{Uint64, Constant}()
+    for (v, c) in x.vars_to_coeffs_map
+      vars_to_coeffs_map[v] = Constant(repmat([c.value], vec_sz, 1))
     end
   end
   constant = x.constant + Constant(vec([y.value]))
-  return AffineExpr(:+, varsToCoeffsMap, constant, promote_sign(x, y), sz)
+  this = AffineExpr(:+, vars_to_coeffs_map, constant, promote_sign(x, y), sz)
+  #TODO eval
+  return this
 end
 
 function +(x::Constant, y::AffineExpr)
@@ -71,35 +74,40 @@ end
 function +(x::AffineExpr, y::AffineExpr)
   sz = promote_size(x, y)
   if x.size == y.size
-    varsToCoeffsMap = copy(x.varsToCoeffsMap)
-    for (v, c) in y.varsToCoeffsMap
-      if v in varsToCoeffsMap
-        varsToCoeffsMap[v] = varsToCoeffsMap[v] + c
+    vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
+    for (v, c) in y.vars_to_coeffs_map
+      if v in vars_to_coeffs_map
+        vars_to_coeffs_map[v] = vars_to_coeffs_map[v] + c
       else
-        varsToCoeffsMap[v] = c
+        vars_to_coeffs_map[v] = c
       end
     end
   elseif x.size == (1, 1)
     return y + x
   elseif y.size == (1, 1)
     vec_sz = sz[1]*sz[2]
-    varsToCoeffsMap = copy(x.varsToCoeffsMap)
-    for (v, c) in y.varsToCoeffsMap
-      if v in varsToCoeffsMap
-        varsToCoeffsMap[v] = varsToCoeffsMap[v] + Constant(repmat([c.value], vec_sz, 1))
+    vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
+    for (v, c) in y.vars_to_coeffs_map
+      if v in vars_to_coeffs_map
+        vars_to_coeffs_map[v] = vars_to_coeffs_map[v] + Constant(repmat([c.value], vec_sz, 1))
       else
-        varsToCoeffsMap[v] = c
+        vars_to_coeffs_map[v] = c
       end
     end
   else
     error("Cannot add two expressions of sizes $(x.size) and $(y.size)")
   end
   constant = x.constant + y.constant
-  this = AffineExpr(:+, varsToCoeffsMap, constant, promote_sign(x, y), sz)
+  this = AffineExpr(:+, vars_to_coeffs_map, constant, promote_sign(x, y), sz)
+  #TODO eval
   return this
 end
 
 function +(x::SumSquaresExpr, y::SumSquaresExpr)
+  affines = copy(x.affines)
+  append!(affines, y.affines)
+  this = SumSquaresExpr(:+, affines)
+  return this
 end
 
 +(x::AffineExpr, y::Value) = +(x, Constant(y))
@@ -109,5 +117,7 @@ end
 # Binary Subtraction
 
 -(x::AffineExpr, y::AffineExpr) = +(x, -y)
--(x::AffineExpr, y::Value) = +(x, -y)
--(x::Value, y::AffineExpr) = +(-y, x)
+-(x::AffineExpr, y::Constant) = +(x, -y)
+-(x::Constant, y::AffineExpr) = +(-y, x)
+-(x::AffineExpr, y::Value) = -(x, Constant(y))
+-(x::Value, y::AffineExpr) = -(Constant(y), x)
