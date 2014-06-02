@@ -1,11 +1,15 @@
 module LSQ
 
-include("expressions.jl")
-include("utilities.jl")
-include("add_subtract.jl")
-include("multiply_divide.jl")
-include("index.jl")
-include("constraints.jl")
-include("problems.jl")
+include("types/expressions.jl")
+include("types/constraints.jl")
+include("types/problems.jl")
+
+include("utils/utilities.jl")
+
+include("atoms/add_subtract.jl")
+include("atoms/multiply_divide.jl")
+include("atoms/index.jl")
+
+include("solve.jl")
 
 end # module
