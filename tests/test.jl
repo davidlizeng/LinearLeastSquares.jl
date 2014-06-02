@@ -19,8 +19,12 @@ x_real = randn(5, 5)
 x = Variable(5, 5)
 y = A*x
 b = A*x_real
-p = minimize(SumSquares(x), y == b)
+p = minimize(SumSquares(x))
+for i = 1:5
+  p.constraints += y[:,i] == b[:,i]
+end 
 solve!(p)
+
 
 
 n = 200
