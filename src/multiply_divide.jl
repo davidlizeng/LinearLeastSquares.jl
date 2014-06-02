@@ -62,7 +62,15 @@ end
 
 function *(x::AffineExpr, y::Constant)
   if x.size[2] == y.size[1]
-    error("Right multiplication not supported yet")
+    y_kron = Constant(kron(y.value', speye(x.size[1])))
+    vars_to_coeffs_map = Dict{Uint64, Constant}()
+    for (v, c) in x.vars_to_coeffs_map
+      vars_to_coeffs_map[v] = y_kron * c
+    end
+    constant = y_kron * x.constant
+    this = AffineExpr(:*, vars_to_coeffs_map, constant, promote_sign(x, y), (x.size[1], y.size[2]))
+    #TODO eval
+    return this
   elseif y.size == (1, 1) || x.size == (1, 1)
     return y*x
   else
