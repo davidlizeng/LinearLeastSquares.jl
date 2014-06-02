@@ -7,8 +7,8 @@ function get_vars_and_vec_sizes(p::Problem)
       vars_to_sizes_map[var] = coeff.size[2]
     end
   end
-  for affine in p.constraints
-    for (var, coeff) in affine.vars_to_coeffs_map
+  for constraint in p.constraints
+    for (var, coeff) in constraint.canon_form.vars_to_coeffs_map
       vars_to_sizes_map[var] = coeff.size[2]
     end
   end
@@ -75,7 +75,11 @@ end
 function solve!(p::Problem)
   vars_to_sizes_map = get_vars_and_vec_sizes(p)
   A, b = coalesce_affine_exprs(vars_to_sizes_map, p.objective.affines)
-  C, d = coalesce_affine_exprs(vars_to_sizes_map, p.constraints)
+  canon_forms = AffineExpr[]
+  for constraint in p.constraints
+    push!(canon_forms, constraint.canon_form)
+  end
+  C, d = coalesce_affine_exprs(vars_to_sizes_map, canon_forms)
   coefficient, constant = build_kkt_system(A, b, C, d)
   solution = nothing
   try
