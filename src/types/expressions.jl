@@ -1,4 +1,6 @@
+import Base.size, Base.endof, Base.ndims
 export Value, AbstractExpr, Constant, AffineExpr, Variable, SumSquaresExpr, SumSquares
+export endof, size, ndims
 
 abstract AbstractExpr
 signs = [:pos, :neg, :any]
@@ -85,3 +87,15 @@ type SumSquaresExpr <: AbstractExpr
 end
 
 SumSquares(affine::AffineExpr) = SumSquaresExpr(:sum_squares, [affine])
+
+endof(x::AbstractExpr) = x.size[1]*x.size[2]
+function size(x::AbstractExpr, dim::Integer)
+  if dim < 1
+    error("dimension out of range")
+  elseif dim > 2
+    return 1
+  else
+    return x.size[dim]
+  end
+end
+ndims(x::AbstractExpr) = 2
