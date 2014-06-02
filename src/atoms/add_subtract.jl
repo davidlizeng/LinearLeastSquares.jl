@@ -76,7 +76,7 @@ function +(x::AffineExpr, y::AffineExpr)
   if x.size == y.size
     vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
     for (v, c) in y.vars_to_coeffs_map
-      if v in vars_to_coeffs_map
+      if haskey(vars_to_coeffs_map, v)
         vars_to_coeffs_map[v] = vars_to_coeffs_map[v] + c
       else
         vars_to_coeffs_map[v] = c
@@ -88,7 +88,7 @@ function +(x::AffineExpr, y::AffineExpr)
     vec_sz = sz[1]*sz[2]
     vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
     for (v, c) in y.vars_to_coeffs_map
-      if v in vars_to_coeffs_map
+      if haskey(vars_to_coeffs_map, v)
         vars_to_coeffs_map[v] = vars_to_coeffs_map[v] + Constant(repmat([c.value], vec_sz, 1))
       else
         vars_to_coeffs_map[v] = c
