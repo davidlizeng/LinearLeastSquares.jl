@@ -56,4 +56,4 @@ Since we are solving a system of linear equations, we can state the precise cond
 has independent columns and that the rows are C are also independent.
 
 ## Credits
-LSQ.jl is being developed by [David Zeng](http://www.stanford.edu/~dzeng0/) and [Karanveer Mohan](http://www.stanford.edu/~kvmohan/). Several parts of the README have been taken directly from [lsqpy](https://github.com/keegango/lsqpy), a sister project being developed by Keegan Go. Special thanks to [Stephen Boyd](http://www.stanford.edu/~boyd/).
+LSQ.jl is being developed by [David Zeng](http://www.stanford.edu/~dzeng0/) and [Karanveer Mohan](http://www.stanford.edu/~kvmohan/) along with Keegan Go, who is also developing [lsqpy](https://github.com/keegango/lsqpy), a sister project. Special thanks to [Stephen Boyd](http://www.stanford.edu/~boyd/).
