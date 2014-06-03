@@ -32,7 +32,7 @@ function -(x::AffineExpr)
   for (v, c) in x.vars_to_coeffs_map
     vars_to_coeffs_map[v] = -c
   end
-  this = AffineExpr(:-, vars_to_coeffs_map, -x.constant, reverse_sign(x), x.size)
+  this = AffineExpr(:-, (x,), vars_to_coeffs_map, -x.constant, reverse_sign(x), x.size)
   #TODO eval
   return this
 end
@@ -62,7 +62,7 @@ function +(x::AffineExpr, y::Constant)
     end
   end
   constant = x.constant + Constant(vec([y.value]))
-  this = AffineExpr(:+, vars_to_coeffs_map, constant, promote_sign(x, y), sz)
+  this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, promote_sign(x, y), sz)
   #TODO eval
   return this
 end
@@ -98,7 +98,7 @@ function +(x::AffineExpr, y::AffineExpr)
     error("Cannot add two expressions of sizes $(x.size) and $(y.size)")
   end
   constant = x.constant + y.constant
-  this = AffineExpr(:+, vars_to_coeffs_map, constant, promote_sign(x, y), sz)
+  this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, promote_sign(x, y), sz)
   #TODO eval
   return this
 end

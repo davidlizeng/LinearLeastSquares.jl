@@ -1,48 +1,54 @@
 export solve!
 
-function get_vars_and_vec_sizes(p::Problem)
-  vars_to_sizes_map = Dict{Uint64, Int64}()
-  for affine in p.objective.affines
-    for (var, coeff) in affine.vars_to_coeffs_map
-      vars_to_sizes_map[var] = coeff.size[2]
+function reset_value_and_add_vars!(x::AbstractExpr, unique_vars_map::Dict{Uint64, AffineExpr})
+  if x.head != :constant
+    x.value = nothing
+    if x.head == :variable
+      unique_vars_map[object_id(x)] = x
+    else
+      for child in x.children
+        reset_value_and_add_vars!(child, unique_vars_map)
+      end
     end
+  end
+end
+
+function reset_values_and_get_vars!(p::Problem)
+  p.status = "not yet solved"
+  p.optval = nothing
+  unique_vars_map = Dict{Uint64, AffineExpr}()
+  for affine in p.objective.affines
+    reset_value_and_add_vars!(affine, unique_vars_map)
   end
   for constraint in p.constraints
-    for (var, coeff) in constraint.canon_form.vars_to_coeffs_map
-      vars_to_sizes_map[var] = coeff.size[2]
-    end
+    reset_value_and_add_vars!(constraint.canon_form, unique_vars_map)
   end
-  return vars_to_sizes_map
+  return unique_vars_map
 end
 
-function get_var_ranges(vars_to_sizes_map::Dict{Uint64, Int64})
+function get_var_ranges_and_num_vars(unique_vars_map::Dict{Uint64, AffineExpr})
   vars_to_ranges_map = Dict{Uint64, (Int64, Int64)}()
-  num = 0
-  for (var, sz) in vars_to_sizes_map
-    vars_to_ranges_map[var] = (num + 1, num + sz)
-    num += sz
+  num_vars = 0
+  for (id, var) in unique_vars_map
+    sz = var.size[1] * var.size[2]
+    vars_to_ranges_map[id] = (num_vars + 1, num_vars + sz)
+    num_vars += sz
   end
-  return vars_to_ranges_map
+  return vars_to_ranges_map, num_vars
 end
 
-function get_num_matrix_rows(affines::Array{AffineExpr})
-  matrix_rows = 0
+function get_num_rows(affines::Array{AffineExpr})
+  num_rows = 0
   for affine in affines
-    matrix_rows = matrix_rows + affine.size[1] * affine.size[2]
+    num_rows += affine.size[1] * affine.size[2]
   end
-  return matrix_rows
+  return num_rows
 end
 
-function get_num_matrix_cols(vars_to_sizes_map::Dict{Uint64, Int64})
-  return sum(values(vars_to_sizes_map))
-end
-
-function coalesce_affine_exprs(vars_to_sizes_map::Dict{Uint64, Int64}, affines::Array{AffineExpr})
-  num_cols = get_num_matrix_cols(vars_to_sizes_map)
-  num_rows = get_num_matrix_rows(affines)
-  coefficient = zeros(num_rows, num_cols)
+function coalesce_affine_exprs(vars_to_ranges_map::Dict{Uint64, (Int64, Int64)}, num_vars::Int64, affines::Array{AffineExpr})
+  num_rows = get_num_rows(affines)
+  coefficient = zeros(num_rows, num_vars)
   constant = zeros(num_rows, 1)
-  vars_to_ranges_map = get_var_ranges(vars_to_sizes_map)
   row = 0
   for affine in affines
     row_sz = affine.size[1] * affine.size[2]
@@ -68,18 +74,22 @@ function build_kkt_system(A, b, C, d)
   return coefficient, constant
 end
 
-function populate_vars(vars_to_sizes_map::Dict{Uint64, Int64}, p::Problem, s::Array{Number})
-
+function populate_vars!(unique_vars_map::Dict{Uint64, AffineExpr}, vars_to_ranges_map::Dict{Uint64, (Int64, Int64)}, solution)
+  for (id, var) in unique_vars_map
+    var.value = zeros(var.size)
+    var.value[:] = solution[vars_to_ranges_map[id][1] : vars_to_ranges_map[id][2]]
+  end
 end
 
 function solve!(p::Problem)
-  vars_to_sizes_map = get_vars_and_vec_sizes(p)
-  A, b = coalesce_affine_exprs(vars_to_sizes_map, p.objective.affines)
+  unique_vars_map = reset_values_and_get_vars!(p)
+  vars_to_ranges_map, num_vars = get_var_ranges_and_num_vars(unique_vars_map)
+  A, b = coalesce_affine_exprs(vars_to_ranges_map, num_vars, p.objective.affines)
   canon_forms = AffineExpr[]
   for constraint in p.constraints
     push!(canon_forms, constraint.canon_form)
   end
-  C, d = coalesce_affine_exprs(vars_to_sizes_map, canon_forms)
+  C, d = coalesce_affine_exprs(vars_to_ranges_map, num_vars, canon_forms)
   coefficient, constant = build_kkt_system(A, b, C, d)
   solution = nothing
   try
@@ -91,8 +101,8 @@ function solve!(p::Problem)
     p.status = "infeasible"
   else
     p.status = "solved"
-    num_vars = get_num_matrix_cols(vars_to_sizes_map)
     p.optval = norm(A*solution[1:num_vars] + b)^2
+    populate_vars!(unique_vars_map, vars_to_ranges_map, solution)
   end
   return p.optval
 end
