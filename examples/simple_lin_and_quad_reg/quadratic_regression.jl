@@ -14,7 +14,7 @@ true_coeffs = [2; -2; 0.5];
 
 # Generate data
 x_data = rand(n, 1) * 5
-x_data_expanded = hcat([x_data .^ i for i in 1:3]...)
+x_data_expanded = hcat([x_data .^ i for i in 1 : 3]...)
 y_data = x_data_expanded * true_coeffs + 0.5 * rand(n, 1)
 
 quadratic = Variable();
@@ -29,7 +29,7 @@ p = minimize(SumSquares(offset + x_data * slope + x_squared * quadratic - y_data
 solve!(p);
 
 # Create some evenly spaced points for plotting, again replicate powers
-t = reshape([0:0.1:5], length([0:0.1:5]), 1);
+t = reshape([0 : 0.1 : 5], length([0 : 0.1 : 5]), 1);
 t_squared = t .^ 2;
 
 # Plot our regressed function

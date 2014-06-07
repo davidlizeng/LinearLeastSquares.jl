@@ -27,7 +27,7 @@ println(a.value);
 plt.plot(X[y[:, 1] .>= 0, 1], X[y[:, 1] .>= 0, 2], "ro");
 plt.plot(X[y[:, 1] .< 0, 1], X[y[:, 1] .< 0, 2], "bo");
 
-t = [-5:0.1:5];
+t = [-5 : 0.1 : 5];
 plt.plot(t, -a.value[1, 1] * t / a.value[2, 1]);
 plt.xlabel("x");
 plt.ylabel("y");

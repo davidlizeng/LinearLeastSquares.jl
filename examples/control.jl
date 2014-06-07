@@ -28,11 +28,11 @@ mu = 1;
 p = minimize(mu * SumSquares(velocity) + SumSquares(force));
 
 # Add constraints on our variables
-for i in 1:T - 1
+for i in 1 : T - 1
   p.constraints += position[:, i + 1] == position[:, i] + h * velocity[:, i];
 end
 
-for i in 1:T - 1
+for i in 1 : T - 1
   p.constraints += velocity[:, i + 1] == velocity[:, i] + h / mass * force[:, i] - drag * velocity[:, i];
 end
 

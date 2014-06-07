@@ -24,12 +24,12 @@ y_data = sin(x_data * 2) + cos(x_data)- 4 * cos(x_data) / 4 + 3 * sin(x_data / 3
 
 num_powers = 20;
 
-t_vals = 0:0.1:18;
+t_vals = 0 : 0.1 : 18;
 t = reshape(t_vals, length(t_vals), 1);
-T = hcat([t .^ i for i in 1:num_powers]...);
+T = hcat([t .^ i for i in 1 : num_powers]...);
 
 # We will regress using different powers of x
-X = hcat([x_data .^ i for i in 1:num_powers]...);
+X = hcat([x_data .^ i for i in 1 : num_powers]...);
 
 # Solve the problem
 mu = 0
