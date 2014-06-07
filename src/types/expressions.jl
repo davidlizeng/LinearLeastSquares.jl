@@ -1,68 +1,59 @@
 import Base.size, Base.endof, Base.ndims
-export Value, AbstractExpr, Constant, AffineExpr, Variable, SumSquaresExpr, SumSquares
+export Constant, AffineExpr, AffineConstant, Variable, SumSquaresExpr
+export Value, AffineOrValue, AffineOrConstant
+export SumSquares
 export endof, size, ndims
 
-abstract AbstractExpr
-signs = [:pos, :neg, :any]
 Value = Union(Number,AbstractArray)
 ValueOrNothing = Union(Value, Nothing)
-ChildExprs = Union((), (AbstractExpr,), (AbstractExpr, AbstractExpr))
 
-type Constant <: AbstractExpr
+abstract AffineOrConstant
+
+type Constant <: AffineOrConstant
   head::Symbol
   value::ValueOrNothing
-  children::ChildExprs
-  sign::Symbol
   size::(Int64, Int64)
   uid::Uint64
   evaluate::Function
 
-  function Constant(value::Value, sign::Symbol)
-    if !(sign in signs)
-      error("sign must be one of :pos, :neg, :any; got $sign")
-    else
-      this = new(:Constant, value, (), sign, (size(value, 1), size(value, 2)))
-      this.uid = object_id(this)
-      this.evaluate = ()->this.value
-      return this
-    end
+  function Constant(value::Value)
+    this = new(:constant, value, (size(value, 1), size(value, 2)))
+    this.uid = object_id(this)
+    this.evaluate = ()->this.value
+    return this
   end
 end
 
-function Constant(x::Value)
-  if all(x .>= 0)
-    return Constant(x, :pos)
-  elseif all(x .<= 0)
-    return Constant(x, :neg)
-  end
-  return Constant(x, :any)
-end
-
-type AffineExpr <: AbstractExpr
+type AffineExpr <: AffineOrConstant
   head::Symbol
   value::ValueOrNothing
-  children::ChildExprs
+  children::Array{AffineOrConstant}
   vars_to_coeffs_map::Dict{Uint64, Constant}
   constant::Constant
-  sign::Symbol
   size::(Int64, Int64)
   uid::Uint64
   evaluate::Function
 
-  function AffineExpr(head::Symbol, children::ChildExprs, vars_to_coeffs_map::Dict{Uint64, Constant}, constant::Constant, sign::Symbol, size::(Int64, Int64))
-    if !(sign in signs)
-      error("sign must be one of :pos, :neg, :any; got $sign")
-    else
-      this = new(head, nothing, children, vars_to_coeffs_map, constant, sign, size)
-      this.uid = object_id(this)
-      return this
-    end
+  function AffineExpr(head::Symbol, children::Array{AffineOrConstant}, vars_to_coeffs_map::Dict{Uint64, Constant}, constant::Constant, size::(Int64, Int64))
+    this = new(head, nothing, children, vars_to_coeffs_map, constant, size)
+    this.uid = object_id(this)
+    return this
   end
+end
+
+AffineOrValue = Union(AffineExpr, Value)
+
+function AffineConstant(value::Value)
+  constant = Constant(value)
+  this = AffineExpr(:constant, AffineOrConstant[], Dict{Uint64, Constant}(), constant, constant.size)
+  this.value = this.constant.value
+  this.evaluate = ()->this.value
+  return this
 end
 
 function Variable(size::(Int64, Int64)) 
   vec_sz = size[1]*size[2]
-  this = AffineExpr(:variable, (), Dict{Uint64, Constant}(), Constant(spzeros(vec_sz, 1)), :any, size)
+  this = AffineExpr(:variable, AffineOrConstant[], Dict{Uint64, Constant}(), Constant(spzeros(vec_sz, 1)), size)
   this.vars_to_coeffs_map[this.uid] = Constant(speye(vec_sz))
   this.evaluate = ()->this.value == nothing ? error("value of the variable is yet to be calculated") : this.value
   return this
@@ -76,23 +67,25 @@ type SumSquaresExpr
   head::Symbol
   value::ValueOrNothing
   affines::Array{AffineExpr}
-  sign::Symbol
-  size::(Int64, Int64)
   uid::Uint64
   evaluate::Function
 
   function SumSquaresExpr(head::Symbol, affines::Array{AffineExpr})
-    this = new(head, nothing, affines, :pos, (1, 1))
+    this = new(head, nothing, affines)
     this.uid = object_id(this)
     #TODO eval
     return this
   end
 end
 
-SumSquares(affine::AffineExpr) = SumSquaresExpr(:sum_squares, [affine])
+function SumSquares(affine::AffineExpr)
+  affines = AffineExpr[]
+  push!(affines, affine)
+  this = SumSquaresExpr(:sum_squares, affines)
+end
 
-endof(x::AbstractExpr) = x.size[1]*x.size[2]
-function size(x::AbstractExpr, dim::Integer)
+endof(x::AffineOrConstant) = x.size[1]*x.size[2]
+function size(x::AffineOrConstant, dim::Integer)
   if dim < 1
     error("dimension out of range")
   elseif dim > 2
@@ -101,4 +94,4 @@ function size(x::AbstractExpr, dim::Integer)
     return x.size[dim]
   end
 end
-ndims(x::AbstractExpr) = 2
+ndims(x::AffineOrConstant) = 2

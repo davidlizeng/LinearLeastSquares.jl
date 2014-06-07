@@ -1,6 +1,6 @@
 export +, -
 
-function promote_size(x::AbstractExpr, y::AbstractExpr)
+function promote_size(x::AffineOrConstant, y::AffineOrConstant)
   if x.size == y.size
     return x.size
   elseif x.size == (1, 1)
@@ -9,15 +9,6 @@ function promote_size(x::AbstractExpr, y::AbstractExpr)
     return x.size
   else
     error ("Cannot add two expressions with sizes $(x.size) and $(y.size)")
-  end
-end
-
-function promote_sign(x::AbstractExpr, y::AbstractExpr)
-  signs = Set(x.sign, y.sign)
-  if :any in signs || signs == Set(:pos,:neg)
-    return :any
-  else
-    return x.sign
   end
 end
 
@@ -32,7 +23,9 @@ function -(x::AffineExpr)
   for (v, c) in x.vars_to_coeffs_map
     vars_to_coeffs_map[v] = -c
   end
-  this = AffineExpr(:-, (x,), vars_to_coeffs_map, -x.constant, reverse_sign(x), x.size)
+  children = AffineOrConstant[]
+  push!(children, x)
+  this = AffineExpr(:-, children, vars_to_coeffs_map, -x.constant, x.size)
   #TODO eval
   return this
 end
@@ -62,7 +55,10 @@ function +(x::AffineExpr, y::Constant)
     end
   end
   constant = x.constant + Constant(vec([y.value]))
-  this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, promote_sign(x, y), sz)
+  children = AffineOrConstant[]
+  push!(children, x)
+  push!(children, y)
+  this = AffineExpr(:+, children, vars_to_coeffs_map, constant, sz)
   #TODO eval
   return this
 end
@@ -98,7 +94,10 @@ function +(x::AffineExpr, y::AffineExpr)
     error("Cannot add two expressions of sizes $(x.size) and $(y.size)")
   end
   constant = x.constant + y.constant
-  this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, promote_sign(x, y), sz)
+  children = AffineOrConstant[]
+  push!(children, x)
+  push!(children, y)
+  this = AffineExpr(:+, children, vars_to_coeffs_map, constant, sz)
   #TODO eval
   return this
 end

@@ -9,6 +9,7 @@ include("utils/utilities.jl")
 include("atoms/add_subtract.jl")
 include("atoms/multiply_divide.jl")
 include("atoms/index.jl")
+include("atoms/stack.jl")
 
 include("solve.jl")
 

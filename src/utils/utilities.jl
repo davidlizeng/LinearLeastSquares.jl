@@ -1,17 +1,4 @@
-export reverse_sign
 export kron
-
-
-function reverse_sign(x::AbstractExpr)
-  if x.sign == :pos
-    return :neg
-  elseif x.sign == :neg
-    return :pos
-  else
-    return :any
-  end
-end
-
 
 # TODO: This is taken from the julia code, remove after updating to new version
 function kron{Tv1,Ti1,Tv2,Ti2}(A::SparseMatrixCSC{Tv1,Ti1}, B::SparseMatrixCSC{Tv2,Ti2})

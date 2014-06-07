@@ -1,6 +1,6 @@
 export solve!
 
-function reset_value_and_add_vars!(x::AbstractExpr, unique_vars_map::Dict{Uint64, AffineExpr})
+function reset_value_and_add_vars!(x::AffineOrConstant, unique_vars_map::Dict{Uint64, AffineExpr})
   if x.head != :constant
     x.value = nothing
     if x.head == :variable
@@ -17,6 +17,7 @@ function reset_values_and_get_vars!(p::Problem)
   p.status = "not yet solved"
   p.optval = nothing
   unique_vars_map = Dict{Uint64, AffineExpr}()
+  p.objective.value = nothing
   for affine in p.objective.affines
     reset_value_and_add_vars!(affine, unique_vars_map)
   end
