@@ -73,7 +73,7 @@ type SumSquaresExpr
   function SumSquaresExpr(head::Symbol, affines::Array{AffineExpr})
     this = new(head, nothing, affines)
     this.uid = object_id(this)
-    #TODO eval
+    # TODO: eval
     return this
   end
 end

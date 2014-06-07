@@ -1,4 +1,5 @@
-export kron
+import Base.vec
+export kron, vec
 
 # TODO: This is taken from the julia code, remove after updating to new version
 function kron{Tv1,Ti1,Tv2,Ti2}(A::SparseMatrixCSC{Tv1,Ti1}, B::SparseMatrixCSC{Tv2,Ti2})
@@ -15,3 +16,13 @@ kron(A::VecOrMat, B::SparseMatrixCSC) = kron(sparse(A), B)
 kron(A::Number, B::Number) = kron([A], [B])
 kron(A::SparseMatrixCSC, B::Number) = kron(A, [B])
 kron(A::Number, B::SparseMatrixCSC) = kron([A], B)
+
+
+# Julia cannot vectorize sparse matrices. This will handle it for now
+function vec(x::SparseMatrixCSC)
+  return Base.reshape(x, size(x, 1) * size(x, 2), 1)
+end
+
+function vec(x::Number)
+  return [x]
+end

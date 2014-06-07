@@ -26,7 +26,7 @@ function -(x::AffineExpr)
   children = AffineOrConstant[]
   push!(children, x)
   this = AffineExpr(:-, children, vars_to_coeffs_map, -x.constant, x.size)
-  #TODO eval
+  # TODO: eval
   return this
 end
 
@@ -59,7 +59,7 @@ function +(x::AffineExpr, y::Constant)
   push!(children, x)
   push!(children, y)
   this = AffineExpr(:+, children, vars_to_coeffs_map, constant, sz)
-  #TODO eval
+  # TODO: eval
   return this
 end
 
@@ -98,7 +98,7 @@ function +(x::AffineExpr, y::AffineExpr)
   push!(children, x)
   push!(children, y)
   this = AffineExpr(:+, children, vars_to_coeffs_map, constant, sz)
-  #TODO eval
+  # TODO: eval
   return this
 end
 
@@ -119,4 +119,4 @@ end
 -(x::AffineExpr, y::Constant) = +(x, -y)
 -(x::Constant, y::AffineExpr) = +(-y, x)
 -(x::AffineExpr, y::Value) = -(x, Constant(y))
--(x::Value, y::AffineExpr) = -(Constant(y), x)
+-(x::Value, y::AffineExpr) = -(Constant(x), y)

@@ -48,7 +48,7 @@ function *(x::Constant, y::AffineExpr)
   else
     error("Cannot multiply two expressions of sizes $(x.size) and $(y.size)")
   end
-  #TODO eval
+  # TODO: eval
   return this
 end
 
@@ -64,7 +64,7 @@ function *(x::AffineExpr, y::Constant)
     push!(children, x)
     push!(children, y)
     this = AffineExpr(:*, children, vars_to_coeffs_map, constant, (x.size[1], y.size[2]))
-    #TODO eval
+    # TODO: eval
     return this
   elseif y.size == (1, 1) || x.size == (1, 1)
     return y*x
