@@ -12,7 +12,39 @@ function vcat_impl(args::Array{AffineOrConstant})
     end
     num_rows += arg.size[1]
   end
-  error("vcat not yet implemented")
+  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  vec_sz = num_rows * num_cols
+  constant = Constant(spzeros(vec_sz, 1))
+  index_start = 0
+  for i = 1:length(args)
+    if args[i].head == :constant
+      for j = 1 : num_cols
+        index = index_start + (j - 1) * num_rows
+        # TODO: Julia 0.2 bug, sparse matrix of floats cannot be set to equal ints
+        # TODO: Julia has so many sparse matrix bugs
+        constant.value[index + 1 : index + args[1].size[1], :] = args[i].value[:, j]
+      end
+    else
+      for (v, c) in args[i].vars_to_coeffs_map
+        if !haskey(vars_to_coeffs_map, v)
+          vars_to_coeffs_map[v] = Constant(spzeros(vec_sz, c.size[2]))
+        end
+        for j in 1 : num_cols
+          index = index_start + (j - 1) * num_rows
+          vars_to_coeffs_map[v].value[index + 1 : index + args[i].size[1], :] = c.value[(j - 1) * args[i].size[1] + 1 : j * args[i].size[1], :]
+        end
+      end
+      for j in 1 : num_cols
+        index = index_start + (j - 1) * num_rows
+        constant.value[index + 1 : index + args[i].size[1], :] = args[i].constant.value[(j - 1) * args[i].size[1] + 1 : j * args[i].size[1], :]
+      end
+    end
+    index_start += args[i].size[1]
+  end
+
+  this = AffineExpr(:vcat, args, vars_to_coeffs_map, constant, (num_rows, num_cols))
+  # TODO: eval
+  return this
 end
 
 function vcat(args::AffineOrValue...)
@@ -50,7 +82,7 @@ function hcat_impl(args::Array{AffineOrConstant})
     else
       for (v, c) in args[i].vars_to_coeffs_map
         if !haskey(vars_to_coeffs_map, v)
-          vars_to_coeffs_map[v]= Constant(spzeros(vec_sz, c.size[2]))
+          vars_to_coeffs_map[v] = Constant(spzeros(vec_sz, c.size[2]))
         end
         vars_to_coeffs_map[v].value[index + 1 : index + arg_vec_sz, :] = c.value
       end
