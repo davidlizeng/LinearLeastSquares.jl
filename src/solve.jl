@@ -63,15 +63,16 @@ function coalesce_affine_exprs(vars_to_ranges_map::Dict{Uint64, (Int64, Int64)},
   return coefficient, constant
 end
 
+# TODO: Julia 0.2 does not support A\b for sparse A,b
 function build_kkt_system(A, b, C, d)
   sz = size(A, 2) + size(C, 1)
   coefficient = zeros(sz, sz)
-  coefficient[1:size(A, 2), 1:size(A, 2)] = 2*A'*A
-  coefficient[size(A, 2) + 1:, 1:size(C, 2)] = C
-  coefficient[1:size(C, 2), size(A, 2) + 1:] = C'
+  coefficient[1 : size(A, 2), 1 : size(A, 2)] = 2 * A' * A
+  coefficient[size(A, 2) + 1 : end, 1 : size(C, 2)] = C
+  coefficient[1 : size(C, 2), size(A, 2) + 1 : end] = C'
   constant = zeros(sz, 1)
-  constant[1:size(A, 2)] = -2*A'*b
-  constant[size(A, 2) + 1:] = -d
+  constant[1 : size(A, 2)] = -2 * A' * b
+  constant[size(A, 2) + 1 : end] = -d
   return coefficient, constant
 end
 
@@ -95,6 +96,7 @@ function solve!(p::Problem)
   solution = nothing
   try
     solution = coefficient\constant
+  # TODO: Only catch specific error
   catch
     println("Could not solve KKT system.")
   end

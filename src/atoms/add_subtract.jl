@@ -87,7 +87,7 @@ function +(x::AffineExpr, y::AffineExpr)
       if haskey(vars_to_coeffs_map, v)
         vars_to_coeffs_map[v] = vars_to_coeffs_map[v] + Constant(repmat([c.value], vec_sz, 1))
       else
-        vars_to_coeffs_map[v] = c
+        vars_to_coeffs_map[v] = Constant(repmat([c.value], vec_sz, 1))
       end
     end
   else
