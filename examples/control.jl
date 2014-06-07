@@ -5,6 +5,8 @@
 #
 # In this control problem, the object starts from the origin
 
+using LSQ
+
 # Some constraints on our motion
 # The object should start from the origin, and end at rest
 initial_velocity = [-20; 20];
