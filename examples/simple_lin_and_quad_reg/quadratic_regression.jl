@@ -25,7 +25,7 @@ offset = Variable();
 x_squared = x_data .^ 2;
 
 # Solve the problem
-p = minimize(SumSquares(offset + x_data * slope + x_squared * quadratic - y_data));
+p = minimize(sum_squares(offset + x_data * slope + x_squared * quadratic - y_data));
 solve!(p);
 
 # Create some evenly spaced points for plotting, again replicate powers

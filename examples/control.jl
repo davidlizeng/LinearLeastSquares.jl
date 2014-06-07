@@ -25,7 +25,7 @@ force = Variable(2, T - 1);
 
 # Create a problem instance
 mu = 1;
-p = minimize(mu * SumSquares(velocity) + SumSquares(force));
+p = minimize(mu * sum_squares(velocity) + sum_squares(force));
 
 # Add constraints on our variables
 for i in 1 : T - 1

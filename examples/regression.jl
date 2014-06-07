@@ -34,7 +34,7 @@ X = hcat([x_data .^ i for i in 1 : num_powers]...);
 # Solve the problem
 mu = 0
 a = Variable(num_powers)
-p = minimize(SumSquares(X * a - y_data) + mu * SumSquares(a));
+p = minimize(sum_squares(X * a - y_data) + mu * sum_squares(a));
 solve!(p);
 
 # Plot our regressed function

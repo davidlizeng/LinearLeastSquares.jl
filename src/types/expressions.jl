@@ -1,7 +1,7 @@
 import Base.size, Base.endof, Base.ndims
 export Constant, AffineExpr, AffineConstant, Variable, SumSquaresExpr
 export Value, AffineOrValue, AffineOrConstant
-export SumSquares
+export sum_squares
 export endof, size, ndims
 
 Value = Union(Number,AbstractArray)
@@ -51,7 +51,7 @@ function AffineConstant(value::Value)
   return this
 end
 
-function Variable(size::(Int64, Int64)) 
+function Variable(size::(Int64, Int64))
   vec_sz = size[1]*size[2]
   this = AffineExpr(:variable, AffineOrConstant[], Dict{Uint64, Constant}(), Constant(spzeros(vec_sz, 1)), size)
   this.vars_to_coeffs_map[this.uid] = Constant(speye(vec_sz))
@@ -78,7 +78,7 @@ type SumSquaresExpr
   end
 end
 
-function SumSquares(affine::AffineExpr)
+function sum_squares(affine::AffineExpr)
   affines = AffineExpr[]
   push!(affines, affine)
   this = SumSquaresExpr(:sum_squares, affines)

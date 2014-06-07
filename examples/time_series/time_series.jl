@@ -10,8 +10,8 @@ for i in 365 + 1 : n
 end
 
 smoothing = 0;
-smooth_objective = SumSquares(seasonal[1 : n - 1] - seasonal[2 : n]);
-p = minimize(SumSquares(temps - seasonal) + smoothing * smooth_objective, eq_constraints);
+smooth_objective = sum_squares(seasonal[1 : n - 1] - seasonal[2 : n]);
+p = minimize(sum_squares(temps - seasonal) + smoothing * smooth_objective, eq_constraints);
 solve!(p);
 residuals = temps - seasonal.value;
 
@@ -21,7 +21,7 @@ residuals_mat = hstack(residuals[ar_len - i : n - i - 1] for i in 1 : ar_len)
 
 # Solve autoregressive problem
 ar_coef = Variable(ar_len)
-minimize(SumSquares(residuals_mat * ar_coef - residuals[ar_len : end]))
+minimize(sum_squares(residuals_mat * ar_coef - residuals[ar_len : end]))
 
 # Do all plotting
 plt.figure(0)
