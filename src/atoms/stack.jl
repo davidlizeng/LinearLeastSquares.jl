@@ -4,7 +4,10 @@ hcat(args) = Base.hcat(args)
 vcat(args) = Base.hcat(args)
 hvcat(args) = Base.hcat(args)
 
-# TODO: don't allow all constants
+hcat(args::Value...) = Base.hcat(args)
+vcat(args::Value...) = Base.vcat(args)
+hvcat(rows::(Int64...), args::Value...) = Base.hvcat(rows, args)
+
 function vcat_impl(args::Array{AffineOrConstant})
   num_cols = args[1].size[2]
   num_rows = 0
@@ -126,5 +129,3 @@ function hvcat(rows::(Int64...), args::AffineOrValue...)
   end
   return hvcat_impl(rows, args_converted)
 end
-
-
