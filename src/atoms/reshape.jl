@@ -8,7 +8,7 @@ function reshape(x::AffineExpr, m::Int64, n::Int64)
     error("Cannot reshape expression of size $(x.size[1]) by $(x.size[2]) to $m by $n")
   end
   this = AffineExpr(:reshape, (x,), x.vars_to_coeffs_map, x.constant, (m, n))
-  # TODO: eval
+  this.evaluate = ()->reshape(x.evaluate(), m, n)
   return this
 end
 

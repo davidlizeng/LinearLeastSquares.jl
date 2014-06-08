@@ -1,8 +1,10 @@
-import Base.vcat, Base.hcat, Base.hvcat
 export vcat, hcat, hvcat
 
-# TODO: don't allow all constants
+hcat(args) = Base.hcat(args)
+vcat(args) = Base.hcat(args)
+hvcat(args) = Base.hcat(args)
 
+# TODO: don't allow all constants
 function vcat_impl(args::Array{AffineOrConstant})
   num_cols = args[1].size[2]
   num_rows = 0
@@ -46,7 +48,7 @@ function vcat_impl(args::Array{AffineOrConstant})
   end
 
   this = AffineExpr(:vcat, tuple(args...), vars_to_coeffs_map, constant, (num_rows, num_cols))
-  # TODO: eval
+  this.evaluate = ()->Base.vcat([arg.evaluate() for arg in args]...)
   return this
 end
 
@@ -93,7 +95,7 @@ function hcat_impl(args::Array{AffineOrConstant})
   end
 
   this = AffineExpr(:hcat, tuple(args...), vars_to_coeffs_map, constant, (num_rows, num_cols))
-  # TODO: eval
+  this.evaluate = ()->Base.hcat([arg.evaluate() for arg in args]...)
   return this
 end
 

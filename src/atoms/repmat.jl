@@ -13,6 +13,6 @@ function repmat(x::AffineExpr, m::Int64, n::Int64)
   end
   constant = repmat(x.constant, vec_sz, 1)
   this = AffineExpr(:repmat, (x,), vars_to_coeffs_map, constant, (m * x.size[1], n * x.size[2]))
-  # TODO: eval
+  this.evaluate = ()->repmat(x.evaluate(), m, n)
   return this
 end

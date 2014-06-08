@@ -40,7 +40,7 @@ function +(x::AffineExpr, y::Constant)
   vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
   constant = x.constant + vec(y)
   this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, sz)
-  # TODO: eval
+  this.evaluate = ()->x.evaluate() + y.evaluate()
   return this
 end
 
@@ -60,7 +60,7 @@ function +(x::AffineExpr, y::AffineExpr)
   end
   constant = x.constant + y.constant
   this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, sz)
-  # TODO: eval
+  this.evaluate = ()->x.evaluate() + y.evaluate()
   return this
 end
 

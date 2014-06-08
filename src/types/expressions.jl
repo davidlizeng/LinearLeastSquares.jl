@@ -74,7 +74,13 @@ type SumSquaresExpr
   function SumSquaresExpr(head::Symbol, affines::Array{AffineExpr})
     this = new(head, nothing, affines)
     this.uid = object_id(this)
-    # TODO: eval
+    this.evaluate = ()->begin
+      sum = 0
+      for affine in affines
+        sum += norm(vec(affine.evaluate()))^2
+      end
+      return sum
+    end
     return this
   end
 end

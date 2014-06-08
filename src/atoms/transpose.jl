@@ -27,7 +27,7 @@ function transpose(x::AffineExpr)
   constant = perm_constant * x.constant
 
   this = AffineExpr(:transpose, (x,), vars_to_coeffs_map, constant, (x.size[2], x.size[1]))
-  # TODO: eval
+  this.evaluate = ()->x.evaluate()'
   return this
 end
 

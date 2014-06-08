@@ -12,7 +12,6 @@ function .*(x::Constant, y::AffineExpr)
   end
 
   if x.size == y.size
-    # TODO: Implement vec
     vec_x = Constant(vec(x.value))
 
     vars_to_coeffs_map = Dict{Uint64, Constant}()
@@ -22,7 +21,7 @@ function .*(x::Constant, y::AffineExpr)
     constant = vec_x .* y.constant
 
     this = AffineExpr(:*, (x, y), vars_to_coeffs_map, constant, x.size)
-    # TODO: eval
+    this.evaluate = ()->x.evaluate() .* y.evaluate()
     return this
   else
     error("Cannot dot multiply two expressions of sizes $(x.size) and $(y.size)")
@@ -48,7 +47,7 @@ function *(x::Constant, y::AffineExpr)
   else
     error("Cannot multiply two expressions of sizes $(x.size) and $(y.size)")
   end
-  # TODO: eval
+  this.evaluate = ()->x.evaluate() * y.evaluate()
   return this
 end
 
@@ -61,7 +60,7 @@ function *(x::AffineExpr, y::Constant)
     end
     constant = y_kron * x.constant
     this = AffineExpr(:*, (x, y), vars_to_coeffs_map, constant, (x.size[1], y.size[2]))
-    # TODO: eval
+    this.evaluate = ()->x.evaluate() * y.evaluate()
     return this
   elseif y.size == (1, 1) || x.size == (1, 1)
     return y * x
