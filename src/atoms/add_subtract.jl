@@ -2,11 +2,11 @@ export +, -
 
 function promote_size(x::AffineOrConstant, y::AffineOrConstant)
   if x.size == y.size
-    return x.size
+    return x, y, x.size
   elseif x.size == (1, 1)
-    return y.size
+    return repmat(x, y.size[1], y.size[2]), y, y.size
   elseif y.size == (1, 1)
-    return x.size
+    return x, repmat(y, x.size[1], y.size[2]), x.size
   else
     error ("Cannot add two expressions with sizes $(x.size) and $(y.size)")
   end
@@ -23,42 +23,23 @@ function -(x::AffineExpr)
   for (v, c) in x.vars_to_coeffs_map
     vars_to_coeffs_map[v] = -c
   end
-  children = AffineOrConstant[]
-  push!(children, x)
-  this = AffineExpr(:-, children, vars_to_coeffs_map, -x.constant, x.size)
-  # TODO: eval
+  this = AffineExpr(:-, (x,), vars_to_coeffs_map, -x.constant, x.size)
+  this.evaluate = ()->-this.value;
   return this
 end
-
 
 # Binary Addition
 
 function +(x::Constant, y::Constant)
-  if x.size == (1, 1)
-    return Constant(x.value[1] + y.value)
-  elseif y.size == (1, 1)
-    return Constant(x.value + y.value[1])
-  else
-    return Constant(x.value + y.value)
-  end
+  x, y, sz = promote_size(x, y)
+  return Constant(x.value + y.value)
 end
 
 function +(x::AffineExpr, y::Constant)
-  sz = promote_size(x, y)
-  if sz == x.size
-    vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
-  else
-    vec_sz = sz[1]*sz[2]
-    vars_to_coeffs_map = Dict{Uint64, Constant}()
-    for (v, c) in x.vars_to_coeffs_map
-      vars_to_coeffs_map[v] = Constant(repmat([c.value], vec_sz, 1))
-    end
-  end
+  x, y, sz = promote_size(x, y)
+  vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
   constant = x.constant + Constant(vec([y.value]))
-  children = AffineOrConstant[]
-  push!(children, x)
-  push!(children, y)
-  this = AffineExpr(:+, children, vars_to_coeffs_map, constant, sz)
+  this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, sz)
   # TODO: eval
   return this
 end
@@ -68,36 +49,17 @@ function +(x::Constant, y::AffineExpr)
 end
 
 function +(x::AffineExpr, y::AffineExpr)
-  sz = promote_size(x, y)
-  if x.size == y.size
-    vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
-    for (v, c) in y.vars_to_coeffs_map
-      if haskey(vars_to_coeffs_map, v)
-        vars_to_coeffs_map[v] = vars_to_coeffs_map[v] + c
-      else
-        vars_to_coeffs_map[v] = c
-      end
+  x, y, sz = promote_size(x, y)
+  vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
+  for (v, c) in y.vars_to_coeffs_map
+    if haskey(vars_to_coeffs_map, v)
+      vars_to_coeffs_map[v] = vars_to_coeffs_map[v] + c
+    else
+      vars_to_coeffs_map[v] = c
     end
-  elseif x.size == (1, 1)
-    return y + x
-  elseif y.size == (1, 1)
-    vec_sz = sz[1]*sz[2]
-    vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
-    for (v, c) in y.vars_to_coeffs_map
-      if haskey(vars_to_coeffs_map, v)
-        vars_to_coeffs_map[v] = vars_to_coeffs_map[v] + Constant(repmat([c.value], vec_sz, 1))
-      else
-        vars_to_coeffs_map[v] = Constant(repmat([c.value], vec_sz, 1))
-      end
-    end
-  else
-    error("Cannot add two expressions of sizes $(x.size) and $(y.size)")
   end
   constant = x.constant + y.constant
-  children = AffineOrConstant[]
-  push!(children, x)
-  push!(children, y)
-  this = AffineExpr(:+, children, vars_to_coeffs_map, constant, sz)
+  this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, sz)
   # TODO: eval
   return this
 end

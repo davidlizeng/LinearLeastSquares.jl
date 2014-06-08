@@ -6,6 +6,8 @@ include("types/problems.jl")
 
 include("utils/utilities.jl")
 
+include("atoms/repmat.jl")
+include("atoms/reshape.jl")
 include("atoms/add_subtract.jl")
 include("atoms/multiply_divide.jl")
 include("atoms/index.jl")

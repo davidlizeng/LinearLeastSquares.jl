@@ -6,6 +6,7 @@
 # In this control problem, the object starts from the origin
 
 using LSQ
+import PyPlot.plt
 
 # Some constraints on our motion
 # The object should start from the origin, and end at rest
@@ -48,11 +49,10 @@ p.constraints += velocity[:, T] == 0;
 solve!(p);
 
 
-# import PyPlot.plt
-# plt.plot(position.value[1, 1:2:T]', position.value[2, 1:2:T]', "r-", linewidth=1.5)
-# plt.quiver(position.value[1, 1:2:T], position.value[2, 1:2:T], force.value[1, 1:2:T-1], force.value[2, 1:2:T-1], width=0.002)
-# plt.plot(0, 0, "bo", markersize=10)
-# plt.plot(final_position[1], final_position[2], "bo", markersize=10)
-# plt.xlim([-15, 16])
-# plt.ylim([-10, 16])
-# plt.show()
+plt.plot(position.value[1, 1:2:T]', position.value[2, 1:2:T]', "r-", linewidth=1.5)
+plt.quiver(position.value[1, 1:2:T], position.value[2, 1:2:T], force.value[1, 1:2:T-1], force.value[2, 1:2:T-1], width=0.002)
+plt.plot(0, 0, "bo", markersize=10)
+plt.plot(final_position[1], final_position[2], "bo", markersize=10)
+plt.xlim([-15, 16])
+plt.ylim([-10, 16])
+plt.show()
