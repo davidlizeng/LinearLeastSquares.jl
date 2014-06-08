@@ -35,13 +35,13 @@ function *(x::Constant, y::AffineExpr)
     for (v, c) in y.vars_to_coeffs_map
       coeff_rep = repmat([c.value], vec_sz, 1)
       for i in 1:vec_sz
-        coeff_rep[i,:] = x.value[i] * c_rep[i,:]
+        coeff_rep[i,:] = x.value[i] * coeff_rep[i,:]
       end
       vars_to_coeffs_map[v] = Constant(coeff_rep)
     end
     constant_rep = repmat([y.constant.value], vec_sz, 1)
     for i in 1:vec_sz
-      constant_rep[i,:] = x.value[i] * y_constant_rep[i,:]
+      constant_rep[i,:] = x.value[i] * constant_rep[i,:]
     end
     constant = Constant(constant_rep)
     this = AffineExpr(:*, children, vars_to_coeffs_map, constant, x.size)
