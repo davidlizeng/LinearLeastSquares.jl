@@ -6,7 +6,7 @@ function promote_size(x::AffineOrConstant, y::AffineOrConstant)
   elseif x.size == (1, 1)
     return repmat(x, y.size[1], y.size[2]), y, y.size
   elseif y.size == (1, 1)
-    return x, repmat(y, x.size[1], y.size[2]), x.size
+    return x, repmat(y, x.size[1], x.size[2]), x.size
   else
     error ("Cannot add two expressions with sizes $(x.size) and $(y.size)")
   end
@@ -38,7 +38,7 @@ end
 function +(x::AffineExpr, y::Constant)
   x, y, sz = promote_size(x, y)
   vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
-  constant = x.constant + Constant(vec([y.value]))
+  constant = x.constant + vec(y)
   this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, sz)
   # TODO: eval
   return this

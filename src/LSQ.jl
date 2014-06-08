@@ -10,6 +10,7 @@ include("atoms/repmat.jl")
 include("atoms/reshape.jl")
 include("atoms/add_subtract.jl")
 include("atoms/multiply_divide.jl")
+include("atoms/transpose.jl")
 include("atoms/index.jl")
 include("atoms/stack.jl")
 
