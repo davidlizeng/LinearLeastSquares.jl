@@ -1,4 +1,4 @@
-export +, -
+export +, -, .+, .-
 
 function promote_size(x::AffineOrConstant, y::AffineOrConstant)
   if x.size == y.size
@@ -30,25 +30,26 @@ end
 
 # Binary Addition
 
-function +(x::Constant, y::Constant)
+
+function .+(x::Constant, y::Constant)
   x, y, sz = promote_size(x, y)
-  return Constant(x.value + y.value)
+  return Constant(x.value .+ y.value)
 end
 
-function +(x::AffineExpr, y::Constant)
+function .+(x::AffineExpr, y::Constant)
   x, y, sz = promote_size(x, y)
   vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
   constant = x.constant + vec(y)
   this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, sz)
-  this.evaluate = ()->x.evaluate() + y.evaluate()
+  this.evaluate = ()->x.evaluate() .+ y.evaluate()
   return this
 end
 
-function +(x::Constant, y::AffineExpr)
-  return y + x
+function .+(x::Constant, y::AffineExpr)
+  return y .+ x
 end
 
-function +(x::AffineExpr, y::AffineExpr)
+function .+(x::AffineExpr, y::AffineExpr)
   x, y, sz = promote_size(x, y)
   vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
   for (v, c) in y.vars_to_coeffs_map
@@ -58,27 +59,49 @@ function +(x::AffineExpr, y::AffineExpr)
       vars_to_coeffs_map[v] = c
     end
   end
-  constant = x.constant + y.constant
+  constant = x.constant .+ y.constant
   this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, sz)
-  this.evaluate = ()->x.evaluate() + y.evaluate()
+  this.evaluate = ()->x.evaluate() .+ y.evaluate()
   return this
 end
 
-function +(x::SumSquaresExpr, y::SumSquaresExpr)
+function +(x::AffineOrConstant, y::AffineOrConstant)
+  if x.size != y.size
+    warn("x + y is deprecated if sizes do not match. Use x .+ y instead.")
+  end
+  return x .+ y
+end
+
+.+(x::AffineExpr, y::Value) = .+(x, Constant(y))
+.+(x::Value, y::AffineExpr) = .+(y, Constant(x))
++(x::AffineExpr, y::Value) = +(x, Constant(y))
++(x::Value, y::AffineExpr) = +(y, Constant(x))
+
+
+function .+(x::SumSquaresExpr, y::SumSquaresExpr)
   affines = copy(x.affines)
   append!(affines, y.affines)
   this = SumSquaresExpr(:+, affines)
   return this
 end
 
-+(x::AffineExpr, y::Value) = +(x, Constant(y))
-+(x::Value, y::AffineExpr) = +(y, Constant(x))
-
++(x::SumSquaresExpr, y::SumSquaresExpr) = .+(x, y)
 
 # Binary Subtraction
 
--(x::AffineExpr, y::AffineExpr) = +(x, -y)
--(x::AffineExpr, y::Constant) = +(x, -y)
--(x::Constant, y::AffineExpr) = +(-y, x)
+
+function -(x::AffineOrConstant, y::AffineOrConstant)
+  if x.size != y.size
+    warn("x - y is deprecated if sizes do not match. Use x .- y instead.")
+  end
+  return x .- y
+end
+
+.-(x::AffineExpr, y::AffineExpr) = .+(x, -y)
+.-(x::AffineExpr, y::Constant) = .+(x, -y)
+.-(x::Constant, y::AffineExpr) = .+(-y, x)
+.-(x::AffineExpr, y::Value) = .-(x, Constant(y))
+.-(x::Value, y::AffineExpr) = .-(Constant(x), y)
+
 -(x::AffineExpr, y::Value) = -(x, Constant(y))
 -(x::Value, y::AffineExpr) = -(Constant(x), y)

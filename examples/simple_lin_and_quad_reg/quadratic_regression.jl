@@ -25,7 +25,7 @@ offset = Variable();
 x_squared = x_data .^ 2;
 
 # Solve the problem
-p = minimize(sum_squares(offset + x_data * slope + x_squared * quadratic - y_data));
+p = minimize(sum_squares(offset .+ x_data * slope + x_squared * quadratic - y_data));
 solve!(p);
 
 # Create some evenly spaced points for plotting, again replicate powers
@@ -34,7 +34,7 @@ t_squared = t .^ 2;
 
 # Plot our regressed function
 plt.plot(x_data, y_data, "ro")
-plt.plot(t, slope.value[1, 1] * t + offset.value[1, 1] + t_squared * quadratic.value[1, 1], "b")
+plt.plot(t, slope.value[1, 1] * t .+ offset.value[1, 1] + t_squared * quadratic.value[1, 1], "b")
 plt.xlabel("x")
 plt.ylabel("y")
 plt.show()
