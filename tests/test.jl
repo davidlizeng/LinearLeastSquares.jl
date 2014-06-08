@@ -1,3 +1,5 @@
+using LSQ
+
 x = Variable(3)
 y = sum_squares(x)
 p = minimize(y)
@@ -11,7 +13,7 @@ solve!(p)
 x = Variable(2)
 A = [1 0; 1 0]
 y = sum_squares(x)
-p = minimize(y, A*x == [1; 2])
+p = minimize(y, A * x == [1; 2])
 solve!(p)
 
 A = randn(5, 5)
@@ -25,8 +27,6 @@ for i = 1:5
 end
 solve!(p)
 
-
-
 n = 200
 # Specify the true value of the variable
 true_vect = [-1; 1]
@@ -37,3 +37,12 @@ y = sign(X * true_vect)+ b
 a = Variable(2)
 p = minimize(sum_squares(X * a - y))
 solve!(p)
+
+x = Variable(5, 5);
+y = Variable(5, 6);
+z = Variable(7, 5);
+
+p = minimize(sum_squares([x y]) + sum_squares([x; z]),
+  [x == 1, 2 * y == 2, ones(7, 5) .* z == 3]);
+solve!(p);
+@assert abs(p.optval - 395) < 1e-4
