@@ -1,10 +1,6 @@
 import Base.diag, Base.diagm
 export diag, diagm
 
-function diag(x::Constant, num::Int64)
-  return Constant(diag(x.value, num))
-end
-
 function diag(x::AffineExpr, num::Int64)
   if num <= -x.size[1] || num >= x.size[2]
     error("Out of bounds diagonal number for diag")
@@ -17,10 +13,10 @@ function diag(x::AffineExpr, num::Int64)
     start_col = num + 1
   end
   len = min(x.size[1] - start_row + 1, x.size[2] - start_col + 1)
-  start_ind = (start_row - 1) * x.size[2] + start_col
+  start_ind = (start_col - 1) * x.size[1] + start_row
   indexer = Constant(zeros(len, x.size[1] * x.size[2]))
   for i = 1 : len
-    indexer.value[i, start_ind + (i - 1) * x.size[2]] = 1
+    indexer.value[i, start_ind + (i - 1) * (x.size[1] + 1)] = 1
   end
 
   vars_to_coeffs_map = Dict{Uint64, Constant}()
@@ -33,7 +29,7 @@ function diag(x::AffineExpr, num::Int64)
   return this
 end
 
-
+diag(x::AffineExpr) = diag(x, 0)
 
 function diagm(x::AffineExpr)
   if x.size[2] != 1
@@ -41,7 +37,7 @@ function diagm(x::AffineExpr)
   end
   indexer = Constant(zeros(x.size[1] * x.size[1], x.size[1]))
   for i = 1 : x.size[1]
-    indexer.value[1 + (i - 1) * x.size[1], i] = 1
+    indexer.value[1 + (i - 1) * (x.size[1] + 1), i] = 1
   end
 
   vars_to_coeffs_map = Dict{Uint64, Constant}()

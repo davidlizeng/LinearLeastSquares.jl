@@ -87,7 +87,7 @@ end
 
 
 function *(x::Constant, y::SumSquaresExpr)
-  if x.size != (1, 1) || x.value .< 0
+  if x.size != (1, 1) || all(x.value .< 0)
     error("Sum Squares expressions can only be multiplied by nonegative scalars")
   end
   affines = [x * affine for affine in y.affines]
@@ -100,7 +100,7 @@ end
 *(x::Value, y::SumSquaresExpr) = *(Constant(x), y)
 
 function /(x::SumSquaresExpr, y::Constant)
-  if y.size != (1, 1) || y.value .<= 0
+  if y.size != (1, 1) || all(y.value .<= 0)
     error("Sum Squares expressions can only be divided by positive scalars")
   end
   return Constant(1 ./ y.value) * x
