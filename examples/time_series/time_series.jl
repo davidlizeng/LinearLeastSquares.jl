@@ -17,7 +17,7 @@ residuals = temps - seasonal.value;
 
 # Generate the residuals matrix
 matlist = []
-residuals_mat = hstack(residuals[ar_len - i : n - i - 1] for i in 1 : ar_len)
+residuals_mat = hcat(residuals[ar_len - i : n - i - 1] for i in 1 : ar_len)
 
 # Solve autoregressive problem
 ar_coef = Variable(ar_len)
