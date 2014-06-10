@@ -40,7 +40,7 @@ From your Julia terminal, run `Pkg.clone("git@github.com:davidlizeng/LSQ.jl.git"
 
 ### Variables
 
-Variables represent the quantities that we want to find. lsqpy handles scalar, vector and matrix variables as shown below.
+Variables represent the quantities that we want to find. LSQ.jl handles scalar, vector and matrix variables as shown below.
 
 	x = Variable() # A scalar variable
 	y = Variable(3) # Create a vector variable with 3 rows and 1 columns
@@ -200,6 +200,179 @@ problem = satisfy([sum(x) == 3, x[0] + x[2] == 2, x[0] + x[1] == 1]);
 solve!(problem);
 x.value
 ```
+
+## Tutorials
+
+### Regression
+
+This is an example of using LSQ.jl for regression - the problem of trying to fit a function to some data.
+
+The files for this example are in [examples/simple_lin_and_quad_reg](https://github.com/davidlizeng/LSQ.jl/tree/master/examples/simple_lin_and_quad_reg).
+
+#### Data
+
+In this problem, we are given n points, represented by two n-by-1 vectors: x_data and y_data. The x and y coordinates of the ith point are given by the i-th entries of x_data and y_data respectively.
+
+We should first visualize the [data](https://github.com/davidlizeng/LSQ.jl/tree/master/examples/simple_lin_and_quad_reg/data.jl). In this example, the plotting is built into the data file so we can just run
+```
+julia data.jl
+```	
+which shows
+
+![data](https://raw.githubusercontent.com/davidlizeng/LSQ.jl/master/examples/simple_lin_and_quad_reg/data.png)
+
+#### Linear regression
+
+We will first try to fit a line to the data. A general function for a line is:
+
+	f(x) = offset + slope * x
+
+where slope and offset are scalar quantities that we pick to determine the line.
+
+We would like our data points to be "close" the line given by the slope and offset we pick. To define "close", we measure a residual defined as
+
+	residual(x, y) = f(x) - y
+
+for each point (x, y) in our data. Note that when the residual is small in magnitude the value of f(x) is close to y which means the line passes near the point. To account for the residual across multiple points we sum the squares of the residuals to obtain
+
+	total_residual_sq = sum of square(residual(x, y)) for each point (x, y)
+
+The values we want for slope and offset will be the ones that minimize total_residual_sq.
+
+We can now use lsqpy to solve this problem. The [code](https://github.com/davidlizeng/LSQ.jl/blob/master/examples/simple_lin_and_quad_reg/linear_regression.jl) for this example is shown below (with the plotting omitted):
+
+```
+# Import LSQ.jl
+using LSQ
+
+# Import the data
+include("data.jl")
+
+# Solve the problem, and print the result
+slope = Variable();
+offset = Variable();
+p = minimize(sum_squares(offset .+ x_data * slope - y_data));
+solve!(p);
+println("Slope = $(slope.value[1, 1]), offset = $(offset.value[1, 1])");
+```
+
+The first section includes LSQ.jl for use, and the second makes the data accessible. The third section contains the actual work. We first declare two Variables, one for each of the quantities we want to determine. Then we call the function 'minimize' and pass in our expression to minimize. Calling minimize both finds the minimum value of the expression and sets all variables in the problem with values that achieve this minimum. With the values set, all we have to do is print the results.
+
+You can run the above code in your console with
+```
+julia linear_regression.jl
+```
+
+This will print the optimal values and also display the a plot of the line we found.
+
+![lin_results](https://raw.githubusercontent.com/davidlizeng/LSQ.jl/master/examples/simple_lin_and_quad_reg/linear.png)
+
+#### Quadratic regression
+
+Now instead of using a line, let's try to fit a quadratic function to the data.
+
+Our new function will be something of the form
+
+	f(x) = offset + slope * x + quadratic * x ^ 2
+
+which is similar to the linear function we used previously. The only difference is that we have introduced an x^2 term with a new Variable coefficient. Along with offset and slope, quadratic is a Variable that we wish to determine.
+
+Here is the [code](https://github.com/davidlizeng/LSQ.jl/blob/master/examples/simple_lin_and_quad_reg/quadratic_regression.jl) that solves the problem (again, with plotting omitted)
+
+```
+# Import LSQ.jl
+using LSQ
+
+# Import the data
+include("data.jl")
+
+# Create variables that holds the coefficients
+quadratic = Variable();
+slope = Variable();
+offset = Variable();
+
+# We copy x_data but square the entries
+x_squared = x_data .^ 2;
+
+# Solve the problem
+p = minimize(sum_squares(offset .+ x_data * slope + x_squared * quadratic - y_data));
+solve!(p);
+```
+
+The code here is very much the same as the linear regression case. Running
+```
+julia quadratic_regression.jl
+```
+will show the plot
+
+![quad_results](https://raw.githubusercontent.com/davidlizeng/LSQ.jl/master/examples/simple_lin_and_quad_reg/quadratic.png)
+
+### Control
+
+Another example of a least-squares problem is control, where we want to plan how something will move. In our example, we want to determine the forces that will move our object to a goal position.
+
+#### Formulation
+
+There are 3 unknown quantities in the problem: the force applied, the velocity of the object, and the position of the object. To solve this problem, we will break up time into T points, each h seconds apart. The values of our variables must then satisfy
+
+	p[t+1] = p[t] + h*v[t]
+	v[t+1] = v[t] + h/mass*f[t] - drag*v[t]
+
+where p[t], v[t], and f[t] are the position, velocity, and force respectively at time t. This model is only an approximation of the real dynamics of moving objects, but when h is small this model is reasonable accurate.
+
+Finally, we need to decide on an objective. Here we will use the combination
+
+	objective = mu*sum_squares(v[t]) + sum_squares(f[t]) for all t
+
+This objective tells us that we want to minimize both the forces we apply as well as the speed of the object. mu is a constant that determines how much we care about the size of the forces versus the size of the velocity.
+
+#### Solution
+
+The [code](https://github.com/keegango/lsqpy/blob/master/examples/simple_control/simple_control.py "control code") is shown below.
+
+	# Import lsqpy
+	from lsqpy import Variable, sum_squares, minimize
+
+	# Import the way points
+	from data import initial_velocity, final_position, T, h, mass, drag
+	
+	# Declare the variables we need
+	position = Variable(2,T)
+	velocity = Variable(2,T)
+	force = Variable(2,T-1)
+	
+	# Create the list of constraints on our variables
+	constraints = []
+	for i in range(T-1):
+		constraints.append(position[:,i+1] == position[:,i] + h * velocity[:,i])
+	for i in range(T-1):
+		constraints.append(velocity[:,i+1] == velocity[:,i] + h/mass * force[:,i] - drag*velocity[:,i])
+		
+	# Add position constraints
+	constraints.append(position[:,0] == 0)
+	constraints.append(position[:,T-1] == final_position)
+	
+	# Add velocity constraints
+	constraints.append(velocity[:,0] == initial_velocity)
+	constraints.append(velocity[:,T-1] == 0)
+	
+	# Solve the problem
+	mu = 1
+	minimize(mu*sum_squares(velocity)+sum_squares(force),constraints)
+	
+The code roughly divides into three sections. We first create our variables: position, velocity, and force. We then create a list of our equality constraints that enforce consistency in our variables. Finally, we call solve. When you run the code with
+
+	python simple_control.py
+
+you should see this plot
+
+![control results](https://github.com/keegango/lsqpy/raw/master/images/control.png "control results")
+
+The black arrows show the force applied to the object, and the red line gives the actual position.
+
+At this point, you can play around with the value of mu to see how the weighting between force and velocity affects the motion of the object. You could even try include in the objective the sum of squares of the position as well. What effect will this have?
+
+
 
 ## Mathematics behind LSQ.jl
 
