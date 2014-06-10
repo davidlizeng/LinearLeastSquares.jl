@@ -1,4 +1,4 @@
-export *, .*
+export *, .*, /, ./
 
 *(x::Constant, y::Constant) = Constant(x.value * y.value)
 .*(x::Constant, y::Constant) = Constant(x.value .* y.value)
@@ -42,13 +42,13 @@ function *(x::Constant, y::AffineExpr)
     end
     constant = x_kron * y.constant
     this = AffineExpr(:*, (x, y), vars_to_coeffs_map, constant, (x.size[1], y.size[2]))
+    this.evaluate = ()->x.evaluate() * y.evaluate()
+    return this
   elseif x.size == (1, 1) || y.size == (1, 1)
     return x .* y
   else
     error("Cannot multiply two expressions of sizes $(x.size) and $(y.size)")
   end
-  this.evaluate = ()->x.evaluate() * y.evaluate()
-  return this
 end
 
 function *(x::AffineExpr, y::Constant)
@@ -74,9 +74,20 @@ end
 .*(x::Value, y::AffineExpr) = .*(Constant(x), y)
 .*(x::AffineExpr, y::Value) = .*(x, Constant(y))
 
+function ./(x::AffineExpr, y::Constant)
+  if y.size != (1, 1)
+    error("Cannot divide by an expression whose size is not 1 by 1")
+  end
+  return Constant(1 ./ y.value) .* x
+end
+
+./(x::AffineExpr, y::Value) = ./(x, Constant(y))
+/(x::AffineExpr, y::Constant) = ./(x, y)
+/(x::AffineExpr, y::Value) = /(x, Constant(y))
+
 
 function *(x::Constant, y::SumSquaresExpr)
-  if x.size != (1, 1) || x.value[1] < 0
+  if x.size != (1, 1) || x.value .< 0
     error("Sum Squares expressions can only be multiplied by nonegative scalars")
   end
   affines = [x * affine for affine in y.affines]
@@ -87,3 +98,12 @@ end
 *(x::SumSquaresExpr, y::Constant) = *(y, x)
 *(x::SumSquaresExpr, y::Value) = *(x, Constant(y))
 *(x::Value, y::SumSquaresExpr) = *(Constant(x), y)
+
+function /(x::SumSquaresExpr, y::Constant)
+  if y.size != (1, 1) || y.value .<= 0
+    error("Sum Squares expressions can only be divided by positive scalars")
+  end
+  return Constant(1 ./ y.value) * x
+end
+
+/(x::SumSquaresExpr, y::Value) = /(x, Constant(y))
