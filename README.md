@@ -24,12 +24,12 @@ LSQ.jl relies mainly on Julia and some plotting library.
 ### Plotting libraries
 Julia has several plotting libraries, although none has emerged yet as a clear winner. 
 
-## PyPlot.jl
-For EE103 at Stanford, we will be using PyPlot.jl To use it, you will also need to install Python, NumPy and Matplotlib. [lsqpy](https://github.com/keegango/lsqpy) has instructions on installing these.
+#### PyPlot.jl
+For EE103 at Stanford, we will be using PyPlot.jl. To use it, you will also need to install Python, NumPy and Matplotlib. [lsqpy](https://github.com/keegango/lsqpy) has instructions on installing these.
 
 Once you have matplotlib, from your Julia terminal, run `julia> Pkg.add(PyPlot)`. Documentation on PyPlot.jl can be found [here](https://github.com/stevengj/PyPlot.jl).
 
-## Winston.jl
+#### Winston.jl
 `julia> Pkg.add("Winston")`
 More details can be found [here](https://github.com/nolta/Winston.jl).
 
@@ -41,27 +41,27 @@ From your Julia terminal, run `Pkg.clone("git@github.com:davidlizeng/LSQ.jl.git"
 ### Variables
 
 Variables represent the quantities that we want to find. LSQ.jl handles scalar, vector and matrix variables as shown below.
+```
+x = Variable(); # A scalar variable
+y = Variable(3); # Create a vector variable with 3 rows and 1 columns
+z = Variable(10, 4); # A matrix variable that has 10 rows and 4 columns
+```
+Variables are objects, not numeric quantities. However, they do have an attribute, value, that stores a numeric value. A variable has no default numerical quantities upon creation, and so accessing the value attribute will do nothing. Their value is set by calling either minimize or satisfy. After these functions are called, the value of a variable can be obtained through its value attribute. For example,
 
-	x = Variable() # A scalar variable
-	y = Variable(3) # Create a vector variable with 3 rows and 1 columns
-	z = Variable(10,4) # A matrix variable that has 10 rows and 4 columns
+```
+x = Variable(10);
+... # Add some constraints
+problem = minimize(x, constraints);
+solve!(p);
 
-Variables are objects, not numeric quantities. Their value is set by calling either minimize or satisfy. After these functions are called, the value of a variable can be obtained through its value attribute. For example,
-
-	x = Variable(10)
-	... # Add some constraints
-	minimize(x, constraints)
-	
-	# Print the numeric value of x that minimizes the above problem
-	print(x.value) 
-
+# Print the numeric value of x that minimizes the above problem
+println(x.value)
+```
 ### Affine expressions
 
 Affine expressions are made from variables, constants, and other affine expressions using the operations +, -, / and * and also .+, and .-. There are a few rules about what can be combined for each operator.
 
 For addition and subtraction, the two expressions being combined must have the same dimensions to use + and -. If one of the expressions is a scalar and the other is not, .+ and .- is used. When one expression is a scalar, it is added to each entry of the other expression. For example,
-
-For addition and subtraction, the two expressions being combined must either have the same dimensions or one of the two must be a scalar. When one expression is a scalar, it is added to each entry of the other expression. For example,
 ```
 x = Variable(3);
 y = Variable(2);
@@ -162,7 +162,7 @@ y = Variable(4, 10)
 z = Variable() # A scalar variable
 
 x == y; # Fails
-x == y[0:3, :]; # Ok, we dropped the last row from y making it 3-by-10
+x == y[1:3, :]; # Ok, we dropped the last row from y making it 3-by-10
 x == z; # Ok
 ```
 ### Sum of squares expressions
@@ -176,7 +176,7 @@ Sum of squares expressions can also be created by combining two other sum of squ
 y = Variable(18);
 z = Variable(20);
 
-sum_squares(y) + sum_squares(z); # Ok, sum_squares is always a scalar so sizes of the affine don't matter
+sum_squares(y) + sum_squares(z); # Ok, sum_squares is always a scalar so sizes of the affine arguments don't matter
 10 * sum_squares(z); # Ok
 -1 * sum_squares(z); # Fails
 ```
@@ -328,51 +328,63 @@ This objective tells us that we want to minimize both the forces we apply as wel
 
 #### Solution
 
-The [code](https://github.com/keegango/lsqpy/blob/master/examples/simple_control/simple_control.py "control code") is shown below.
+The [code](https://github.com/davidlizeng/LSQ.jl/blob/master/examples/control.jl) is shown below.
+```
+using LSQ
+import PyPlot.plt
 
-	# Import lsqpy
-	from lsqpy import Variable, sum_squares, minimize
+# Some constraints on our motion
+# The object should start from the origin, and end at rest
+initial_velocity = [-20; 20];
+final_position = [10; 0];
 
-	# Import the way points
-	from data import initial_velocity, final_position, T, h, mass, drag
-	
-	# Declare the variables we need
-	position = Variable(2,T)
-	velocity = Variable(2,T)
-	force = Variable(2,T-1)
-	
-	# Create the list of constraints on our variables
-	constraints = []
-	for i in range(T-1):
-		constraints.append(position[:,i+1] == position[:,i] + h * velocity[:,i])
-	for i in range(T-1):
-		constraints.append(velocity[:,i+1] == velocity[:,i] + h/mass * force[:,i] - drag*velocity[:,i])
-		
-	# Add position constraints
-	constraints.append(position[:,0] == 0)
-	constraints.append(position[:,T-1] == final_position)
-	
-	# Add velocity constraints
-	constraints.append(velocity[:,0] == initial_velocity)
-	constraints.append(velocity[:,T-1] == 0)
-	
-	# Solve the problem
-	mu = 1
-	minimize(mu*sum_squares(velocity)+sum_squares(force),constraints)
-	
-The code roughly divides into three sections. We first create our variables: position, velocity, and force. We then create a list of our equality constraints that enforce consistency in our variables. Finally, we call solve. When you run the code with
+T = 100; # The number of timesteps
+h = 0.1; # The time between time intervals
+mass = 1; # Mass of object
+drag = 0.01; # Drag on object
 
-	python simple_control.py
 
+# Declare the variables we need
+position = Variable(2, T);
+velocity = Variable(2, T);
+force = Variable(2, T - 1);
+
+# Create a problem instance
+mu = 1;
+p = minimize(mu * sum_squares(velocity') + sum_squares(force'));
+
+# Add constraints on our variables
+for i in 1 : T - 1
+  p.constraints += position[:, i + 1] == position[:, i] + h * velocity[:, i];
+end
+
+for i in 1 : T - 1
+  p.constraints += velocity[:, i + 1] == velocity[:, i] + h / mass * force[:, i] - drag * velocity[:, i];
+end
+
+# Add position constraints
+p.constraints += position[:, 1] == 0;
+p.constraints += position[:, T] == final_position;
+
+# Add velocity constraints
+p.constraints += velocity[:, 1] == initial_velocity;
+p.constraints += velocity[:, T] == 0;
+
+# Solve the problem
+solve!(p);
+```
+
+The code roughly divides into four sections. We first create the required constraints. Then, we first create our variables: position, velocity, and force. We then create a list of our equality constraints that enforce consistency in our variables. Finally, we call solve. When you run the code with
+```
+julia control.jl
+```
 you should see this plot
 
-![control results](https://github.com/keegango/lsqpy/raw/master/images/control.png "control results")
+![control results](https://raw.githubusercontent.com/davidlizeng/LSQ.jl/master/examples/control.png)
 
 The black arrows show the force applied to the object, and the red line gives the actual position.
 
 At this point, you can play around with the value of mu to see how the weighting between force and velocity affects the motion of the object. You could even try include in the objective the sum of squares of the position as well. What effect will this have?
-
-
 
 ## Mathematics behind LSQ.jl
 
