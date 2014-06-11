@@ -6,7 +6,7 @@ getindex{T <: Real}(x::Constant, inds::AbstractArray{T, 1}) = Constant(getindex(
 getindex{T <: Real}(x::Constant, rows::AbstractArray{T, 1}, cols::AbstractArray{T, 1}) = Constant(getindex(x.value, rows, cols))
 
 function getindex{T <: Real}(x::AffineExpr, inds::AbstractArray{T, 1})
-  indexer = Constant(zeros(length(rows), x.size[1] * x.size[2]))
+  indexer = Constant(zeros(length(inds), x.size[1] * x.size[2]))
   k = 1
   for i in inds
     indexer.value[k, i] = 1

@@ -1,8 +1,8 @@
 export vcat, hcat, hvcat
 
 hcat(args) = Base.hcat(args)
-vcat(args) = Base.hcat(args)
-hvcat(args) = Base.hcat(args)
+vcat(args) = Base.vcat(args)
+hvcat(rows, args) = Base.hvcat(rows, args)
 
 hcat(args::Value...) = Base.hcat(args)
 vcat(args::Value...) = Base.vcat(args)

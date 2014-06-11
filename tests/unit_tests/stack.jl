@@ -7,7 +7,7 @@ h = [x y c z];
 x.value = [2; 3; 4];
 y.value = [5 8; 6 9; 7 0];
 z.value = eye(3);
-val1 = eval_internals(h, (x, y, z), 3, 7);
+val1 = eval_internals(h, (x, y, z));
 val2 = h.evaluate();
 @assert all(val1 .== val2);
 
@@ -20,7 +20,7 @@ v = [x; y; c; z];
 x.value = [2 3 4];
 y.value = [5 6 7; 8 9 0];
 z.value = eye(3);
-val1 = eval_internals(v, (x, y, z), 7, 3);
+val1 = eval_internals(v, (x, y, z));
 val2 = v.evaluate();
 @assert all(val1 .== val2);
 
