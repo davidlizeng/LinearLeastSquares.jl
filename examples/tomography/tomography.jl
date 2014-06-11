@@ -28,4 +28,5 @@ solve!(p)
 
 import PyPlot.plt
 import PyPlot.cm
-plt.imshow(reshape(x.value, img_size,img_size), cmap = get_cmaps()[29]
+using PyPlot
+plt.imshow(reshape(x.value, img_size,img_size), cmap = get_cmaps()[29])
