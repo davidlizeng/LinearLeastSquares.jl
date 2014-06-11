@@ -32,10 +32,9 @@ T = hcat([t .^ i for i in 1 : num_powers]...);
 X = hcat([x_data .^ i for i in 1 : num_powers]...);
 
 # Solve the problem
-mu = 0
-a = Variable(num_powers)
-p = minimize(sum_squares(X * a - y_data) + mu * sum_squares(a));
-solve!(p);
+mu = 0;
+a = Variable(num_powers);
+optval = minimize!(sum_squares(X * a - y_data) + mu * sum_squares(a));
 
 # Plot our regressed function
 plt.plot(x_data, y_data, "bo");

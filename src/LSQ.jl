@@ -18,6 +18,7 @@ include("atoms/sum.jl")
 include("atoms/mean.jl")
 include("atoms/variance.jl")
 
-include("solve.jl")
+include("solvers/backslash_solver.jl")
 
+include("solve.jl")
 end # module

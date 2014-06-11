@@ -31,8 +31,7 @@ smoothing = 0.0001;
 objective = sum_squares(yearly_tread + t * b + t2 * a - temperatures);
 objective += smoothing * sum_squares(yearly_tread[1 : num_samples - 1] - yearly_tread[2 : num_samples]);
 
-p = minimize(objective, equality_constraints);
-solve!(p)
+optval = minimize!(objective, equality_constraints);
 
 plt.figure(0)
 plt.plot(temperatures)

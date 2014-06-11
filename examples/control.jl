@@ -26,27 +26,27 @@ force = Variable(2, T - 1);
 
 # Create a problem instance
 mu = 1;
-p = minimize(mu * sum_squares(velocity') + sum_squares(force'));
+constraints = EqConstraint[];
 
 # Add constraints on our variables
 for i in 1 : T - 1
-  p.constraints += position[:, i + 1] == position[:, i] + h * velocity[:, i];
+  constraints += position[:, i + 1] == position[:, i] + h * velocity[:, i];
 end
 
 for i in 1 : T - 1
-  p.constraints += velocity[:, i + 1] == velocity[:, i] + h / mass * force[:, i] - drag * velocity[:, i];
+  constraints += velocity[:, i + 1] == velocity[:, i] + h / mass * force[:, i] - drag * velocity[:, i];
 end
 
 # Add position constraints
-p.constraints += position[:, 1] == 0;
-p.constraints += position[:, T] == final_position;
+constraints += position[:, 1] == 0;
+constraints += position[:, T] == final_position;
 
 # Add velocity constraints
-p.constraints += velocity[:, 1] == initial_velocity;
-p.constraints += velocity[:, T] == 0;
+constraints += velocity[:, 1] == initial_velocity;
+constraints += velocity[:, T] == 0;
 
 # Solve the problem
-solve!(p);
+optval = minimize!(mu * sum_squares(velocity') + sum_squares(force'), constraints);
 
 
 plt.plot(position.value[1, 1:2:T]', position.value[2, 1:2:T]', "r-", linewidth=1.5)

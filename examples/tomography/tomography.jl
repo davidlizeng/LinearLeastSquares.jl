@@ -23,8 +23,7 @@ end
 
 x = Variable(num_pixels)
 objective = sum_squares(line_mat * x - line_vals);
-p = minimize(objective);
-solve!(p)
+optval = minimize!(objective);
 
 import PyPlot.plt
 import PyPlot.cm

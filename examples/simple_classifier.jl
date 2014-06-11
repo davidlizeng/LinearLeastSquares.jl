@@ -19,8 +19,7 @@ X = rand(n, 2) * 2;
 y = sign(X * true_vect + rand(n, 1));
 
 a = Variable(2);
-p = minimize(sum_squares(X * a - y));
-solve!(p);
+optval = minimize!(sum_squares(X * a - y));
 println(a.value);
 
 # Plot the line we found

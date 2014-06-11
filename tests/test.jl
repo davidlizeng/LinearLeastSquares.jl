@@ -4,33 +4,30 @@ TOLERANCE = 1e-4;
 
 x = Variable(3);
 y = sum_squares(x);
-p = minimize(y);
-solve!(p);
-@assert abs(p.optval - 0) < TOLERANCE
+optval = minimize!(y);
+@assert abs(optval - 0) < TOLERANCE
 
 x = Variable(3);
 y = sum_squares(x);
-p = minimize(y, x == 3);
-solve!(p)
-@assert abs(p.optval - 27) < TOLERANCE
+optval = minimize!(y, x == 3);
+@assert abs(optval - 27) < TOLERANCE
 
 x = Variable(2);
 A = [1 0; 1 0];
 y = sum_squares(x);
-p = minimize(y, A * x == [1; 2]);
-solve!(p);
-@assert p.status == "infeasible";
+optval = minimize!(y, A * x == [1; 2]);
+@assert optval == nothing
 
 A = randn(5, 5);
 x_real = randn(5, 5);
 x = Variable(5, 5);
 y = A * x;
 b = A * x_real;
-p = minimize(sum_squares(x));
+constraints = EqConstraint[];
 for i = 1:5
-  p.constraints += y[:, i] == b[:, i];
+  constraints += y[:, i] == b[:, i];
 end
-solve!(p)
+optval = minimize!(sum_squares(x), constraints);
 
 n = 200;
 # Specify the true value of the variable
@@ -40,19 +37,17 @@ X = randn(n, 2) * 2;
 b = randn(n, 1);
 y = sign(X * true_vect) + b;
 a = Variable(2);
-p = minimize(sum_squares(X * a - y));
-solve!(p);
+optval = minimize!(sum_squares(X * a - y));
+
 
 x = Variable(5, 5);
 y = Variable(5, 6);
 z = Variable(7, 5);
-
-p = minimize(sum_squares([x y]) + sum_squares([x; z]),
+optval = minimize!(sum_squares([x y]) + sum_squares([x; z]),
   [x == 1, 2 * y == 2, ones(7, 5) .* z == 3]);
-solve!(p);
-@assert abs(p.optval - 395) < TOLERANCE
+@assert abs(optval - 395) < TOLERANCE
 
 # x = Variable(5);
-# p = minimize(sum_squares(sum(x)), x == 3);
+# p = minimize!(sum_squares(sum(x)), x == 3);
 # solve!(p);
 # @assert abs(p.optval - 225) < TOLERANCE

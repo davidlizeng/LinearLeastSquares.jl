@@ -11,8 +11,7 @@ end
 
 smoothing = 0;
 smooth_objective = sum_squares(seasonal[1 : n - 1] - seasonal[2 : n]);
-p = minimize(sum_squares(temps - seasonal) + smoothing * smooth_objective, eq_constraints);
-solve!(p);
+optval = minimize!(sum_squares(temps - seasonal) + smoothing * smooth_objective, eq_constraints);
 residuals = temps - seasonal.value;
 
 # Generate the residuals matrix

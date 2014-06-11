@@ -1,4 +1,4 @@
-export minimize, satisfy
+export Problem
 
 Float64OrNothing = Union(Float64, Nothing)
 SumSquaresExprOrNothing = Union(SumSquaresExpr, Nothing)
@@ -15,10 +15,3 @@ type Problem
     return this
   end
 end
-
-minimize(objective::SumSquaresExpr, constraints::Array{EqConstraint}) = Problem(:minimize, objective, constraints)
-minimize(objective::SumSquaresExpr, constraint::EqConstraint) = minimize(objective, [constraint])
-minimize(objective::SumSquaresExpr) = minimize(objective, EqConstraint[])
-
-satisfy(constraints::Array{EqConstraint}) = Problem(:satisfy, SumSquaresExpr(:empty, AffineExpr[]), constraints)
-satisfy(constraint::EqConstraint) = satisfy([constraint])

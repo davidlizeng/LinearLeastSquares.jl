@@ -19,8 +19,7 @@ y_data = x_data_expanded * true_coeffs + 0.5 * rand(n, 1);
 
 slope = Variable();
 offset = Variable();
-p = minimize(sum_squares(offset .+ x_data * slope - y_data));
-solve!(p);
+optval = minimize!(sum_squares(offset .+ x_data * slope - y_data));
 println("Slope = $(slope.value[1, 1]), offset = $(offset.value[1, 1])");
 
 import PyPlot.plt
