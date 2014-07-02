@@ -1,0 +1,68 @@
+
+Welcome to LSQ
+==============
+LSQ is a library that makes it easy to formulate and solve least squares
+optimization problems with linear equality constraints. With LSQ, these types
+of problems can be created using a natural syntax that mirrors standard
+mathematical notation. Currently LSQ has been implemented in three different
+laguages: Python, Julia, and Matlab.
+
+
+Mathematics behind LSQ
+======================
+LSQ can solve any least squares problem that can be framed as the following:
+
+  .. math::
+    \begin{array}{ll}
+      \mbox{minimize} & \|Ax + b\|_2^2 \\
+      \mbox{subject to} & Cx = d
+    \end{array}
+
+where :math:`x` is the variable and :math:`A, b, C, d` are constants.
+If :math:`C` has linearly independent rows and :math:`Ay \ne 0` for all
+:math:`y \in \mathcal{N}(C)`, then solving our original least squares problem
+is equivalent to solving the following linear system for variables :math:`x`
+and :math:`z`:
+
+  .. math::
+    \begin{bmatrix} 2A^TA & C^T \\ C & 0 \end{bmatrix}
+    \begin{bmatrix} x \\ z \end{bmatrix} =
+    \begin{bmatrix} -2A^Tb \\ d \end{bmatrix}
+
+Furthermore, the solution to this system is guaranteed to be unique, and the
+unique :math:`x` that solves this system will also be the unique solution to
+the original least squares problem.
+
+LSQ solves least squares problems by
+building this system of linear equations, and then
+calling built-in linear equation solvers to solve for :math:`x` and :math:`z`.
+As such, LSQ will fail to solve the problem if the least squares problem does
+provide a matrix :math:`C` with linearly independent rows and a matrix :math:`A`
+such that :math:`Ay \ne 0` for all :math:`y \in \mathcal{N}(C)`.
+
+LSQ defines syntax so that you can easily formulate a least squares problem to
+fulfill all of the conditions above.
+
+LSQ.jl Basics
+=============
+
+Basic Example
+
+Solve Functions
+---------------
+
+Variables
+---------
+
+Affine Expressions
+------------------
+
+Equality Constraints
+--------------------
+
+Sum of Squares Expressions
+--------------------------
+
+
+
+
