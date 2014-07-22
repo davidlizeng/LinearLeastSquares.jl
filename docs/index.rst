@@ -49,9 +49,6 @@ As such, LSQ will fail to solve the problem if the least squares problem does
 not provide a matrix :math:`C` with linearly independent rows and a matrix
 :math:`A` such that :math:`Ay \ne 0` for all :math:`y \in \mathcal{N}(C)`.
 
-LSQ defines syntax so that you can easily formulate a least squares problem to
-fulfill all of the conditions above.
-
 LSQ.jl Basics
 =============
 Recall that the least squares problem is defined as
@@ -101,50 +98,46 @@ the ``.+, .-`` operators instead.
     x = Variable(3); # A 3-by-1 vector
     y = Variable(2); # A 2-by-1 vector
     z = Variable(3);
-    c = [1; 2; 3]; # A 3-by-1 vector
-    x - z; # Ok
-    x + y; # Fails, sizes do not match
-    x - c + z; # Ok
-
     w = Variable(); # A scalar variable
-    x .+ w; # Ok
-    y .+ 1; # Ok
+    c = [1; 2; 3]; # A 3-by-1 vector
+
+    affine1 = x - z;
+    affine2 = x - c + z;
+
+    affine3 = x .+ w;
+    affine4 = y .+ 1;
 
 The multiplication operator ``*`` supports both scalar multiplication and
-matrix multiplication. Note that affine expressions can only be multiplied by
+matrix multiplication. Matrix-Matrix multiplication must obey the normal size constraint
+i.e. a m x n matrix can only be multiplied on the right by a n x p matrix.
+Note that affine expressions can only be multiplied by
 constants; two affine expressions cannot be multiplied!
 
   .. code-block:: none
 
     x = Variable(3); # A 3-by-1 vector variable
     y = Variable(); # A scalar variable
+
     c = [1; 2; 3]; # A 3-by-1 vector
-
-    x * y; # Fails, one must be a constant
-    5 * x; # Ok
-    y * c; # Ok
-
-    a = [1 2 3 4]; # A 1-by-4 matrix
     b = [1 2 3]; # A 1-by-3 matrix
     I = eye(3); # A 3-by-3 identity matrix
 
-    b * x; # Ok
-    a * x; # Fails, sizes do not match for matrix multiplication
-    I * x; # Ok
-    x * I; # Fails, sizes do not match for matrix multiplication
+    affine1 = 5 * x;
+    affine2 = y * c;
 
-The division operator ``\`` functions similarly, except that only scalar
+    affine3 = b * x;
+    affine4 = I * x;
+
+The division operator ``/`` functions similarly, except that only scalar
 division by a constant is supported.
 
   .. code-block:: none
 
     x = Variable(3); # A 3-by-1 vector variable
     y = Variable(); # A scalar variable
-    c = [1; 2; 3]; # A 3-by-1 vector
 
-    x / 5; # Ok
-    c / y; # Fails, divisor must be a constant
-    x / c; # Fails, divisor must be a scalar
+    affine1 = x / 5;
+		affine2 = y / 5;
 
 
 .. TODO describe shaping and indexing atoms, explain why these stay affine
@@ -167,7 +160,16 @@ The ``==`` operator creates equality constraints between two affine expressions.
 
     x = Variable();
     y = Variable();
+
     x == y + 2; # An equality constraint
+
+An equality constraint can also be assigned and referenced later.
+
+  .. code-block:: none
+
+		# The following is equivalent to
+		# eqconst1 = (x == y + 2);
+    eqconst1 = x == y + 2;
 
 Similar to addition or subtraction, an equality constraint can only be created
 if two expressions have equal dimensions or if one expression is a scalar.
@@ -175,19 +177,24 @@ In the latter case, each entry of the matrix is set equal to the scalar.
 
   .. code-block:: none
 
-    x = Variable(3, 10)
-    y = Variable(4, 10)
-    z = Variable() # A scalar variable
+    x = Variable(3, 10);
+    y = Variable(4, 10);
+    z = Variable();
 
-    x == y; # Fails
-    x == y[1:3, :]; # Ok, we dropped the last row from y making it 3-by-10
-    x == z; # Ok
+    eqconst1 = x == y[1:3, :]; # Indexing resized y to be 3 by 10
+    eqconst2 = x == z;
 
 Sum of Squares Expressions
 --------------------------
 
-A sum of squares expression is used to emulate the mathematical concept of
-norm squared. That is, the expression :math:`\|Ax + b\|_2^2` is equivalent to
+A sum of squares expression is used to represent the mathematical concept of
+norm squared in a way that covers both vectors and matrices. For a general m by n
+matrix :math:`M`, the sum of squares of :math:`M` is
+
+  .. math::
+		S = \sum_{i=0}^{m}\sum_{j=0}^{n} M_{ij}^2.
+
+That is, the expression :math:`\|Ax + b\|_2^2` is equivalent to
 the following code
 
   .. code-block:: none
@@ -209,9 +216,8 @@ size restrictions when adding two sum of squares expressions
     y = Variable(18);
     z = Variable(20);
 
-    sum_squares(y) + sum_squares(z); # Ok, internal argument sizes don't matter
-    10 * sum_squares(z); # Ok
-    -1 * sum_squares(z); # Fails, multiplication must be by positive scalar
+    sumsq1 = sum_squares(y) + sum_squares(z);
+    sumsq2 = 10 * sum_squares(z);
 
 Any sum of squares expression is equivalent to some mathematical expression of
 the form :math:`\|Ax + b\|_2^2`. Adding sum of squares expressions or
