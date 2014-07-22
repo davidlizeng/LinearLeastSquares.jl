@@ -46,8 +46,8 @@ the original least squares problem. LSQ solves least squares problems by
 building this system of linear equations, and then
 calling built-in linear equation solvers to solve for :math:`x` and :math:`z`.
 As such, LSQ will fail to solve the problem if the least squares problem does
-provide a matrix :math:`C` with linearly independent rows and a matrix :math:`A`
-such that :math:`Ay \ne 0` for all :math:`y \in \mathcal{N}(C)`.
+not provide a matrix :math:`C` with linearly independent rows and a matrix
+:math:`A` such that :math:`Ay \ne 0` for all :math:`y \in \mathcal{N}(C)`.
 
 LSQ defines syntax so that you can easily formulate a least squares problem to
 fulfill all of the conditions above.
@@ -249,7 +249,7 @@ solution to an underdetermined system
     b = randn(2, 1);
     x = Variable(3);
     objective = sum_squares(x);
-    constraint = A*x == b;
+    constraint = A * x == b;
     optimal_value = minimize!(objective, constraint);
     println(x.value);
 
@@ -265,7 +265,7 @@ constraints, or with none at all
     A = randn(3, 3); C = randn(3, 3);
     b = randn(3, 1); d = randn(3, 1);
     objective = sum_squares(x);
-    constraints = [A*x == b, C*x == d];
+    constraints = [A * x == b, C * x == d];
     optimum_value_1 = minimize!(objective, constraints);
     println(x.value);
     optimum_value_2 = minimize!(objective);
@@ -279,7 +279,7 @@ linear equations
     x = Variable(3); y = Variable(3)
     A = randn(3, 3); C = randn(3, 3);
     b = randn(3, 1); d = randn(3, 1);
-    constraints = [A*x == b, C*y == d];
+    constraints = [A * x == b, C * y == d];
     satisfy!(constraints);
     println(x.value);
     println(y.value);
