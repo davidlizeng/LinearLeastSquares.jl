@@ -200,7 +200,7 @@ easily transformed to the <span class="math">\(Cx = d\)</span> form</p>
 \[\begin{split}Ay + Bz - k = Dy - h \implies \begin{bmatrix} A - D &amp; B \end{bmatrix}
 \begin{bmatrix} y \\ z \end{bmatrix} = k - h\end{split}\]</div>
 </div></blockquote>
-<p>The &#8216;==&#8217; operator creates equality constraints between two affine expressions.</p>
+<p>The <tt class="docutils literal"><span class="pre">==</span></tt> operator creates equality constraints between two affine expressions.</p>
 <blockquote>
 <div><div class="highlight-none"><div class="highlight"><pre>x = Variable();
 y = Variable();
@@ -229,7 +229,7 @@ x == z; # Ok
 norm squared. That is, the expression <span class="math">\(\|Ax + b\|_2^2\)</span> is equivalent to
 the following code</p>
 <blockquote>
-<div><div class="highlight-none"><div class="highlight"><pre>sum_squares(A * x + b)
+<div><div class="highlight-none"><div class="highlight"><pre>sum_squares(A * x + b);
 </pre></div>
 </div>
 </div></blockquote>
@@ -265,10 +265,64 @@ multiplying them by positive constants will preseve this property.</p>
 c\|Ax + b\|_2^2 &amp; = \left\|\sqrt{c}Ax + \sqrt{c}b\right\|_2^2
 \end{align*}\end{split}\]</div>
 </div></blockquote>
+<p>This means that any sum of squares expression can serve as the objective of
+a least squares problem, and that, conversely, the objective of any least
+squares problem can be framed as a sum of squares expression.</p>
 </div>
 <div class="section" id="solve-functions">
 <h2>Solve Functions<a class="headerlink" href="#solve-functions" title="Permalink to this headline">¶</a></h2>
-<p>At the top level, LSQ provides functions for solving least</p>
+<p>At the top level, LSQ provides functions for compiling the sum of squares
+objective and the equality constraints into one problem for solving. These
+functions will also populate the variables with optimal values. Following
+Julia convention, the names of these functions will contain a <tt class="docutils literal"><span class="pre">!</span></tt> character
+to denote the fact that they will modify the arguments (variables are populated
+with optimal values).</p>
+<p>The <tt class="docutils literal"><span class="pre">minimize!</span></tt> function minimizes a sum squares expression over
+equality constraints. For example, the following code finds the least norm
+solution to an underdetermined system</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>A = randn(3, 2);
+b = randn(2, 1);
+x = Variable(3);
+objective = sum_squares(x);
+constraint = A*x == b;
+optimal_value = minimize!(objective, constraint);
+println(x.value);
+</pre></div>
+</div>
+</div></blockquote>
+<p>The optimal value of <span class="math">\(\|Ax - b\|_2^2\)</span> is stored in <tt class="docutils literal"><span class="pre">optimal_value</span></tt>, and
+the optimal value of <tt class="docutils literal"><span class="pre">x</span></tt> can be accessed via <tt class="docutils literal"><span class="pre">x.value</span></tt>.</p>
+<p>The <tt class="docutils literal"><span class="pre">minimize!</span></tt> function can also be called with a list of equality
+constraints, or with none at all</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3);
+A = randn(3, 3); C = randn(3, 3);
+b = randn(3, 1); d = randn(3, 1);
+objective = sum_squares(x);
+constraints = [A*x == b, C*x == d];
+optimum_value_1 = minimize!(objective, constraints);
+println(x.value);
+optimum_value_2 = minimize!(objective);
+println(x.value);
+</pre></div>
+</div>
+</div></blockquote>
+<p>LSQ also supports a <tt class="docutils literal"><span class="pre">satisfy!</span></tt> function, which aims to satisfy a system of
+linear equations</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3); y = Variable(3)
+A = randn(3, 3); C = randn(3, 3);
+b = randn(3, 1); d = randn(3, 1);
+constraints = [A*x == b, C*y == d];
+satisfy!(constraints);
+println(x.value);
+println(y.value);
+</pre></div>
+</div>
+</div></blockquote>
+<p>The variables values that satisfy the system will be stored in the <tt class="docutils literal"><span class="pre">value</span></tt>
+field of the variable, similar to the <tt class="docutils literal"><span class="pre">minimize!</span></tt> function.</p>
 </div>
 </div>
 

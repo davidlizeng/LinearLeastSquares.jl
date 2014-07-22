@@ -1,4 +1,3 @@
-
 Welcome to LSQ
 ==============
 LSQ is a library that makes it easy to formulate and solve least squares
@@ -162,7 +161,7 @@ easily transformed to the :math:`Cx = d` form
     Ay + Bz - k = Dy - h \implies \begin{bmatrix} A - D & B \end{bmatrix}
     \begin{bmatrix} y \\ z \end{bmatrix} = k - h
 
-The '==' operator creates equality constraints between two affine expressions.
+The ``==`` operator creates equality constraints between two affine expressions.
 
   .. code-block:: none
 
@@ -193,7 +192,7 @@ the following code
 
   .. code-block:: none
 
-    sum_squares(A * x + b)
+    sum_squares(A * x + b);
 
 Like affine expressions, sum of squares expressions can be constructed following
 certain rules
@@ -234,9 +233,57 @@ squares problem can be framed as a sum of squares expression.
 Solve Functions
 ---------------
 At the top level, LSQ provides functions for compiling the sum of squares
-objective and the equality constraints into one problem for solving.
+objective and the equality constraints into one problem for solving. These
+functions will also populate the variables with optimal values. Following
+Julia convention, the names of these functions will contain a ``!`` character
+to denote the fact that they will modify the arguments (variables are populated
+with optimal values).
 
+The ``minimize!`` function minimizes a sum squares expression over
+equality constraints. For example, the following code finds the least norm
+solution to an underdetermined system
 
+  .. code-block:: none
 
+    A = randn(3, 2);
+    b = randn(2, 1);
+    x = Variable(3);
+    objective = sum_squares(x);
+    constraint = A*x == b;
+    optimal_value = minimize!(objective, constraint);
+    println(x.value);
 
+The optimal value of :math:`\|Ax - b\|_2^2` is stored in ``optimal_value``, and
+the optimal value of ``x`` can be accessed via ``x.value``.
+
+The ``minimize!`` function can also be called with a list of equality
+constraints, or with none at all
+
+  .. code-block:: none
+
+    x = Variable(3);
+    A = randn(3, 3); C = randn(3, 3);
+    b = randn(3, 1); d = randn(3, 1);
+    objective = sum_squares(x);
+    constraints = [A*x == b, C*x == d];
+    optimum_value_1 = minimize!(objective, constraints);
+    println(x.value);
+    optimum_value_2 = minimize!(objective);
+    println(x.value);
+
+LSQ also supports a ``satisfy!`` function, which aims to satisfy a system of
+linear equations
+
+  .. code-block:: none
+
+    x = Variable(3); y = Variable(3)
+    A = randn(3, 3); C = randn(3, 3);
+    b = randn(3, 1); d = randn(3, 1);
+    constraints = [A*x == b, C*y == d];
+    satisfy!(constraints);
+    println(x.value);
+    println(y.value);
+
+The variables values that satisfy the system will be stored in the ``value``
+field of the variable, similar to the ``minimize!`` function.
 
