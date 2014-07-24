@@ -50,236 +50,190 @@ of problems can be created using a natural syntax that mirrors standard
 mathematical notation. Currently LSQ has been implemented in three different
 laguages: Python, Julia, and Matlab.</p>
 </div>
-<div class="section" id="mathematics-behind-lsq">
-<h1>Mathematics behind LSQ<a class="headerlink" href="#mathematics-behind-lsq" title="Permalink to this headline">¶</a></h1>
-<p>General equality constrained optimization problems over a variable <span class="math">\(x\)</span>
-can be defined as having the following form</p>
+<div class="section" id="linearly-constrained-least-squares">
+<h1>Linearly Constrained Least Squares<a class="headerlink" href="#linearly-constrained-least-squares" title="Permalink to this headline">¶</a></h1>
+<p>LSQ solves <strong>linearly constrained least squares</strong> (or LCLS) problems,
+which have the form</p>
 <blockquote>
 <div><div class="math">
 \[\begin{split}\begin{array}{ll}
-  \mbox{minimize} &amp; f(x)\\
-  \mbox{subject to} &amp; g_i(x) = 0, \ \forall i = 1,2,\ldots
-\end{array}\end{split}\]</div>
-</div></blockquote>
-<p>Here, the function <span class="math">\(f(x)\)</span> is known as the <strong>objective</strong>, and the
-equations <span class="math">\(g_i(x) = 0\)</span> are known as the <strong>equality constraints</strong>.
-LSQ aims to tackle only one class of such optimization problems, which we will
-call <strong>least squares problems</strong>. A least squares problem in the variable
-<span class="math">\(x\)</span> can be framed as the following</p>
-<blockquote>
-<div><div class="math">
-\[\begin{split}\begin{array}{ll}
-  \mbox{minimize} &amp; \|Ax + b\|_2^2 \\
+  \mbox{minimize} &amp; \|Ax - b\|_2^2 \\
   \mbox{subject to} &amp; Cx = d
 \end{array}\end{split}\]</div>
 </div></blockquote>
-<p>where <span class="math">\(A, b, C, d\)</span> are constants.
-If <span class="math">\(C\)</span> has linearly independent rows and <span class="math">\(Ay \ne 0\)</span> for all
-<span class="math">\(y \in \mathcal{N}(C)\)</span>, then solving our original least squares problem
-is equivalent to solving the following linear system for variables <span class="math">\(x\)</span>
-and <span class="math">\(z\)</span></p>
+<p>where the unknown variable <span class="math">\(x\)</span> is a vector of size <span class="math">\(n\)</span>. The values for
+<span class="math">\(A\)</span>, <span class="math">\(b\)</span>, <span class="math">\(C\)</span>, and <span class="math">\(d\)</span> are given and have sizes
+<span class="math">\(m\times n\)</span>, <span class="math">\(m\)</span>, <span class="math">\(p\times n\)</span>, and <span class="math">\(p\)</span>,
+respectively.
+LSQ finds the unique value for <span class="math">\(x\)</span> that both satisfies the linear equality
+constraints <span class="math">\(Cx = d\)</span> and minimizes the objective, the sum of the squares of
+the entries of <span class="math">\(Ax - b\)</span>.</p>
+</div>
+<div class="section" id="solving-lcls">
+<h1>Solving LCLS<a class="headerlink" href="#solving-lcls" title="Permalink to this headline">¶</a></h1>
+<p>There is a unique solution to the LCLS problem if and only if there is a
+unique solution to the following linear system of equations in the variable
+<span class="math">\(x\)</span> and a new variable <span class="math">\(z\)</span></p>
 <blockquote>
 <div><div class="math">
 \[\begin{split}\begin{bmatrix} 2A^TA &amp; C^T \\ C &amp; 0 \end{bmatrix}
 \begin{bmatrix} x \\ z \end{bmatrix} =
-\begin{bmatrix} -2A^Tb \\ d \end{bmatrix}\end{split}\]</div>
+\begin{bmatrix} 2A^Tb \\ d \end{bmatrix}\end{split}\]</div>
 </div></blockquote>
-<p>Furthermore, the solution to this system is guaranteed to be unique, and the
-unique <span class="math">\(x\)</span> that solves this system will also be the unique solution to
-the original least squares problem. LSQ solves least squares problems by
-building this system of linear equations, and then
-calling built-in linear equation solvers to solve for <span class="math">\(x\)</span> and <span class="math">\(z\)</span>.
-As such, LSQ will fail to solve the problem if the least squares problem does
-not provide a matrix <span class="math">\(C\)</span> with linearly independent rows and a matrix
-<span class="math">\(A\)</span> such that <span class="math">\(Ay \ne 0\)</span> for all <span class="math">\(y \in \mathcal{N}(C)\)</span>.</p>
-<p>LSQ defines syntax so that you can easily formulate a least squares problem to
-fulfill all of the conditions above.</p>
+<p>This occurs when the the matrix <span class="math">\(C\)</span> has independent rows, and the matrix
+<span class="math">\(\begin{bmatrix} A\\ C\end{bmatrix}\)</span> has indepedent columns.</p>
+<p>There are a couple special cases that LSQ can also handle. If <span class="math">\(p = 0\)</span>,
+then LSQ solves the unconstrained minimization of <span class="math">\(\|Ax - b\|_2^2\)</span>, which
+will have a unique solution as long as <span class="math">\(A\)</span> has independent columns.
+If <span class="math">\(m = 0\)</span>, then LSQ solves the system of linear equations <span class="math">\(Cx = d\)</span>,
+which will have a unique solution if <span class="math">\(C\)</span> is square and invertible.</p>
 </div>
 <div class="section" id="lsq-jl-basics">
 <h1>LSQ.jl Basics<a class="headerlink" href="#lsq-jl-basics" title="Permalink to this headline">¶</a></h1>
-<p>Recall that the least squares problem is defined as</p>
-<blockquote>
-<div><div class="math">
-\[\begin{split}\begin{array}{ll}
-  \mbox{minimize} &amp; \|Ax + b\|_2^2 \\
-  \mbox{subject to} &amp; Cx = d
-\end{array}\end{split}\]</div>
-</div></blockquote>
-<p>We will build up the LSQ syntax, step by step, to eventually create and solve
-a problem of this form.</p>
-<div class="section" id="variables">
-<h2>Variables<a class="headerlink" href="#variables" title="Permalink to this headline">¶</a></h2>
-<p>One of the goals of solving the least squares problem is to obtain the optimal
+<p>TODO: Open up with an example, maybe regularized least squares?</p>
+</div>
+<div class="section" id="variables-and-constants">
+<h1>Variables and Constants<a class="headerlink" href="#variables-and-constants" title="Permalink to this headline">¶</a></h1>
+<p>One of the goals of solving the LCLS problem is to obtain the optimal
 values for the variables. To declare variables in LSQ, use the following
 syntax to specify their size</p>
 <blockquote>
-<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(); # A scalar variable
-y = Variable(3); # Create a vector variable with 3 rows and 1 columns
+<div><div class="highlight-none"><div class="highlight"><pre>x = Variable();      # A scalar variable
+y = Variable(3);     # Create a vector variable with 3 rows and 1 columns
 z = Variable(10, 4); # A matrix variable that has 10 rows and 4 columns
 </pre></div>
 </div>
 </div></blockquote>
-<p>LSQ currently only supports variables up to 2 dimensions in size.</p>
+<p>LSQ currently only supports variables up to 2 dimensions in size. Variables
+have no value upon creation, but after solving a problem, LSQ will populate
+the variable with its optimal value. This value can be accessed in the
+following ways</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre># x is a variable with value populated
+println(evaluate(x)) # evaluate function
+println(x.value)     # value attribute
+</pre></div>
+</div>
+</div></blockquote>
+<p>Constants refer to any numerical scalars, vectors, or matrices of fixed value.
+Together with variables serve as the building blocks for more complex expressions.</p>
 </div>
 <div class="section" id="affine-expressions">
-<h2>Affine Expressions<a class="headerlink" href="#affine-expressions" title="Permalink to this headline">¶</a></h2>
-<p>Affine expression of variables is used to emulate the mathematical concept of
-affine transformations on variables. Affine expressions of variables can be
-built up following the rules below</p>
+<h1>Affine Expressions<a class="headerlink" href="#affine-expressions" title="Permalink to this headline">¶</a></h1>
+<p>Affine expression are linear functions of variables plus a constant.
+Variables are themselves affine expressions.
+The most basic way to build more affine expressions from variables is to use the overloaded
+binary arithmetic operators <tt class="docutils literal"><span class="pre">+,</span> <span class="pre">-,</span> <span class="pre">*,</span> <span class="pre">/</span></tt>. The following operations are
+supported</p>
 <ol class="arabic simple">
-<li>Variables are themselves affine expressions</li>
-<li>Adding or subtracting two affine expressions yields an affine expression</li>
-<li>Adding or subtracting constants from an affine expression yields an affine expression</li>
-<li>Multiplying an affine expression by a constant yields an affine expression</li>
+<li>Addition or subtraction between two affine expressions, provided they are the same size or one is scalar.</li>
+<li>Addition or subtraction between an affine expression and a constant, provided they are the same size or one is scalar.</li>
+<li>Scalar or matrix multiplication between an affine expression and a constant.</li>
+<li>Division of an affine expression by a scalar, nonzero constant.</li>
 </ol>
-<p>The most basic way of building affine expressions of variables is to use the
-binary arithmetic operators <tt class="docutils literal"><span class="pre">+,</span> <span class="pre">.+,</span> <span class="pre">-,</span> <span class="pre">.-,</span> <span class="pre">*,</span> <span class="pre">\</span></tt>. The <tt class="docutils literal"><span class="pre">+,</span> <span class="pre">-</span></tt> operators
-require the left hand side and the right hand side to be of the same size. If
-you wish to add or subtract a scalar to an expression of a different size, use
-the <tt class="docutils literal"><span class="pre">.+,</span> <span class="pre">.-</span></tt> operators instead.</p>
+<p>Here are some examples of using binary operators to construct affine expressions</p>
 <blockquote>
-<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3); # A 3-by-1 vector
-y = Variable(2); # A 2-by-1 vector
-z = Variable(3);
-c = [1; 2; 3]; # A 3-by-1 vector
-x - z; # Ok
-x + y; # Fails, sizes do not match
-x - c + z; # Ok
+<div><div class="highlight-none"><div class="highlight"><pre>w = Variable();     # scalar
+x = Variable(3);    # 3-by-1 vector
+Y = Variable(2, 3); # 2-by-3 matrix
+z = Variable();     # scalar
+b = [1 2 3];        # 1-by-3 vector
+C = randn(3, 4);    # 3-by-4 matrix
 
-w = Variable(); # A scalar variable
-x .+ w; # Ok
-y .+ 1; # Ok
+affine1 = w + b * x / 1.3 - 6.1;   # scalar
+affine2 = (affine1 - Y) * C;       # 2-by-4 matrix
 </pre></div>
 </div>
 </div></blockquote>
-<p>The multiplication operator <tt class="docutils literal"><span class="pre">*</span></tt> supports both scalar multiplication and
-matrix multiplication. Note that affine expressions can only be multiplied by
-constants; two affine expressions cannot be multiplied!</p>
+<p>An affine expression can be evaluated to a numerical value if all variables the affine
+expression depends on have been populated with values. The syntax for doing so is</p>
 <blockquote>
-<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3); # A 3-by-1 vector variable
-y = Variable(); # A scalar variable
-c = [1; 2; 3]; # A 3-by-1 vector
-
-x * y; # Fails, one must be a constant
-5 * x; # Ok
-y * c; # Ok
-
-a = [1 2 3 4]; # A 1-by-4 matrix
-b = [1 2 3]; # A 1-by-3 matrix
-I = eye(3); # A 3-by-3 identity matrix
-
-b * x; # Ok
-a * x; # Fails, sizes do not match for matrix multiplication
-I * x; # Ok
-x * I; # Fails, sizes do not match for matrix multiplication
+<div><div class="highlight-none"><div class="highlight"><pre>println(evaluate(affine1))
 </pre></div>
 </div>
 </div></blockquote>
-<p>The division operator <tt class="docutils literal"><span class="pre">\</span></tt> functions similarly, except that only scalar
-division by a constant is supported.</p>
+<p>TODO: describe shaping and indexing functions, sum, mean, etc.</p>
+</div>
+<div class="section" id="linear-equality-constraints">
+<h1>Linear Equality Constraints<a class="headerlink" href="#linear-equality-constraints" title="Permalink to this headline">¶</a></h1>
+<p>In LSQ, a linear equality constraint is formed between an affine expression and a constant,
+or two affine expressions, using the <tt class="docutils literal"><span class="pre">==</span></tt> operator.
+Note that the <tt class="docutils literal"><span class="pre">==</span></tt> operator has been overloaded to no longer return a boolean,
+but rather object representing the linear equality constraint.
+A linear equality constraint is only valid if the left hand side and the right hand side
+of the <tt class="docutils literal"><span class="pre">==</span></tt> have the same size, or if one is scalar. Here are some examples of
+linear equality constraints</p>
 <blockquote>
-<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3); # A 3-by-1 vector variable
-y = Variable(); # A scalar variable
-c = [1; 2; 3]; # A 3-by-1 vector
-
-x / 5; # Ok
-c / y; # Fails, divisor must be a constant
-x / c; # Fails, divisor must be a scalar
+<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3);
+A = randn(4, 3);
+constraint1 = A * x == randn(4, 1);
+constraint2 = 3 == x[1:2];
+</pre></div>
+</div>
+</div></blockquote>
+<p>Lists of constraints can also be created. Additional constraints can be appended
+to a list using the <tt class="docutils literal"><span class="pre">+</span></tt> operator.</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>constraint_list = [A * x == randn(4, 1), 3 == x[1:2]];
+constraint_list += x[3] == 1.6;
 </pre></div>
 </div>
 </div></blockquote>
 </div>
-<div class="section" id="equality-constraints">
-<h2>Equality Constraints<a class="headerlink" href="#equality-constraints" title="Permalink to this headline">¶</a></h2>
-<p>The constraints of a least squares problem, <span class="math">\(Cx = d\)</span> is equivalent to the
-form <tt class="docutils literal"><span class="pre">affine</span> <span class="pre">expression</span> <span class="pre">=</span> <span class="pre">affine</span> <span class="pre">expression</span></tt>. For example, the equality
-constraint involving affine expressions in <span class="math">\(y\)</span> and <span class="math">\(z\)</span> can be
-easily transformed to the <span class="math">\(Cx = d\)</span> form</p>
-<blockquote>
-<div><div class="math">
-\[\begin{split}Ay + Bz - k = Dy - h \implies \begin{bmatrix} A - D &amp; B \end{bmatrix}
-\begin{bmatrix} y \\ z \end{bmatrix} = k - h\end{split}\]</div>
-</div></blockquote>
-<p>The <tt class="docutils literal"><span class="pre">==</span></tt> operator creates equality constraints between two affine expressions.</p>
+<div class="section" id="the-solve-method">
+<h1>The <tt class="docutils literal"><span class="pre">solve!</span></tt> Method<a class="headerlink" href="#the-solve-method" title="Permalink to this headline">¶</a></h1>
+<p>LSQ can solve a system of linear equations using the <tt class="docutils literal"><span class="pre">solve!</span></tt> method.
+After a system is solved, values of variables can be accessed.</p>
 <blockquote>
 <div><div class="highlight-none"><div class="highlight"><pre>x = Variable();
 y = Variable();
-x == y + 2; # An equality constraint
+solve!([x + 3 * y = 2; x - y = 1]);
+println(evaluate(x));
+println(evaluate(y));
 </pre></div>
 </div>
 </div></blockquote>
-<p>Similar to addition or subtraction, an equality constraint can only be created
-if two expressions have equal dimensions or if one expression is a scalar.
-In the latter case, each entry of the matrix is set equal to the scalar.</p>
-<blockquote>
-<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3, 10)
-y = Variable(4, 10)
-z = Variable() # A scalar variable
-
-x == y; # Fails
-x == y[1:3, :]; # Ok, we dropped the last row from y making it 3-by-10
-x == z; # Ok
-</pre></div>
-</div>
-</div></blockquote>
+<p>The arguments to the <tt class="docutils literal"><span class="pre">solve!</span></tt> method are either one linear equality constraint
+or a list of linear equality constraints. Only systems with unique solutions can
+be solved by LSQ; see the <a class="reference internal" href="#solving-lcls">Solving LCLS</a> section for detailed conditions.
+The <tt class="docutils literal"><span class="pre">solve!</span></tt> method will throw an error if these conditions are nor satisfied.</p>
 </div>
 <div class="section" id="sum-of-squares-expressions">
-<h2>Sum of Squares Expressions<a class="headerlink" href="#sum-of-squares-expressions" title="Permalink to this headline">¶</a></h2>
-<p>A sum of squares expression is used to emulate the mathematical concept of
-norm squared. That is, the expression <span class="math">\(\|Ax + b\|_2^2\)</span> is equivalent to
-the following code</p>
-<blockquote>
-<div><div class="highlight-none"><div class="highlight"><pre>sum_squares(A * x + b);
-</pre></div>
-</div>
-</div></blockquote>
-<p>Like affine expressions, sum of squares expressions can be constructed following
-certain rules</p>
+<h1>Sum of Squares Expressions<a class="headerlink" href="#sum-of-squares-expressions" title="Permalink to this headline">¶</a></h1>
+<p>In LSQ, a sum of sqaures expression is the sum of squares of the entries of a scalar, vector,
+or matrix. The most basic way to create such an expression is the <tt class="docutils literal"><span class="pre">sum_squares</span></tt> function.
+For example, <tt class="docutils literal"><span class="pre">sum_squares(A</span> <span class="pre">*</span> <span class="pre">x</span> <span class="pre">-</span> <span class="pre">b)</span></tt> is the LSQ representation of <span class="math">\(\|Ax - b\|_2^2\)</span>.
+The argument of the <tt class="docutils literal"><span class="pre">sum_squares</span></tt> function must be an affine expression. To create
+other sum of squares expressions, the <tt class="docutils literal"><span class="pre">+</span></tt> and <tt class="docutils literal"><span class="pre">*</span></tt> operators can be used in
+conjunction with the following rules</p>
 <ol class="arabic simple">
-<li>The argument of a sum of squares expression must be an affine expression</li>
-<li>The sum of two sum of squares expressions yields a sum of squares expression</li>
-<li>Multiplying a sum of squares expression by a positive constant yields a sum of squares expression</li>
+<li>Two sum of squares expressions can be added</li>
+<li>A sum of squares expression can be multiplied or divided by a postive, scalar constant.</li>
 </ol>
-<p>Since the output of a sum of squares expression is a scalar value, there are no
-size restrictions when adding two sum of squares expressions</p>
+<p>Here are some examples of building sum of squares expressions</p>
 <blockquote>
-<div><div class="highlight-none"><div class="highlight"><pre>y = Variable(18);
-z = Variable(20);
-
-sum_squares(y) + sum_squares(z); # Ok, internal argument sizes don&#39;t matter
-10 * sum_squares(z); # Ok
--1 * sum_squares(z); # Fails, multiplication must be by positive scalar
+<div><div class="highlight-none"><div class="highlight"><pre>A = randn(4, 3);
+b = randn(4, 1);
+x = Variable(3);
+c = 0.1;
+reg_least_squares = sum_squares(A * x - b) + c * sum_squares(x)
 </pre></div>
 </div>
 </div></blockquote>
-<p>Any sum of squares expression is equivalent to some mathematical expression of
-the form <span class="math">\(\|Ax + b\|_2^2\)</span>. Adding sum of squares expressions or
-multiplying them by positive constants will preseve this property.</p>
+<p>Similar to an affine expression, a sum of squares expression can be evaluated
+to a numerical value if all variables the sum of squares expression depends on
+have been populated with values. The syntax for doing so is</p>
 <blockquote>
-<div><div class="math">
-\[\begin{split}\begin{align*}
-\|Ey + f\|_2^2 + \|Gz + h\|_2^2 &amp; =
-\left\| \begin{bmatrix}E &amp; 0 \\ 0 &amp; G\end{bmatrix}
-\begin{bmatrix}y \\ z\end{bmatrix} +
-\begin{bmatrix} f \\ h\end{bmatrix} \right\|_2^2 \\
-c\|Ax + b\|_2^2 &amp; = \left\|\sqrt{c}Ax + \sqrt{c}b\right\|_2^2
-\end{align*}\end{split}\]</div>
-</div></blockquote>
-<p>This means that any sum of squares expression can serve as the objective of
-a least squares problem, and that, conversely, the objective of any least
-squares problem can be framed as a sum of squares expression.</p>
+<div><div class="highlight-none"><div class="highlight"><pre>println(evaluate(reg_least_squares))
+</pre></div>
 </div>
-<div class="section" id="solve-functions">
-<h2>Solve Functions<a class="headerlink" href="#solve-functions" title="Permalink to this headline">¶</a></h2>
-<p>At the top level, LSQ provides functions for compiling the sum of squares
-objective and the equality constraints into one problem for solving. These
-functions will also populate the variables with optimal values. Following
-Julia convention, the names of these functions will contain a <tt class="docutils literal"><span class="pre">!</span></tt> character
-to denote the fact that they will modify the arguments (variables are populated
-with optimal values).</p>
-<p>The <tt class="docutils literal"><span class="pre">minimize!</span></tt> function minimizes a sum squares expression over
-equality constraints. For example, the following code finds the least norm
-solution to an underdetermined system</p>
+</div></blockquote>
+<p>TODO: Talk abt the variance function.</p>
+</div>
+<div class="section" id="the-minimize-method">
+<h1>The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Method<a class="headerlink" href="#the-minimize-method" title="Permalink to this headline">¶</a></h1>
+<p>LSQ can also solve a linearly constrained least squares problem using the
+<tt class="docutils literal"><span class="pre">minimize!</span></tt> method.</p>
 <blockquote>
 <div><div class="highlight-none"><div class="highlight"><pre>A = randn(3, 2);
 b = randn(2, 1);
@@ -287,43 +241,40 @@ x = Variable(3);
 objective = sum_squares(x);
 constraint = A * x == b;
 optimal_value = minimize!(objective, constraint);
-println(x.value);
+println(evaluate(x));
 </pre></div>
 </div>
 </div></blockquote>
-<p>The optimal value of <span class="math">\(\|Ax - b\|_2^2\)</span> is stored in <tt class="docutils literal"><span class="pre">optimal_value</span></tt>, and
-the optimal value of <tt class="docutils literal"><span class="pre">x</span></tt> can be accessed via <tt class="docutils literal"><span class="pre">x.value</span></tt>.</p>
-<p>The <tt class="docutils literal"><span class="pre">minimize!</span></tt> function can also be called with a list of equality
-constraints, or with none at all</p>
+<p>The first argument, or objective, of <tt class="docutils literal"><span class="pre">minimize!</span></tt> must be a sum of squares expression.
+The second argument is for constriants, and can be empty, a single linear equality
+constraint, or a list of linear equality constraints.
+The <tt class="docutils literal"><span class="pre">minimize!</span></tt> function
+will return the optimal value of the sum of squares expression, while
+populating all variables with optimal values.
+Here are some usage examples</p>
 <blockquote>
 <div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3);
-A = randn(3, 3); C = randn(3, 3);
-b = randn(3, 1); d = randn(3, 1);
-objective = sum_squares(x);
-constraints = [A * x == b, C * x == d];
-optimum_value_1 = minimize!(objective, constraints);
-println(x.value);
-optimum_value_2 = minimize!(objective);
-println(x.value);
+C = randn(2, 3);
+d = randn(2, 1);
+A = randn(4, 3);
+b = randn(4, 1);
+
+# list of constraints
+objective1 = sum_squares(x);
+constraints = [C * x == d, x[1] == 0];
+optimum_value_1 = minimize!(objective1, constraints);
+println(evaluate(x));
+
+# no constraints
+objective2 = sum_squares(A * x - b)
+optimum_value_2 = minimize!(objective2);
+println(evaluate(x));
 </pre></div>
 </div>
 </div></blockquote>
-<p>LSQ also supports a <tt class="docutils literal"><span class="pre">satisfy!</span></tt> function, which aims to satisfy a system of
-linear equations</p>
-<blockquote>
-<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3); y = Variable(3)
-A = randn(3, 3); C = randn(3, 3);
-b = randn(3, 1); d = randn(3, 1);
-constraints = [A * x == b, C * y == d];
-satisfy!(constraints);
-println(x.value);
-println(y.value);
-</pre></div>
-</div>
-</div></blockquote>
-<p>The variables values that satisfy the system will be stored in the <tt class="docutils literal"><span class="pre">value</span></tt>
-field of the variable, similar to the <tt class="docutils literal"><span class="pre">minimize!</span></tt> function.</p>
-</div>
+<p>A linearly constrained least squares can only be solved if it satisfies the
+conditions in the <a class="reference internal" href="#solving-lcls">Solving LCLS</a> section. The <tt class="docutils literal"><span class="pre">minimize!</span></tt> method will throw
+an error these conditions are not satisfied.</p>
 </div>
 
 
@@ -335,15 +286,15 @@ field of the variable, similar to the <tt class="docutils literal"><span class="
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Welcome to LSQ</a></li>
-<li><a class="reference internal" href="#mathematics-behind-lsq">Mathematics behind LSQ</a></li>
-<li><a class="reference internal" href="#lsq-jl-basics">LSQ.jl Basics</a><ul>
-<li><a class="reference internal" href="#variables">Variables</a></li>
+<li><a class="reference internal" href="#linearly-constrained-least-squares">Linearly Constrained Least Squares</a></li>
+<li><a class="reference internal" href="#solving-lcls">Solving LCLS</a></li>
+<li><a class="reference internal" href="#lsq-jl-basics">LSQ.jl Basics</a></li>
+<li><a class="reference internal" href="#variables-and-constants">Variables and Constants</a></li>
 <li><a class="reference internal" href="#affine-expressions">Affine Expressions</a></li>
-<li><a class="reference internal" href="#equality-constraints">Equality Constraints</a></li>
+<li><a class="reference internal" href="#linear-equality-constraints">Linear Equality Constraints</a></li>
+<li><a class="reference internal" href="#the-solve-method">The <tt class="docutils literal"><span class="pre">solve!</span></tt> Method</a></li>
 <li><a class="reference internal" href="#sum-of-squares-expressions">Sum of Squares Expressions</a></li>
-<li><a class="reference internal" href="#solve-functions">Solve Functions</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#the-minimize-method">The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Method</a></li>
 </ul>
 
   <h3>This Page</h3>
