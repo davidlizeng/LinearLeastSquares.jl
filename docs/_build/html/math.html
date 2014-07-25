@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Math Behind LSQ &mdash; LSQ 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="LSQ 0.1 documentation" href="index.html" />
+    <link rel="next" title="LSQ.jl Tutorial" href="lsqjl.html" />
+    <link rel="prev" title="Welcome to LSQ" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="lsqjl.html" title="LSQ.jl Tutorial"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to LSQ"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">LSQ 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-math-behind-lsq">
+<h1>The Math Behind LSQ<a class="headerlink" href="#the-math-behind-lsq" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="linearly-constrained-least-squares">
+<h2>Linearly Constrained Least Squares<a class="headerlink" href="#linearly-constrained-least-squares" title="Permalink to this headline">¶</a></h2>
+<p>LSQ solves <strong>linearly constrained least squares</strong> (or LCLS) problems,
+which have the form:</p>
+<blockquote>
+<div><div class="math">
+\[\begin{split}\begin{array}{ll}
+  \mbox{minimize} &amp; \|Ax - b\|_2^2 \\
+  \mbox{subject to} &amp; Cx = d
+\end{array}\end{split}\]</div>
+</div></blockquote>
+<p>where the unknown variable <span class="math">\(x\)</span> is a vector of size <span class="math">\(n\)</span>. The values for
+<span class="math">\(A\)</span>, <span class="math">\(b\)</span>, <span class="math">\(C\)</span>, and <span class="math">\(d\)</span> are given and have sizes
+<span class="math">\(m\times n\)</span>, <span class="math">\(m\)</span>, <span class="math">\(p\times n\)</span>, and <span class="math">\(p\)</span>,
+respectively.
+LSQ finds a value for <span class="math">\(x\)</span> that satisfies the linear equality
+constraints <span class="math">\(Cx = d\)</span> and minimizes the objective, the sum of the squares of
+the entries of <span class="math">\(Ax - b\)</span>.</p>
+<p>When there are no equality constraints, LCLS reduces to the simple unconstrained
+least squares problem (LS):</p>
+<blockquote>
+<div><div class="math">
+\[\begin{split}\begin{array}{ll}
+  \mbox{minimize}  &amp; \|Ax-b\|_2^2
+\end{array}\end{split}\]</div>
+</div></blockquote>
+<p>When the objective is absent, LCLS reduces to finding <span class="math">\(x\)</span> that satisfies
+<span class="math">\(Cx=d\)</span>, i.e., solving a set of linear equations.</p>
+</div>
+<div class="section" id="solving-lcls">
+<h2>Solving LCLS<a class="headerlink" href="#solving-lcls" title="Permalink to this headline">¶</a></h2>
+<p>There is a unique solution to the LCLS problem if and only if there is a
+unique solution to the following linear system of equations in the variable
+<span class="math">\(x\)</span> and a new variable <span class="math">\(z\)</span>:</p>
+<blockquote>
+<div><div class="math">
+\[\begin{split}\begin{bmatrix} 2A^TA &amp; C^T \\ C &amp; 0 \end{bmatrix}
+\begin{bmatrix} x \\ z \end{bmatrix} =
+\begin{bmatrix} 2A^Tb \\ d \end{bmatrix},\end{split}\]</div>
+</div></blockquote>
+<p>i.e., the matrix on the left is invertible. This occurs when the matrix
+<span class="math">\(C\)</span> has independent rows, and the matrix
+<span class="math">\(\begin{bmatrix} A\\ C\end{bmatrix}\)</span> has indepedent columns.</p>
+<p>When there are no equality constraints, the unconstrained least squares problem
+has a unique solution if and only if the system of linear equations:</p>
+<blockquote>
+<div><div class="math">
+\[2A^TA x = 2A^Tb\]</div>
+</div></blockquote>
+<p>has a unique solution, which occurs when <span class="math">\(A^TA\)</span> is invertible.</p>
+<p>When the objective is absent, the system of linear equations <span class="math">\(Cx = d\)</span> has
+a unique solution if and only if <span class="math">\(C\)</span> is invertible.</p>
+<p>LSQ allows you to specify an LCLS problem in a natural way.  It translates your
+specification into the general form in this section, and then solves the
+appropriate set of linear equations.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The Math Behind LSQ</a><ul>
+<li><a class="reference internal" href="#linearly-constrained-least-squares">Linearly Constrained Least Squares</a></li>
+<li><a class="reference internal" href="#solving-lcls">Solving LCLS</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to LSQ</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="lsqjl.html"
+                        title="next chapter">LSQ.jl Tutorial</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/math.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="lsqjl.html" title="LSQ.jl Tutorial"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to LSQ"
+             >previous</a> |</li>
+        <li><a href="index.html">LSQ 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Keegan Go, Karanveer Mohan, David Zeng.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

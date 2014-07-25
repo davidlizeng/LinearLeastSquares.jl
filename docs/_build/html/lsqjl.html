@@ -1,0 +1,304 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>LSQ.jl Tutorial &mdash; LSQ 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="LSQ 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Linearly Constrained Least Squares" href="math.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="math.html" title="Linearly Constrained Least Squares"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">LSQ 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="lsq-jl-tutorial">
+<h1>LSQ.jl Tutorial<a class="headerlink" href="#lsq-jl-tutorial" title="Permalink to this headline">¶</a></h1>
+<p>TODO: Open up with an example, maybe regularized least squares?</p>
+<div class="section" id="variables-and-constants">
+<h2>Variables and Constants<a class="headerlink" href="#variables-and-constants" title="Permalink to this headline">¶</a></h2>
+<p>To declare variables in LSQ, use the following syntax to specify their size:</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>x = Variable();      # A scalar variable
+y = Variable(3);     # Create a vector variable with 3 rows and 1 columns
+z = Variable(10, 4); # A matrix variable that has 10 rows and 4 columns
+</pre></div>
+</div>
+</div></blockquote>
+<p>LSQ currently only supports variables up to 2 dimensions in size. Variables
+have no value upon creation, but after solving a problem, LSQ will populate
+the variable with its optimal value. This value can be accessed in the
+following ways:</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre># x is a variable with value populated
+println(evaluate(x)) # evaluate function
+println(x.value)     # value attribute
+</pre></div>
+</div>
+</div></blockquote>
+<p>Constants refer to any numerical scalars, vectors, or matrices of fixed value.
+Together with variables, they serve as the building blocks for more complex expressions.</p>
+</div>
+<div class="section" id="affine-expressions">
+<h2>Affine Expressions<a class="headerlink" href="#affine-expressions" title="Permalink to this headline">¶</a></h2>
+<p>Affine expressions are linear functions of variables plus a constant.
+Variables are themselves affine expressions.
+The most basic way to build more affine expressions from variables is to use the overloaded
+binary arithmetic operators <tt class="docutils literal"><span class="pre">+,</span> <span class="pre">-,</span> <span class="pre">*,</span> <span class="pre">/</span></tt>. The following operations are
+supported:</p>
+<ol class="arabic simple">
+<li>Addition or subtraction of two affine expressions, provided they are the same size or one is scalar.</li>
+<li>Addition or subtraction of an affine expression and a constant, provided they are the same size or one is scalar.</li>
+<li>Scalar or matrix multiplication between an affine expression and a constant.</li>
+<li>Division of an affine expression by a scalar, nonzero constant.</li>
+</ol>
+<p>Here are some examples of using binary operators to construct affine expressions:</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>w = Variable();     # scalar
+x = Variable(3);    # 3-by-1 vector
+Y = Variable(2, 3); # 2-by-3 matrix
+z = Variable();     # scalar
+b = [1 2 3];        # 1-by-3 vector
+C = randn(3, 4);    # 3-by-4 matrix
+
+affine1 = w + b * x / 1.3 - 6.1;   # scalar
+affine2 = (affine1 - Y) * C;       # 2-by-4 matrix
+</pre></div>
+</div>
+</div></blockquote>
+<p>An affine expression can be evaluated to a numerical value if all variables the affine
+expression depends on have been populated with values. For example, the following
+code prints the value of the affine expression <tt class="docutils literal"><span class="pre">affine1</span></tt>, assuming both <tt class="docutils literal"><span class="pre">w</span></tt>
+and <tt class="docutils literal"><span class="pre">x</span></tt> have been populated with values:</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>println(evaluate(affine1))
+</pre></div>
+</div>
+</div></blockquote>
+<p>TODO: describe shaping and indexing functions, sum, mean, etc.</p>
+</div>
+<div class="section" id="linear-equality-constraints">
+<h2>Linear Equality Constraints<a class="headerlink" href="#linear-equality-constraints" title="Permalink to this headline">¶</a></h2>
+<p>In LSQ, a linear equality constraint is formed between an affine expression and a constant,
+or two affine expressions, using the <tt class="docutils literal"><span class="pre">==</span></tt> operator.
+Note that the <tt class="docutils literal"><span class="pre">==</span></tt> operator has been overloaded to no longer return a boolean,
+but rather an object representing the linear equality constraint.
+A linear equality constraint is only valid if the left hand side and the right hand side
+of the <tt class="docutils literal"><span class="pre">==</span></tt> have the same size, or if one is scalar. Here are some examples of
+linear equality constraints</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3);
+A = randn(4, 3);
+constraint1 = A * x == randn(4, 1);
+constraint2 = 3 == x[1:2];
+</pre></div>
+</div>
+</div></blockquote>
+<p>Lists of constraints can also be created. Additional constraints can be appended
+to a list using the <tt class="docutils literal"><span class="pre">+</span></tt> operator.</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>constraint_list = [A * x == randn(4, 1), 3 == x[1:2]];
+constraint_list += x[3] == 1.6;
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="the-solve-method">
+<h2>The <tt class="docutils literal"><span class="pre">solve!</span></tt> Method<a class="headerlink" href="#the-solve-method" title="Permalink to this headline">¶</a></h2>
+<p>LSQ can solve a system of linear equations using the <tt class="docutils literal"><span class="pre">solve!</span></tt> method.
+When a system of linear equations is solved, the values of all variables are
+populated. After that, the values of the variables, and any expressions that
+depend on them, can be accessed.</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>x = Variable();
+y = Variable();
+solve!([x + 3 * y == 2, x - y == 1]);
+println(evaluate(x));
+println(evaluate(y));
+</pre></div>
+</div>
+</div></blockquote>
+<p>The arguments to the <tt class="docutils literal"><span class="pre">solve!</span></tt> method are either one linear equality constraint
+or a list of linear equality constraints. Only systems with unique solutions can
+be solved by LSQ; see the <a href="#id1"><span class="problematic" id="id2">`Solving LCLS`_</span></a> section for detailed conditions.
+The <tt class="docutils literal"><span class="pre">solve!</span></tt> method will issue an error if these conditions are not satisfied.</p>
+</div>
+<div class="section" id="sum-of-squares-expressions">
+<h2>Sum of Squares Expressions<a class="headerlink" href="#sum-of-squares-expressions" title="Permalink to this headline">¶</a></h2>
+<p>In LSQ, a sum of sqaures expression is the sum of squares of the entries of a scalar, vector,
+or matrix. The most basic way to create such an expression is to call the <tt class="docutils literal"><span class="pre">sum_squares</span></tt> function
+on an affine expression argument.
+For example, <tt class="docutils literal"><span class="pre">sum_squares(A</span> <span class="pre">*</span> <span class="pre">x</span> <span class="pre">-</span> <span class="pre">b)</span></tt> is the LSQ representation of <span class="math">\(\|Ax - b\|_2^2\)</span>.
+To create other sum of squares expressions, the <tt class="docutils literal"><span class="pre">+</span></tt> and <tt class="docutils literal"><span class="pre">*</span></tt> operators can be used in
+conjunction with the following rules</p>
+<ol class="arabic simple">
+<li>Two sum of squares expressions can be added</li>
+<li>A sum of squares expression can be multiplied or divided by a postive, scalar constant.</li>
+</ol>
+<p>Note that sum of squares expression cannot be subtracted from each other,
+or multiplied or divided by a negative number. LSQ will issue an error message if
+the user attempts any of these.
+Here are some examples of building sum of squares expressions</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>A = randn(4, 3);
+b = randn(4, 1);
+x = Variable(3);
+c = 0.1;
+reg_least_squares = sum_squares(A * x - b) + c * sum_squares(x)
+</pre></div>
+</div>
+</div></blockquote>
+<p>Similar to an affine expression, a sum of squares expression can be evaluated
+to a numerical value if all variables the sum of squares expression depends on
+have been populated with values. The syntax for doing so is</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>println(evaluate(reg_least_squares))
+</pre></div>
+</div>
+</div></blockquote>
+<p>TODO: Talk abt the variance function.</p>
+</div>
+<div class="section" id="the-minimize-method">
+<h2>The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Method<a class="headerlink" href="#the-minimize-method" title="Permalink to this headline">¶</a></h2>
+<p>LSQ can also solve a linearly constrained least squares problem using the
+<tt class="docutils literal"><span class="pre">minimize!</span></tt> method.</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>A = randn(3, 2);
+b = randn(2, 1);
+x = Variable(3);
+objective = sum_squares(x);
+constraint = A * x == b;
+optimal_value = minimize!(objective, constraint);
+println(evaluate(x));
+</pre></div>
+</div>
+</div></blockquote>
+<p>The first argument, or objective, of <tt class="docutils literal"><span class="pre">minimize!</span></tt> must be a sum of squares expression.
+The second argument is for constraints, and can be empty, a single linear equality
+constraint, or a list of linear equality constraints.
+The <tt class="docutils literal"><span class="pre">minimize!</span></tt> function
+will return the optimal value of the sum of squares expression, while
+populating all variables with optimal values.
+Here are some usage examples</p>
+<blockquote>
+<div><div class="highlight-none"><div class="highlight"><pre>x = Variable(3);
+C = randn(2, 3);
+d = randn(2, 1);
+A = randn(4, 3);
+b = randn(4, 1);
+
+# list of constraints
+objective1 = sum_squares(x);
+constraints = [C * x == d, x[1] == 0];
+optimum_value_1 = minimize!(objective1, constraints);
+println(evaluate(x));
+
+# no constraints
+objective2 = sum_squares(A * x - b)
+optimum_value_2 = minimize!(objective2);
+println(evaluate(x));
+</pre></div>
+</div>
+</div></blockquote>
+<p>A linearly constrained least squares can only be solved if it satisfies the
+conditions in the <a href="#id3"><span class="problematic" id="id4">`Solving LCLS`_</span></a> section. The <tt class="docutils literal"><span class="pre">minimize!</span></tt> method will issue
+an error these conditions are not satisfied.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">LSQ.jl Tutorial</a><ul>
+<li><a class="reference internal" href="#variables-and-constants">Variables and Constants</a></li>
+<li><a class="reference internal" href="#affine-expressions">Affine Expressions</a></li>
+<li><a class="reference internal" href="#linear-equality-constraints">Linear Equality Constraints</a></li>
+<li><a class="reference internal" href="#the-solve-method">The <tt class="docutils literal"><span class="pre">solve!</span></tt> Method</a></li>
+<li><a class="reference internal" href="#sum-of-squares-expressions">Sum of Squares Expressions</a></li>
+<li><a class="reference internal" href="#the-minimize-method">The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Method</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="math.html"
+                        title="previous chapter">Linearly Constrained Least Squares</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/lsqjl.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="math.html" title="Linearly Constrained Least Squares"
+             >previous</a> |</li>
+        <li><a href="index.html">LSQ 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Keegan Go, Karanveer Mohan, David Zeng.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
