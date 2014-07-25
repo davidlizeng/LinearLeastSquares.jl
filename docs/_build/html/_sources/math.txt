@@ -1,8 +1,9 @@
+===================
 The Math Behind LSQ
 ===================
 
 Linearly Constrained Least Squares
-----------------------------------
+==================================
 LSQ solves **linearly constrained least squares** (or LCLS) problems,
 which have the form:
 
@@ -34,7 +35,7 @@ When the objective is absent, LCLS reduces to finding :math:`x` that satisfies
 .. _solving-lcls:
 
 Solving LCLS
-------------
+============
 There is a unique solution to the LCLS problem if and only if there is a
 unique solution to the following linear system of equations in the variable
 :math:`x` and a new variable :math:`z`:

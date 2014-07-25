@@ -1,10 +1,11 @@
+===============
 LSQ.jl Tutorial
 ===============
 TODO: Open up with an example, maybe regularized least squares?
 
 
 Variables and Constants
------------------------
+=======================
 To declare variables in LSQ, use the following syntax to specify their size:
 
   .. code-block:: none
@@ -29,7 +30,7 @@ Together with variables, they serve as the building blocks for more complex expr
 
 
 Affine Expressions
-------------------
+==================
 Affine expressions are linear functions of variables plus a constant.
 Variables are themselves affine expressions.
 The most basic way to build more affine expressions from variables is to use the overloaded
@@ -68,7 +69,7 @@ TODO: describe shaping and indexing functions, sum, mean, etc.
 
 
 Linear Equality Constraints
----------------------------
+===========================
 In LSQ, a linear equality constraint is formed between an affine expression and a constant,
 or two affine expressions, using the ``==`` operator.
 Note that the ``==`` operator has been overloaded to no longer return a boolean,
@@ -94,7 +95,7 @@ to a list using the ``+`` operator.
 
 
 The ``solve!`` Method
----------------------
+=====================
 LSQ can solve a system of linear equations using the ``solve!`` method.
 When a system of linear equations is solved, the values of all variables are
 populated. After that, the values of the variables, and any expressions that
@@ -115,13 +116,13 @@ The ``solve!`` method will issue an error if these conditions are not satisfied.
 
 
 Sum of Squares Expressions
---------------------------
+==========================
 In LSQ, a sum of sqaures expression is the sum of squares of the entries of a scalar, vector,
 or matrix. The most basic way to create such an expression is to call the ``sum_squares`` function
 on an affine expression argument.
 For example, ``sum_squares(A * x - b)`` is the LSQ representation of :math:`\|Ax - b\|_2^2`.
 To create other sum of squares expressions, the ``+`` and ``*`` operators can be used in
-conjunction with the following rules
+conjunction with the following rules:
 
 #. Two sum of squares expressions can be added
 #. A sum of squares expression can be multiplied or divided by a postive, scalar constant.
@@ -129,7 +130,7 @@ conjunction with the following rules
 Note that sum of squares expression cannot be subtracted from each other,
 or multiplied or divided by a negative number. LSQ will issue an error message if
 the user attempts any of these.
-Here are some examples of building sum of squares expressions
+Here are some examples of building sum of squares expressions:
 
   .. code-block:: none
 
@@ -141,7 +142,9 @@ Here are some examples of building sum of squares expressions
 
 Similar to an affine expression, a sum of squares expression can be evaluated
 to a numerical value if all variables the sum of squares expression depends on
-have been populated with values. The syntax for doing so is
+have been populated with values. For example, the following
+code prints the value of the sum of squares expression ``reg_least_squares``,
+assuming ``x`` has been populated with a value:
 
   .. code-block:: none
 
@@ -151,9 +154,9 @@ TODO: Talk abt the variance function.
 
 
 The ``minimize!`` Method
-------------------------
+========================
 LSQ can also solve a linearly constrained least squares problem using the
-``minimize!`` method.
+``minimize!`` method:
 
   .. code-block:: none
 
@@ -171,7 +174,7 @@ constraint, or a list of linear equality constraints.
 The ``minimize!`` function
 will return the optimal value of the sum of squares expression, while
 populating all variables with optimal values.
-Here are some usage examples
+Here are some usage examples:
 
   .. code-block:: none
 
