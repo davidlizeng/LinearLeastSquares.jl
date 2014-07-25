@@ -31,6 +31,7 @@ least squares problem (LS):
 When the objective is absent, LCLS reduces to finding :math:`x` that satisfies
 :math:`Cx=d`, i.e., solving a set of linear equations.
 
+.. _solving-lcls:
 
 Solving LCLS
 ------------

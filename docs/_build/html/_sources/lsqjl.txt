@@ -110,7 +110,7 @@ depend on them, can be accessed.
 
 The arguments to the ``solve!`` method are either one linear equality constraint
 or a list of linear equality constraints. Only systems with unique solutions can
-be solved by LSQ; see the `Solving LCLS`_ section for detailed conditions.
+be solved by LSQ; see the :ref:`solving-lcls` section for detailed conditions.
 The ``solve!`` method will issue an error if these conditions are not satisfied.
 
 
@@ -193,5 +193,5 @@ Here are some usage examples
     println(evaluate(x));
 
 A linearly constrained least squares can only be solved if it satisfies the
-conditions in the `Solving LCLS`_ section. The ``minimize!`` method will issue
+conditions in the :ref:`solving-lcls` section. The ``minimize!`` method will issue
 an error these conditions are not satisfied.
