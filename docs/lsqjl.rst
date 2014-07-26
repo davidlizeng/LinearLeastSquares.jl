@@ -1,8 +1,29 @@
 ===============
 LSQ.jl Tutorial
 ===============
-TODO: Open up with an example, maybe regularized least squares?
 
+Installing LSQ.jl
+=================
+LSQ.jl requires `Julia 0.3 <http://julialang.org/downloads/>`_ or higher.
+For those new to Julia, the `official Julia docs <http://docs.julialang.org/en/release-0.2/>`_
+are a good way to get acquainted with the language.
+
+To install LSQ.jl, simply open up the Julia shell and run the command:
+
+  .. code-block:: none
+
+    Pkg.clone("git@github.com:davidlizeng/LSQ.jl.git")
+
+To use LSQ.jl in Julia, run the following command to import the library:
+
+  .. code-block:: none
+
+    using LSQ
+
+The same line of code can also be used in Julia scripts to import the LSQ.jl
+library.
+
+..TODO: plotting library instructions.
 
 Variables and Constants
 =======================
@@ -14,9 +35,10 @@ To declare variables in LSQ, use the following syntax to specify their size:
     y = Variable(3);     # Create a vector variable with 3 rows and 1 columns
     z = Variable(10, 4); # A matrix variable that has 10 rows and 4 columns
 
-LSQ currently only supports variables up to 2 dimensions in size. Variables
+LSQ currently only supports variables up to 2 dimensions in size, i.e.,
+scalars, vector, and matrices. Variables
 have no value upon creation, but after solving a problem, LSQ will populate
-the variable with its optimal value. This value can be accessed in the
+all variables in the problem with optimal values. These values can be accessed in the
 following ways:
 
   .. code-block:: none
@@ -55,6 +77,7 @@ Here are some examples of using binary operators to construct affine expressions
 
     affine1 = w + b * x / 1.3 - 6.1;   # scalar
     affine2 = (affine1 - Y) * C;       # 2-by-4 matrix
+    affine3 = affine2 - affine1;       # 2-by-4 matrix
 
 An affine expression can be evaluated to a numerical value if all variables the affine
 expression depends on have been populated with values. For example, the following
@@ -65,8 +88,20 @@ and ``x`` have been populated with values:
 
     println(evaluate(affine1))
 
-TODO: describe shaping and indexing functions, sum, mean, etc.
+Affine expressions support indexing and slicing, compatible with Julia's syntax:
 
+  .. code-block:: none
+
+    x = Variable(4);
+    a = x[3];              # third component of x
+    y = x[1:2];            # first two components of x
+    X = Variable(4, 5);
+    Y = X[3:4, 4:5];       # bottom right 2-by-2 submatrix of X
+    T = X[1:2, :];         # first two rows of X
+    Z = 2 * x[1] + X;
+    b = Z[1, 2]            # entry in first row and second column of Z
+
+.. TODO: Mean, Sum, Stacking, Vec, Diag, etc.
 
 Linear Equality Constraints
 ===========================
@@ -96,10 +131,11 @@ to a list using the ``+`` operator.
 
 The ``solve!`` Method
 =====================
-LSQ can solve a system of linear equations using the ``solve!`` method.
-When a system of linear equations is solved, the values of all variables are
-populated. After that, the values of the variables, and any expressions that
-depend on them, can be accessed.
+LSQ can solve a system of linear equations using the ``solve!`` method. The
+exclamation point after ``solve`` is a Julia convention signifying that this
+method will have side effects; specifically, it will assign values to
+variables after solving. After that, the values of the variables, and any
+expressions that depend on them, can be accessed.
 
   .. code-block:: none
 
@@ -150,7 +186,7 @@ assuming ``x`` has been populated with a value:
 
     println(evaluate(reg_least_squares))
 
-TODO: Talk abt the variance function.
+.. TODO: var
 
 
 The ``minimize!`` Method

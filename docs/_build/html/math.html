@@ -76,7 +76,7 @@ least squares problem (LS):</p>
 <div><div class="math">
 \[\begin{split}\begin{array}{ll}
   \mbox{minimize}  &amp; \|Ax-b\|_2^2
-\end{array}\end{split}\]</div>
+\end{array}.\end{split}\]</div>
 </div></blockquote>
 <p>When the objective is absent, LCLS reduces to finding <span class="math">\(x\)</span> that satisfies
 <span class="math">\(Cx=d\)</span>, i.e., solving a set of linear equations.</p>
@@ -84,7 +84,7 @@ least squares problem (LS):</p>
 <div class="section" id="solving-lcls">
 <span id="id1"></span><h2>Solving LCLS<a class="headerlink" href="#solving-lcls" title="Permalink to this headline">¶</a></h2>
 <p>There is a unique solution to the LCLS problem if and only if there is a
-unique solution to the following linear system of equations in the variable
+unique solution to the following system of linear equations in the variable
 <span class="math">\(x\)</span> and a new variable <span class="math">\(z\)</span>:</p>
 <blockquote>
 <div><div class="math">
@@ -101,7 +101,8 @@ has a unique solution if and only if the system of linear equations:</p>
 <div><div class="math">
 \[2A^TA x = 2A^Tb\]</div>
 </div></blockquote>
-<p>has a unique solution, which occurs when <span class="math">\(A^TA\)</span> is invertible.</p>
+<p>has a unique solution, which occurs when <span class="math">\(A^TA\)</span> is invertible, i.e., the
+columns of <span class="math">\(A\)</span> are independent.</p>
 <p>When the objective is absent, the system of linear equations <span class="math">\(Cx = d\)</span> has
 a unique solution if and only if <span class="math">\(C\)</span> is invertible.</p>
 <p>LSQ allows you to specify an LCLS problem in a natural way.  It translates your

@@ -27,7 +27,7 @@ least squares problem (LS):
   .. math::
     \begin{array}{ll}
       \mbox{minimize}  & \|Ax-b\|_2^2
-    \end{array}
+    \end{array}.
 
 When the objective is absent, LCLS reduces to finding :math:`x` that satisfies
 :math:`Cx=d`, i.e., solving a set of linear equations.
@@ -37,7 +37,7 @@ When the objective is absent, LCLS reduces to finding :math:`x` that satisfies
 Solving LCLS
 ============
 There is a unique solution to the LCLS problem if and only if there is a
-unique solution to the following linear system of equations in the variable
+unique solution to the following system of linear equations in the variable
 :math:`x` and a new variable :math:`z`:
 
   .. math::
@@ -55,7 +55,8 @@ has a unique solution if and only if the system of linear equations:
   .. math::
     2A^TA x = 2A^Tb
 
-has a unique solution, which occurs when :math:`A^TA` is invertible.
+has a unique solution, which occurs when :math:`A^TA` is invertible, i.e., the
+columns of :math:`A` are independent.
 
 When the objective is absent, the system of linear equations :math:`Cx = d` has
 a unique solution if and only if :math:`C` is invertible.
