@@ -17,8 +17,7 @@ type Constant <: AffineOrConstant
   evaluate::Function
 
   function Constant(value::Value)
-    # Use full([value])'' to ensure everything has two dimensions and uses dense types
-    this = new(:constant, full([value])'', (size(value, 1), size(value, 2)))
+    this = new(:constant, value, (size(value, 1), size(value, 2)))
     this.uid = object_id(this)
     this.evaluate = ()->this.value
     return this

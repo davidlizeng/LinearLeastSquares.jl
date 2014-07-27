@@ -31,8 +31,11 @@ end
 .*(x::AffineExpr, y::Constant) = y .* x
 
 function *(x::Constant, y::AffineExpr)
-  # y could be a matrix variable and needs to be vectorized, hence we use kron
-  if x.size[2] == y.size[1]
+  # scalar multiplication
+  if x.size == (1, 1) || y.size == (1, 1)
+    return x .* y
+  # matrix multiplication
+  elseif x.size[2] == y.size[1]
     x_kron = Constant(kron(eye(y.size[2]), x.value))
 
     # Build the coefficient map for x * y
@@ -44,15 +47,17 @@ function *(x::Constant, y::AffineExpr)
     this = AffineExpr(:*, (x, y), vars_to_coeffs_map, constant, (x.size[1], y.size[2]))
     this.evaluate = ()->x.evaluate() * y.evaluate()
     return this
-  elseif x.size == (1, 1) || y.size == (1, 1)
-    return x .* y
   else
     error("Cannot multiply two expressions of sizes $(x.size) and $(y.size)")
   end
 end
 
 function *(x::AffineExpr, y::Constant)
-  if x.size[2] == y.size[1]
+  # scalar multiplication
+  if y.size == (1, 1) || x.size == (1, 1)
+    return y .* x
+  # matrix multiplication
+  elseif x.size[2] == y.size[1]
     y_kron = Constant(kron(y.value', eye(x.size[1])))
     vars_to_coeffs_map = Dict{Uint64, Constant}()
     for (v, c) in x.vars_to_coeffs_map
@@ -62,8 +67,6 @@ function *(x::AffineExpr, y::Constant)
     this = AffineExpr(:*, (x, y), vars_to_coeffs_map, constant, (x.size[1], y.size[2]))
     this.evaluate = ()->x.evaluate() * y.evaluate()
     return this
-  elseif y.size == (1, 1) || x.size == (1, 1)
-    return y * x
   else
     error("Cannot multiply two expressions of sizes $(x.size) and $(y.size)")
   end

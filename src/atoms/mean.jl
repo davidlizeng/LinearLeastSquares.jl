@@ -1,6 +1,10 @@
+import Base.mean
 export mean
 
+function mean(x::AffineExpr)
+  return sum(x) / (x.size[1] * x.size[2])
+end
+
 function mean(x::AffineExpr, dim::Int64)
-  # TODO: use / once supported
-  return sum(x, dim) * (1 / x.size[dim])
+  return sum(x, dim) / x.size[dim]
 end

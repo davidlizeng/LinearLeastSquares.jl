@@ -1,3 +1,4 @@
+import Base.sum
 export sum
 
 function sum(x::AffineExpr)
