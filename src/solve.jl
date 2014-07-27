@@ -20,5 +20,6 @@ minimize!(objective::SumSquaresExpr, constraints::Array{EqConstraint}) = solve!(
 minimize!(objective::SumSquaresExpr, constraint::EqConstraint) = minimize!(objective, [constraint])
 minimize!(objective::SumSquaresExpr) = minimize!(objective, EqConstraint[])
 
-satisfy!(constraints::Array{EqConstraint}) = solve!(:satisfy, SumSquaresExpr(:empty, AffineExpr[]), constraints)
-satisfy!(constraint::EqConstraint) = satisfy!([constraint])
+solve!(constraints::Array{EqConstraint}) = solve!(:satisfy, SumSquaresExpr(:empty, AffineExpr[]), constraints)
+solve!(constraint::EqConstraint) = satisfy!([constraint])
+solve!(constraints::EqConstraint...) = satisfy!([constraints...])
