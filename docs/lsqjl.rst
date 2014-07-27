@@ -23,7 +23,7 @@ To use LSQ.jl in Julia, run the following command to import the library:
 The same line of code can also be used in Julia scripts to import the LSQ.jl
 library.
 
-..TODO: plotting library instructions.
+.. TODO: plotting library instructions.
 
 Variables and Constants
 =======================
@@ -88,7 +88,7 @@ and ``x`` have been populated with values:
 
     println(evaluate(affine1))
 
-Affine expressions support indexing and slicing, compatible with Julia's syntax:
+Affine expressions support indexing and slicing using Julia's native syntax:
 
   .. code-block:: none
 
@@ -101,7 +101,51 @@ Affine expressions support indexing and slicing, compatible with Julia's syntax:
     Z = 2 * x[1] + X;
     b = Z[1, 2]            # entry in first row and second column of Z
 
-.. TODO: Mean, Sum, Stacking, Vec, Diag, etc.
+Affine expressions may also be stacked vertically and horizontally using Julia's
+native syntax:
+
+  .. code-block:: none
+
+    x = Variable();
+    y = Variable(1, 3);
+    z = Variable(3, 1);
+    T = Variable(3, 3);
+    horizontal_stack = [x y];  # 1-by-4 vector
+    vertical_stack = [z; x];   # 4-by-1 vector
+    horizontal_and_vertical_stack = [x y; z T];  # 4-by-4 matrix
+
+A few other functions also alter the shapes and sizes of
+affine expressions:
+
+  .. code-block:: none
+
+    x = Variable(3, 1);
+    T = Variable(4, 4);
+
+    y = x'; # transpose of x
+
+    X = diagm(x);     # create a diagonal matrix from a vector x
+    t = diag(T);      # extract the main diagonal of T as a column vector
+    t1 = diag(T, 1);  # extract the diagonal one right of the main diagonal of T
+    t2 = diag(T, -1); # extract the diagonal one left of the main diagonal of T
+
+    S = reshape(T, 8, 2); # reshape T as an 8-by-2 matrix
+    s = vec(S);           # reshape S as a 16-by-1 vector
+
+    x_rep = repmat(x, 2, 3); # tiles x twice vertically and three times horizontally to form a 6-by-3 matrix
+
+The sum and mean of the entries of an affine expression can be constructed:
+
+  .. code-block:: none
+
+    X = Variable(2, 3);
+    sum_of_entries = sum(X);    # sums all entries of X
+    sum_of_columns = sum(X, 1); # sums along the first dimension of X, creating a row vector
+    sum_of_rows = sum(X, 2);    # sums along the second dimension of X, creating a column vector
+    mean_of_entries = mean(X);
+    mean_of_columns = mean(X, 1);
+    mean_of_rows = mean(X, 2);
+
 
 Linear Equality Constraints
 ===========================
@@ -186,7 +230,15 @@ assuming ``x`` has been populated with a value:
 
     println(evaluate(reg_least_squares))
 
-.. TODO: var
+The variance of the entries of an affine expression ``X`` can be expressed as
+``sum_squares(mean(X) - X) / (m * n)``, where ``m`` and ``n`` are the number of rows
+and number of columns of ``X``, respectively. For convenience, the function ``var``
+can be used to directly create this sum of squares expression for variance.
+
+  .. code-block:: none
+
+    X = Variable(3, 4);
+    variance = var(X);
 
 
 The ``minimize!`` Method
