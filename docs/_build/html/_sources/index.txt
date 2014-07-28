@@ -34,10 +34,11 @@ implmentations include Python and Matlab.
 In Depth Tutorials
 ==================
 .. toctree::
-  :titlesonly:
+  :maxdepth: 2
 
   math
   lsqjl
+  lsqjl_examples
 
 
 Credits

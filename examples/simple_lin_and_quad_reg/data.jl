@@ -15,3 +15,4 @@ x_data_expanded = hcat([x_data .^ i for i in 1 : 3]...);
 y_data = x_data_expanded * true_coeffs + 0.5 * rand(n, 1);
 
 plt.plot(x_data, y_data, "ro");
+plt.show()

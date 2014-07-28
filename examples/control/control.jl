@@ -46,7 +46,7 @@ constraints += velocity[:, 1] == initial_velocity;
 constraints += velocity[:, T] == 0;
 
 # Solve the problem
-optval = minimize!(mu * sum_squares(velocity') + sum_squares(force'), constraints);
+optval = minimize!(mu * sum_squares(velocity) + sum_squares(force), constraints);
 
 
 plt.plot(position.value[1, 1:2:T]', position.value[2, 1:2:T]', "r-", linewidth=1.5)
