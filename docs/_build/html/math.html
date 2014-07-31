@@ -56,13 +56,11 @@
 <h2>Linearly Constrained Least Squares<a class="headerlink" href="#linearly-constrained-least-squares" title="Permalink to this headline">¶</a></h2>
 <p>LSQ solves <strong>linearly constrained least squares</strong> (or LCLS) problems,
 which have the form:</p>
-<blockquote>
-<div><div class="math">
+<div class="math">
 \[\begin{split}\begin{array}{ll}
   \mbox{minimize} &amp; \|Ax - b\|_2^2 \\
   \mbox{subject to} &amp; Cx = d
 \end{array}\end{split}\]</div>
-</div></blockquote>
 <p>where the unknown variable <span class="math">\(x\)</span> is a vector of size <span class="math">\(n\)</span>. The values for
 <span class="math">\(A\)</span>, <span class="math">\(b\)</span>, <span class="math">\(C\)</span>, and <span class="math">\(d\)</span> are given and have sizes
 <span class="math">\(m\times n\)</span>, <span class="math">\(m\)</span>, <span class="math">\(p\times n\)</span>, and <span class="math">\(p\)</span>,
@@ -72,12 +70,10 @@ constraints <span class="math">\(Cx = d\)</span> and minimizes the objective, th
 the entries of <span class="math">\(Ax - b\)</span>.</p>
 <p>When there are no equality constraints, LCLS reduces to the simple unconstrained
 least squares problem (LS):</p>
-<blockquote>
-<div><div class="math">
+<div class="math">
 \[\begin{split}\begin{array}{ll}
   \mbox{minimize}  &amp; \|Ax-b\|_2^2
 \end{array}.\end{split}\]</div>
-</div></blockquote>
 <p>When the objective is absent, LCLS reduces to finding <span class="math">\(x\)</span> that satisfies
 <span class="math">\(Cx=d\)</span>, i.e., solving a set of linear equations.</p>
 </div>
@@ -86,21 +82,17 @@ least squares problem (LS):</p>
 <p>There is a unique solution to the LCLS problem if and only if there is a
 unique solution to the following system of linear equations in the variable
 <span class="math">\(x\)</span> and a new variable <span class="math">\(z\)</span>:</p>
-<blockquote>
-<div><div class="math">
+<div class="math">
 \[\begin{split}\begin{bmatrix} 2A^TA &amp; C^T \\ C &amp; 0 \end{bmatrix}
 \begin{bmatrix} x \\ z \end{bmatrix} =
 \begin{bmatrix} 2A^Tb \\ d \end{bmatrix},\end{split}\]</div>
-</div></blockquote>
 <p>i.e., the matrix on the left is invertible. This occurs when the matrix
 <span class="math">\(C\)</span> has independent rows, and the matrix
 <span class="math">\(\begin{bmatrix} A\\ C\end{bmatrix}\)</span> has indepedent columns.</p>
 <p>When there are no equality constraints, the unconstrained least squares problem
 has a unique solution if and only if the system of linear equations:</p>
-<blockquote>
-<div><div class="math">
+<div class="math">
 \[2A^TA x = 2A^Tb\]</div>
-</div></blockquote>
 <p>has a unique solution, which occurs when <span class="math">\(A^TA\)</span> is invertible, i.e., the
 columns of <span class="math">\(A\)</span> are independent.</p>
 <p>When the objective is absent, the system of linear equations <span class="math">\(Cx = d\)</span> has

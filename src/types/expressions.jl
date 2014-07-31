@@ -53,8 +53,8 @@ end
 
 function Variable(size::(Int64, Int64))
   vec_sz = size[1]*size[2]
-  this = AffineExpr(:variable, (), Dict{Uint64, Constant}(), Constant(spzeros(vec_sz, 1)), size)
-  this.vars_to_coeffs_map[this.uid] = Constant(speye(vec_sz))
+  this = AffineExpr(:variable, (), Dict{Uint64, Constant}(), Constant(zeros(vec_sz, 1)), size)
+  this.vars_to_coeffs_map[this.uid] = Constant(eye(vec_sz))
   this.evaluate = ()->this.value == nothing ? error("value of the variable is yet to be calculated") : this.value
   return this
 end

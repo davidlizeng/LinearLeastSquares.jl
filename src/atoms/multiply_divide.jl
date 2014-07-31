@@ -10,7 +10,6 @@ function .*(x::Constant, y::AffineExpr)
   elseif y.size == (1, 1)
     y = repmat(y, x.size[1], x.size[2])
   end
-
   if x.size == y.size
     vec_x = Constant(vec(x.value))
 
@@ -93,7 +92,8 @@ function *(x::Constant, y::SumSquaresExpr)
   if x.size != (1, 1) || all(x.value .< 0)
     error("Sum Squares expressions can only be multiplied by nonegative scalars")
   end
-  affines = [x * affine for affine in y.affines]
+  x_sqrt = Constant(sqrt(x.value))
+  affines = [x_sqrt * affine for affine in y.affines]
   this = SumSquaresExpr(:*, affines)
   return this
 end

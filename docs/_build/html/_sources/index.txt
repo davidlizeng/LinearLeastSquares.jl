@@ -9,23 +9,23 @@ mathematical notation.
 For example, the classic problem of finding the least norm solution to an
 underdetermined system can be easily setup and solved with the following code:
 
-  .. code-block:: none
+.. code-block:: none
 
-    using LSQ
+  using LSQ
 
-    # Problem data
-    p = 20;
-    n = 30;
-    C = randn(p, n);
-    d = randn(p, 1);
+  # Problem data
+  p = 20;
+  n = 30;
+  C = randn(p, n);
+  d = randn(p, 1);
 
-    # Build the components of the problem
-    x = Variable(n);
-    objective = sum_squares(x);
-    constraint = C * x == d;
+  # Build the components of the problem
+  x = Variable(n);
+  objective = sum_squares(x);
+  constraint = C * x == d;
 
-    # Solve the problem
-    optimal_value = minimize!(objective, constraint)
+  # Solve the problem
+  optimal_value = minimize!(objective, constraint)
 
 This example showcases the Julia implementation of LSQ; other
 implmentations include Python and Matlab.
