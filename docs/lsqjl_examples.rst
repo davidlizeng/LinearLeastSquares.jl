@@ -16,14 +16,30 @@ The files for this example can be found `here <https://github.com/davidlizeng/LS
 
 In this problem, we are given n points, represented by two n-by-1 vectors, ``x_data`` and ``y_data``. The x and y coordinates of the i-th point are given by the i-th entries of ``x_data`` and ``y_data``, respectively.
 
-We'll start by visualizing the data to get a better sense of the problem at hand.
-In a Julia shell, run the following code:
+We'll start by visualizing the data to get a better sense of the problem at hand:
 
 .. code-block:: none
 
-  include("data.jl");
+  import PyPlot.plt
 
-If the PyPlot package is installed, the following graph of the data will appear
+  # Set the random seed to get consistent data
+  srand(1)
+
+  # Number of examples to use
+  n = 100
+
+  # Specify the true value of the variable
+  true_coeffs = [2; -2; 0.5];
+
+  # Generate data
+  x_data = rand(n, 1) * 5;
+  x_data_expanded = hcat([x_data .^ i for i in 1 : 3]...);
+  y_data = x_data_expanded * true_coeffs + 0.5 * rand(n, 1);
+
+  plt.plot(x_data, y_data, "ro");
+  plt.show()
+
+The following graph of the data will appear
 
 .. image:: data.png
 
@@ -32,35 +48,43 @@ Linear Regression
 We will first try to fit a line to the data. A general function for a line is
 
 .. math::
-  f(x) = \mbox{offset} +  \mbox{slope} \cdot x
+  f(x) = \alpha + \beta x
 
-where :math:`\mbox{slope}` and :math:`\mbox{offset}` are scalar quantities that we pick to determine the line.
-We would like to pick :math:`\mbox{slope}` and :math:`\mbox{offset}` so that our data points lie "close" to
-our line. For a point with coordinates :math`x` and :math:`y` the residual between the point
+where :math:`\alpha` is the offset and :math:`\beta` is the slope.
+We would like to pick :math:`\alpha` and :math:`\beta` so that our data points lie "close" to
+our line. For a point with coordinates :math:`x` and :math:`y` the residual between the point
 and our line is defined as
 
 .. math::
-  \mbox{residual}(x, y) = f(x) - y
+  r(x, y) = f(x) - y.
 
-One reasonable way to measure how good the line fits the data is to
-sum the squares of the residuals between each point in the data and the line.
-Using this measurement as "goodness of fit", we would like to choose :math:`\mbox{slope}`
-and :math:`\mbox{offset}` to minimize this quantity.
+One reasonable way to measure the how different line is from the data is to
+sum the squares of the residuals between each point in the data and the line:
 
+.. math::
+  E(\alpha, \beta) = \sum_{i = 1}^n (r(x_i, y_i))^2 = \sum_{i = 1}^n (\alpha + \beta x_i - y_i)^2.
+
+We would like to choose :math:`\alpha` and :math:`\beta` to minimize this error.
 We can now frame this problem in Julia code and solve our problem using LSQ.jl:
 
 .. code-block:: none
 
   slope = Variable();
   offset = Variable();
-  optval = minimize!(sum_squares(offset .+ x_data * slope - y_data));
-  println("Slope = $(slope.value[1, 1]), offset = $(offset.value[1, 1])");
+  line = offset .+ x_data * slope;
+  residuals = line - y_data;
+  error = sum_squares(residuals);
+  optval = minimize!(error);
 
-To see a plot of the best fitting line, run:
+  # plot the data and the line
+  t = [0; 5; 0.1];
+  plt.plot(x_data, y_data, "ro");
+  plt.plot(t, slope.value .* t .+ offset.value);
+  plt.xlabel("x");
+  plt.ylabel("y");
+  plt.show();
 
-  .. code-block:: none
-
-    include("linear_regression.jl");
+The line of best fit on our data is shown below:
 
   .. image:: linear.png
 
@@ -70,28 +94,39 @@ A line is probably not the best function to fit to this data. Instead, let's try
 to fit a quadratic function, which has the form:
 
 .. math::
-  f(x) = \mbox{offset} + \mbox{linear_coeff} \cdot x + \mbox{quadratic_coeff} \cdot x ^ 2
+  f(x) = \alpha + \beta x + \gamma x ^ 2
 
-We have now introduced a new quadratic term, along with a new coefficient.
-The same residual function from the linear regression example can still be used here,
-and similarly, we can measure how good the quadratic function fits the data
-by summing the squares of the residuals between each point in the data and the
-quadratic.
+where the new coefficient :math:`\gamma` corresponds to the quadratic term
+A similar residual function from the linear regression example can be used here;
+we measure the error of our quadratic fit by summing the squares of the
+residuals
 
-The Julia code to solve this problem using LSQ.jl is the following:
+.. math::
+  E(\alpha, \beta, \gamma) = \sum_{i = 1}^n (r(x_i, y_i))^2 = \sum_{i = 1}^n (\alpha + \beta x_i + \gamma x_i^2 - y_i)^2.
+
+Again, we pick our coefficients to minimize the error.
+Here is the Julia code to solve this problem using LSQ.jl and plot the quadratic:
 
 .. code-block:: none
 
   quadratic_coeff = Variable();
-  linear_coeff = Variable();
+  slope = Variable();
   offset = Variable();
-  optval = minimize!(sum_squares(offset + x_data * linear_coeff + x_data .^ 2 * quadratic - y_data));
+  quadratic = offset .+ x_data * slope + quadratic_coeff * x_data .^ 2;
+  residuals = quadratic - y_data;
+  error = sum_squares(error);
+  optval = minimize!(error);
 
-To see a plot of the best fitting line, run:
+  # Create some evenly spaced points for plotting, again replicate powers
+  t = reshape([0 : 0.1 : 5], length([0 : 0.1 : 5]), 1);
+  t_squared = t .^ 2;
 
-.. code-block:: none
-
-  include("quadratic_regression.jl");
+  # Plot our regressed function
+  plt.plot(x_data, y_data, "ro")
+  plt.plot(t, offset.value .+  t .* slope.value .+ t_squared * quadratic.value, "b")
+  plt.xlabel("x")
+  plt.ylabel("y")
+  plt.show()
 
 .. image:: quadratic.png
 
@@ -100,68 +135,137 @@ A much better fit than the line!
 
 Control
 =======
-One common application of linearly constrained least squares is control, i.e.,
-planning the motion of an object.
+A simple control problem on a system usually involves a variable :math:`x(t)`
+that denotes the state of the system over time, and a variable :math:`v(t)` that
+denotes the input into the system over time. Linear constraints are used to
+capture the evolution of the system over time:
 
-Hitting Waypoints (Terrible title)
-----------------------------------
-For our example, we want to determine what
-forces to apply to an object with some initial position and velocity to bring it to
-rest at a final position over some amount of time.
+.. math::
+  x(t) = Ax(t - 1) + Bu(t), \ \mbox{for} \ t = 1,\ldots, T,
 
-We can simplify the problem by adding a condition that we can only apply constant
-forces over fixed length intervals of time, and
-that we will have exactly :math:`T` intervals of time, each :math:`h` seconds in length.
-Therefore, at each time interval :math:`t`, we have three unknown quantites:
-the constant force applied during that interval :math:`f(t)`, the velocity of the object at
-the beginning of the interval :math:`v(t)`, and the position of the object at the beginning of
-the interval :math:`p(t)`. By the basic laws of physics, these variables must satisfy:
+where the numerical matrices :math:`A` and :math:`B` are called the dynamics and input matrices,
+respectively.
+
+The goal of the control problem is to find a sequence of inputs
+:math:`u(t)` that will allow the state :math:`x(t)` to achieve specified values
+at certain times. For example, we can specify initial and final states of the system:
 
 .. math::
   \begin{align*}
-    p(t+1) &= p(t) + h \cdot v(t) \\
-    v(t+1) &= v(t) + (h/\mbox{mass}) \cdot f(t) - \mbox{drag} \cdot v(t)
+    x(0) &= x_i \\
+    x(T) &= x_f
   \end{align*}
 
-where :math:`\mbox{mass}` and :math:`\mbox{drag}` are constants for the mass of the object and the drag
-coefficient of the fluid the object is moving in.
+Additional states between the initial and final states can also be specified. These
+are known as waypoint constraints. Often, the input and state of the system will
+have physical meaning, so we often want to find a sequence inputs that also
+minimizes a least squares objective like the following:
+
+.. math::
+  \sum_{t = 1}^T \|Fx(t)\|^2_2 + \|Gu(t)\|^2_2,
+
+where :math:`F` and :math:`G` are numerical matrices.
+
+We'll now apply the basic format of the control problem to an example of controlling
+the motion of an object in a fluid over :math:`T` intervals, each of :math:`h` seconds.
+The state of the system at time interval :math:`t` will be given by the position and the velocity of the
+object, denoted :math:`p(t)` and :math:`v(t)`, while the input will be forces
+applied to the object, denoted by :math:`f(t)`.
+By the basic laws of physics, the relationship between force, velocity, an position
+must satisfy:
+
+.. math::
+  \begin{align*}
+    p(t+1) &= p(t) + h v(t) \\
+    v(t+1) &= v(t) + (h/m) f(t)  + hg - d v(t)
+  \end{align*}
+
+where :math:`m`, :math:`d`, :math:`g` are constants for the mass of the object, the drag
+coefficient of the fluid, and the acceleration from gravity, respectively.
 
 Additionally, we have our initial/final position/velocity conditions:
 
 .. math::
   \begin{align*}
-    p(1) &= \mbox{initial_position}\\
-    v(1) &= \mbox{initial_velocity}\\
-    p(T+1) &= \mbox{final_position}\\
+    p(1) &= p_i\\
+    v(1) &= v_i\\
+    p(T+1) &= p_f\\
     v(T+1) &= 0
   \end{align*}
 
-Often we would like to satisfy all of these constraints on the motion of the object
-while minimizing something along the lines of how much fuel must be conserved to
-generate these forces. Usually it is in our best interest to keep the values of the
-forces small. It is also possible that we would like to keep the velocity of the
-object small as well, perhaps for safety concerns. One reasonable objective to
-minimize then would be
+One reasonable objective to minimize would be
 
 .. math::
 
   \mbox{objective} = \mu \sum_{t = 1}^{T+1} (v(t))^2 + \sum_{t = 1}^T (f(t))^2
 
+We would like to keep both the forces small to perhaps save fuel, and keep
+the velocities small for safety concerns.
 Here :math:`\mu` serves as a parameter to control which part of the objective we
 deem more important, keeping the velocity small or keeping the force small.
 
-The code for this problem can be found `here <https://github.com/davidlizeng/LSQ.jl/tree/master/examples/control>`_.
-To see a plot of the motion of the object, run the following in a Julia shell:
+The following code builds and solves our control example, and plots the final
+outcome:
 
 .. code-block:: none
 
-  include("control.jl");
+  using LSQ
+  import PyPlot.plt
+
+  # Some constraints on our motion
+  # The object should start from the origin, and end at rest
+  initial_velocity = [4; 20];
+  final_position = [10; 10];
+
+  T = 100; # The number of timesteps
+  h = 0.1; # The time between time intervals
+  mass = 1; # Mass of object
+  drag = 0.01; # Drag on object
+  g = [0, -1]; # Gravity on object
+
+  # Declare the variables we need
+  position = Variable(2, T);
+  velocity = Variable(2, T);
+  force = Variable(2, T - 1);
+
+  # Create a problem instance
+  mu = 1;
+  constraints = EqConstraint[];
+
+  # Add constraints on our variables
+  for i in 1 : T - 1
+    constraints += position[:, i + 1] == position[:, i] + h * velocity[:, i];
+  end
+
+  for i in 1 : T - 1
+    constraints += velocity[:, i + 1] == velocity[:, i] + h / mass * force[:, i] + h * g - drag * velocity[:, i];
+  end
+
+  # Add position constraints
+  constraints += position[:, 1] == 0;
+  constraints += position[:, T] == final_position;
+
+  # Add velocity constraints
+  constraints += velocity[:, 1] == initial_velocity;
+  constraints += velocity[:, T] == 0;
+
+  # Solve the problem
+  optval = minimize!(mu * sum_squares(velocity) + sum_squares(force), constraints);
+
+
+  plt.plot(position.value[1, 1:2:T]', position.value[2, 1:2:T]', "r-", linewidth=1.5)
+  plt.quiver(position.value[1, 1:4:T], position.value[2, 1:4:T], force.value[1, 1:4:T-1]/2, force.value[2, 1:4:T-1]/2, width=0.002)
+  plt.plot(0, 0, "bo", markersize=10)
+  plt.plot(final_position[1], final_position[2], "go", markersize=10)
+  plt.xlim([-5, 15])
+  plt.ylim([-20, 20])
+  plt.show()
 
 .. image:: control.png
 
 The red path traces the position of the object over the time, while the black
-arrows show the forces applied. The blue dots show the initial and final
-positions.
+arrows show the forces applied. The blue dot shows the initial position, and
+the green dot shows the final position.
 
 
 Image Processing
@@ -170,51 +274,28 @@ Image Processing
 Tomography
 ----------
 
-Tomography is the process of reconstructing a density distrbution from given
-integrals over sections of the distribution. The idea can be best visualized using a
-two dimensional black and white image. The density distribution in this case
-is how much black ink is used in each pixel.
-Now, imagine drawing a red line across the image.
-The total amount of black ink covered up by the red line can be thought of
-as integrals over the line of the density distrbution. If we draw many, many of these
-red lines and record the integral for each, can we use just this information to
-reconstruct the original image? This is the very similar to the problem that a device like an
-x-ray uses to construct a picture of your internals given only information on how
-the radiation waves traveled through your body. It turns out the two dimensional
-black and white image scenario can be solved by LSQ.
-
-Suppose there are :math:`n` pixels in the picture, each with density value :math:`x_j` for :math:`1 \le j \le n`,
-which are currently unknown.
-We also take :math:`m` line integrals, where :math:`m > n` each with value :math:`y_i` for :math:`1 \le i \le m`.
-We also know how each line passes over which pixels and at what angle. Using this
-information, we can represent this problem as
+Tomography is the process of reconstructing a density distribution from given
+integrals over sections of the distribution. In our example, we will
+work with tomography on black and white images.
+Suppose :math:`x` be the vector of :math:`n` pixel densities, with :math:`x_j`
+denoting how white pixel :math:`j` is.
+Let :math:`y` be the vector of :math:`m` line integrals over the image, with :math:`y_i`
+denoting the integral for line :math:`i`.
+We can define a matrix :math:`A` to describe the geometry of the lines. Entry
+:math:`A_{ij}` describes how much of pixel :math:`j` is intersected by line :math:`i`.
+Assuming our measurements of the line integrals are perfect, we have the relationship that
 
 .. math::
   y = Ax
 
-Here, :math:`A` is a matrix where :math:`A_{ij}` represents how much line :math:`i`
-passes over pixel :math:`j`. For example, if the line barely touches the corner of a pixel,
-the corresponding value for :math:`A_{ij}` would be very small. If the line instead
-cross over the pixel straight through the middle, the value for :math:`A_{ij}` would be
-relatively big.
-
-Anytime we have measurements, there are usually small errors that occur. So a more
-accruate model for our problem would be
+However, anytime we have measurements, there are usually small errors that occur.
+Therefore it makes sense to try to minimize
 
 .. math::
-  y = Ax + v \iff v = Ax - y
+  \|y - Ax\|_2^2.
 
-Where the error vector :math:`v` is assumed to be small and have zero mean.
-It is very reasonable then to try to minimize the sum of squares of the error,
-as that would force the resulting :math:`v` to have rather small entries,
-and center the mean of the entries at :math:`0`. Thus our problem becomes:
 
-.. math::
-
-  \begin{array}{ll}\mbox{minimize} & \|v\|_2^2 \end{array} \iff
-  \begin{array}{ll}\mbox{minimize} & \|Ax - y\|_2^2 \end{array}
-
-which we recognize as an unconstrained least squares problem; something we can
+This is simply an unconstrained least squares problem; something we can
 readily solve in LSQ.jl!
 
 The code and data for this example can be found `here <https://github.com/davidlizeng/LSQ.jl/tree/master/examples/tomography>`_.
@@ -266,26 +347,19 @@ Machine Learning
 Binary Classification
 ---------------------
 One common problem found in machine learning is the classification of a group of objects into two subgroups.
-In this example, we will work with a collection of text documents, that
-come from three sources: sports articles, Harry Potter excerpts, and education articles.
-The goal will be to classify each document as either a sports article, or
-not a sports article. These sources will only have slight overlap in content, e.g, some
-education articles may mention sports and of course Harry Potter plays the sport
-of Quidditch.
+In this example, we will try to separate sports articles from
+other texts in a collection of documents.
 
 When classifying text documents, one of the most common techniques is to build
-a term-by-document frequency matrix :math:`F`. That is, :math:`F_{ij}`
-reflects the frequency of term :math:'j' in document :math:`i`.
-A handful of common preprocessing techniques are used to make this more effective, such
-as removing overly common words like "the", removing endings in words like "ing",
-converting all nouns to singular forms, removing words that appear in too few documents,
-and normalizing frequency counts so that longer documents will not outweight shorter ones.
+a term-by-document frequency matrix :math:`F`, where :math:`F_{ij}`
+reflects the frequency of term :math:`j` in document :math:`i`.
 
 The documents are then split into a training and testing set. For each document
-in the training example, we also label the document with the correct label, in this case,
-sports or not sports. Often, the numbers :math:`1` and :math:`-1` will be used to represent the labels.
-One reasonable approach is to model the label of a document as an affine function
-of the term frequencies of the document:
+in the training example, we also label the document with a label. In this case,
+sports articles are labelled with a :math:`1` and all other text documents are
+labelled with a :math:`-1`.
+One reasonable approach to classify the documents is to model the label
+as an affine function of the term frequencies of the document:
 
 .. math::
   \mbox{label}(i) = v + \sum_{j = 1}^n w_jF_{ij}.
@@ -293,22 +367,18 @@ of the term frequencies of the document:
 The goal now is to find a scalar :math:`v` and a weight vector :math:`w`, where :math:`w_j` reflects how
 important term :math:`j` is in determining the label of the document. In our context, a positive value
 means that the term is often seen in sports articles, while a negative value means
-the term is often seen in the Harry Potter excerpts or education articles. One reasonable
-method of learning :math:`v` and :math:`w` is to use regularized least squares. We
-try to minimize the objective:
+the term is often seen in the other documents. One reasonable approach to
+finding the best :math:`w` and :math:`v` is to minimize the following objective:
 
 .. math::
   \sum_{i = 1}^m  \left(\mbox{label}(i) - v - \sum_{j = 1}^n w_jF_{ij}\right)^2 + \lambda \sum_{j = 1}^n w_j^2
 
 The first part of the objective is to ensure that our linear model actually closely
 reproduces the labels of our training documents. The second part of the objective
-ensures that the components of :math:`w` are relatively small. We want our document
-classifier to work on other text documents, not just the ones we trained on. If
-the components of :math:`w` are large, then slight changes in term frequecies of
-documents would mean drastic changes in the value of the affine function, to the point
-where the sign could change. Keeping :math:`w` small allows our model to behave
-better on documents not in the training set. The regularization parameter :math:`\lambda`
-allows us to control how much we should prioritize keeping :math:`w` small versus
+ensures that the components of :math:`w` are relatively small.
+Keeping :math:`w` small allows our model to behave better on documents not in the training set.
+The regularization parameter :math:`\lambda`
+is used to control how much we should prioritize keeping :math:`w` small versus
 how close the affine function should fit the labels.
 
 Here is the LSQ.jl code:
@@ -353,110 +423,123 @@ Here is the LSQ.jl code:
   objective = sum_squares(trainDocuments * w + v - trainClasses) + lambda * sum_squares(w);
   optval = minimize!(objective);
 
-  # calculate training error
-  yhat = sign(trainDocuments * w.value .+ v.value);
-  trainCE =  1/size(trainClasses,1)*sum(trainClasses .!= yhat)
+  # print out the 5 words most indicative of sports and nonsports
+  words = String[];
+  f = open("largeCorpusfeatures.txt");
+  for i = 1:length(w.value)
+    push!(words, readline(f))
+  end
+  indices = sortperm(vec(w.value));
+  for i = 1:5
+    print(words[indices[i]])
+  end
+  for i = 0:4
+    print(words[indices[length(words) - i]])
+  end
 
-  # calculate performance of our classifier on the test set
-  yhat2 = sign(testDocuments * w.value .+ v.value);
-  testCE = 1/size(testClasses,1)*sum(testClasses .!= yhat2)
+We can now sort our weight vector :math:`w` to see which words were the most
+indicative of sports articles and which were most indicative of nonsports.
+The 5 strings with largest positive weights were "play", "peopl", "olymp", "nativ", and "fan".
+The 5 strings with largest negative weights were "get", "ml", "issu", "professor", and "student".
 
 
 Time Series Analysis
 ====================
-A time series is a sequence of data points, each associated with a time. The time series
-is usually organized in increasing order based on time, and often the times are
-regularly spaced. In our example, we will work with a time series of daily
+A time series is a sequence of data points, each associated with a time.
+In our example, we will work with a time series of daily
 temperatures in the city of Melbourne, Australia over a period of a few years.
-Heres a picture of the temperature data:
+Let :math:`x` be the vector of the time series, and :math:`x_i` denote
+the temperature in Melbourne on day :math:`i`.
+Here is a picture of the time series:
 
 .. image:: melbourne.png
 
-Finding Trends
---------------
+We can quickly compute the mean of the time series to be :math:`11.2`. If
+we were to always guess the mean as the temperature of Melbourne on a given day,
+the RMS error of our guesswork would be :math:`4.1`. We'll try to lower
+this RMS error by coming up with better ways to model the temperature than
+guessing the mean.
 
-The picture motivates a decomposition of the time series. We can easily see that
-there is a long term up and down in the temperature over the course of each year.
-On top of that there are short term fluctuations in temperature that cause
-each year to look slightly different.
-Using our least squares methods, we will try to find a time series
-that repeats itself every year that best captures the seasonal up and downs in
-temperature, and separate this from the daily fluctuations.
-
-We can represent the seasonal trend in temperature as a vector where the :math:`i`-th
-entry denotes the temperature on the :math:`i`-th day.
+A simple way to model this time series would be to find a smooth curve that
+approximates the yearly ups and downs.
+We can represent this model as a vector :math:`s` where :math:`s_i`
+denotes the temperature on the :math:`i`-th day.
 To force this trend to repeat yearly, we simply want
 
 .. math::
-  \mbox{seasonal}(i) = \mbox{seasonal}(i + 365)
+  s_i = s_{i + 365}
 
-for each applicable :math:`i`. This can easily be encapsulated in linear
-equality constraints our sesonal temperature variable.
+for each applicable :math:`i`.
 
-We also want the seasonal trend to have two more properties. The first is that
-the seasonal trend should be relatively close to the actual temperature of that day.
-Short term fluctuations in temperature can only cause so much deviation.
-The second is that the change in temperature of the seasonal trend from day to
-day should be relatively small. Sudden jumps in temeprature are better described
-by the short term fluctuations than the long term trends. Therefore, we would like
-to minimize the value of the following objective
+We also want our model to have two more properties. The first is that
+the temperature on each day in our model should be relatively close to the actual temperature of that day.
+The second is that our model needs to be smooth, so the change in temperature from day to
+day should be relatively small. The following objective would capture both properties:
 
 .. math::
-  \sum_{i = 1}^n (\mbox{seasonal}(i) - \mbox{actual}(i))^2 + \lambda \sum_{i = 2}^n(\mbox{seasonal}(i) - \mbox{seasonal}(i - 1))^2
+  \sum_{i = 1}^n (s_i - x_i)^2 + \lambda \sum_{i = 2}^n(s_i - s_{i - 1})^2
 
-where :math:`\lambda` is the smoothing parameter. The larger :math`\lambda` is, the more
-we favor the seasonal trend to be smooth, i.e., the seasonal trend should have small
-change from day to day.
+where :math:`\lambda` is the smoothing parameter. The larger :math:`\lambda` is,
+the smoother our model will be.
 
-The following code uses LSQ.jl to find and plot the seasonal trend:
+The following code uses LSQ.jl to find and plot the model:
 
 .. code-block:: none
 
-  # read in the data
+  using LSQ
+  import PyPlot.plt
   temps = readdlm("melbourne_temps.txt", ',');
+  plt.figure(0)
+  plt.plot(temps, color="b")
+  plt.title("Melbourne Daily Temperature")
   n = size(temps, 1);
-
-  # enforce the seasonal trend to be the same every year
-  seasonal = Variable(n);
-  eq_constraints = EqConstraint[]
-  for i in 365 + 1 : n
-    eq_constraints += seasonal[i] == seasonal[i - 365];
-  end
-
-  # build the objective and solve the problem
-  smoothing = 3;
-  smooth_objective = sum_squares(seasonal[1 : n - 1] - seasonal[2 : n]);
-  optval = minimize!(sum_squares(temps - seasonal) + smoothing * smooth_objective, eq_constraints);
-  residuals = temps - seasonal.value;
-
-  # plot seasonal trend
-  plt.figure(1)
-  plt.plot(temps)
-  plt.plot(seasonal.value, color="r", alpha=0.5)
-  plt.title("Seasonal Fit of Data")
   plt.xlim([0, n])
 
-.. image:: seasonal_fit.png
+  yearly = Variable(n)
 
-Modeling Fluctuations
----------------------
+  eq_constraints = EqConstraint[]
+  for i in 365 + 1 : n
+    eq_constraints += yearly[i] == yearly[i - 365];
+  end
 
-The next step is to model out short term fluctuations. We subtract our seasonal
-trend from the actual temperatures to get our residual temperatures, i.e., deviations from the
-seasonal trend temperatures. A reasonable hypothesis is that the residual temperature
-today depends on some linear combination of the residual temperatures over the last
-five days. If the last couple of days were abnormably hot, chances are today will also be pretty hot.
-Such a model is called an autoregressive model. We are essentially trying to fit the data
+  smoothing = 100;
+  smooth_objective = sum_squares(yearly[1 : n - 1] - yearly[2 : n]);
+  optval = minimize!(sum_squares(temps - yearly) + smoothing * smooth_objective, eq_constraints);
+  residuals = temps - yearly.value;
+
+  # Plot smooth fit
+  plt.figure(1)
+  plt.plot(temps)
+  plt.plot(yearly.value, color="r")
+  plt.title("Smooth Fit of Data")
+  plt.xlim([0, n])
+
+  # Plot residuals for a few days
+  plt.figure(2)
+  plt.plot(residuals[1:100], color="g")
+
+.. image:: smooth_fit.png
+
+We can also plot the residual temperatures, :math:`r`, define as :math:`r = x - s`.
+
+.. image:: residuals.png
+
+Our smooth model has a RMS error of :math:`2.7`, a significant improvement from
+just guessing the mean, but we can do better.
+
+We now make the hypothesis that the residual temperature on a given day is
+some linear combination of the previous :math:`5` days. Such a model is called
+autoregressive. We are essentially trying to fit the residuals
 as a function of other parts of the data itself.
-Therefore, we want to find a vector of coefficients :math:`a` such that
+We want to find a vector of coefficients :math:`a` such that
 
 .. math::
-  \mbox{residual}(i) \approx \sum_{j = 1}^5 a_j \mbox{residual}(i - j)
+  \mbox{r}(i) \approx \sum_{j = 1}^5 a_j \mbox{r}(i - j)
 
 This can be done by simply minimizing the following sum of squares objective
 
 .. math::
-  \sum_{i = 6}^n \left(\mbox{residual}(i) - \sum_{j = 1}^5 a_j \mbox{residual}(i - j)\right)^2
+  \sum_{i = 6}^n \left(\mbox{r}(i) - \sum_{j = 1}^5 a_j \mbox{r}(i - j)\right)^2
 
 The following LSQ.jl code solves this problem and plots our autoregressive model
 against the actual residual temperatures:
@@ -464,42 +547,40 @@ against the actual residual temperatures:
 .. code-block:: none
 
   # Generate the residuals matrix
-  ar_len = 5;
-  residuals_mat = residuals[ar_len : n - 1];
+  ar_len = 5
+  residuals_mat = residuals[ar_len : n - 1]
   for i = 1:ar_len - 1
-    residuals_mat = [residuals_mat residuals[ar_len - i : n - i - 1]];
+    residuals_mat = [residuals_mat residuals[ar_len - i : n - i - 1]]
   end
 
   # Solve autoregressive problem
-  ar_coef = Variable(ar_len);
-  optval2 = minimize!(sum_squares(residuals_mat * ar_coef - residuals[ar_len + 1 : end]));
+  ar_coef = Variable(ar_len)
+  optval2 = minimize!(sum_squares(residuals_mat * ar_coef - residuals[ar_len + 1 : end]))
 
-  # plot autoregressive fit of daily fluctuations
-  plt.figure(2)
-  plt.plot(residuals[ar_len + 1 : end], color="g", alpha=1)
-  plt.plot(residuals_mat * ar_coef.value, color="r", alpha=0.5)
+  # plot autoregressive fit of daily fluctuations for first few days
+  plt.figure(3)
+  plt.plot(residuals[ar_len + 1 : ar_len + 100], color="g")
+  plt.plot(residuals_mat[1:100, :] * ar_coef.value, color="r")
   plt.title("Autoregressive Fit of Residuals")
-  plt.xlim([0, n])
+
 
 .. image:: ar_fit.png
 
 Now, we can add our autoregressive model for the residual temperatures to our
-seasonal trend to get an overall model for the daily temperatures in the city of
+smooth model to get an better fitting model for the daily temperatures in the city of
 Melbourne:
 
 .. code-block:: none
 
   # plot final fit of data
-  total_estimate = seasonal.value
-  total_estimate[ar_len + 1 : end] += residuals_mat * ar_coef.value
-  plt.figure(3)
+  plt.figure(4)
   plt.plot(temps)
+  total_estimate = yearly.value
+  total_estimate[ar_len + 1 : end] += residuals_mat * ar_coef.value
   plt.plot(total_estimate, color="r", alpha=0.5)
   plt.title("Total Fit of Data")
   plt.xlim([0, n])
 
 .. image:: total_fit.png
 
-Our model does a pretty decent job capturing both the long term and short term
-trends in temperatures.
-
+The RMS error of this final model is :math:`2.3`.

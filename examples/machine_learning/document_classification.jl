@@ -33,8 +33,22 @@ testClasses[testClasses .== holdClass] = 1;
 lambda = 100;
 w = Variable(size(A, 2));
 v = Variable();
-objective = sum_squares(trainDocuments * w + v - trainClasses) + lambda * sum_squares(w);
+objective = sum_squares(trainDocuments * w .+ v - trainClasses) + lambda * sum_squares(w);
 optval = minimize!(objective);
+
+# print out the 5 words most indicative of sports and nonsports
+words = String[];
+f = open("largeCorpusfeatures.txt");
+for i = 1:length(w.value)
+  push!(words, readline(f))
+end
+indices = sortperm(vec(w.value));
+for i = 1:5
+  print(words[indices[i]])
+end
+for i = 0:4
+  print(words[indices[length(words) - i]])
+end
 
 # calculate training error
 yhat = sign(trainDocuments * w.value .+ v.value);

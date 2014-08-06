@@ -1,6 +1,6 @@
-# Set the random seed to get consistent data
 import PyPlot.plt
 
+# Set the random seed to get consistent data
 srand(1)
 
 # Number of examples to use
