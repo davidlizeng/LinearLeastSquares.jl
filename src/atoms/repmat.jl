@@ -10,7 +10,7 @@ function repmat(x::AffineExpr, m::Int64, n::Int64)
   vars_to_coeffs_map = Dict{Uint64, Constant}()
   index_start = 0
   for (v, c) in x.vars_to_coeffs_map
-    vars_to_coeffs_map[v] = Constant(zeros(m * x.size[1] * x.size[2], c.size[2]))
+    vars_to_coeffs_map[v] = Constant(spzeros(m * x.size[1] * x.size[2], c.size[2]))
     for j = 1 : x.size[2]
       index_start = (j - 1) * x.size[1] * m
       for i = 1 : m
@@ -19,7 +19,7 @@ function repmat(x::AffineExpr, m::Int64, n::Int64)
       end
     end
   end
-  constant = Constant(zeros(m * x.size[1] * x.size[2], 1))
+  constant = Constant(spzeros(m * x.size[1] * x.size[2], 1))
   for j = 1 : x.size[2]
     index_start = (j - 1) * x.size[1] * m
     for i = 1 : m

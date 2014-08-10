@@ -1,6 +1,6 @@
 include("MatrixMarket.jl")
 using MatrixMarket
-using LSQ
+using LinearLeastSquares
 
 # read in the data
 A = full(MatrixMarket.mmread("largeCorpus.mtx"));

@@ -12,7 +12,7 @@ To install LSQ.jl, simply open up the Julia shell and run the command:
 
 .. code-block:: none
 
-  Pkg.clone("git@github.com:davidlizeng/LSQ.jl.git")
+  Pkg.clone("https://github.com/davidlizeng/LSQ.jl.git")
 
 To use LSQ.jl in Julia, run the following command to import the library:
 

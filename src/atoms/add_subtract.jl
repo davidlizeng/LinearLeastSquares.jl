@@ -1,16 +1,4 @@
-export +, -, .+, .-
-
-function promote_size(x::AffineOrConstant, y::AffineOrConstant)
-  if x.size == y.size
-    return x, y, x.size
-  elseif x.size == (1, 1)
-    return repmat(x, y.size[1], y.size[2]), y, y.size
-  elseif y.size == (1, 1)
-    return x, repmat(y, x.size[1], x.size[2]), x.size
-  else
-    error ("Cannot add two expressions with sizes $(x.size) and $(y.size)")
-  end
-end
+export +, -
 
 # Unary Negation
 
@@ -24,33 +12,52 @@ function -(x::AffineExpr)
     vars_to_coeffs_map[v] = -c
   end
   this = AffineExpr(:-, (x,), vars_to_coeffs_map, -x.constant, x.size)
-  this.evaluate = ()->-this.value;
+  this.evaluate = ()-> -this.value;
   return this
 end
 
 # Binary Addition
 
 
-function .+(x::Constant, y::Constant)
-  x, y, sz = promote_size(x, y)
-  return Constant(x.value .+ y.value)
+function +(x::Constant, y::Constant)
+  if x.size == (1, 1) || y.size == (1, 1) || x.size == y.size
+    return convert(Constant, x.value + y.value)
+  else
+    error ("Cannot add two expressions with sizes $(x.size) and $(y.size)")
+  end
 end
 
-function .+(x::AffineExpr, y::Constant)
-  x, y, sz = promote_size(x, y)
+function +(x::AffineExpr, y::Constant)
+  if x.size != (1, 1) && y.size != (1, 1) && x.size != y.size
+    error ("Cannot add two expressions with sizes $(x.size) and $(y.size)")
+  end
+
+  if x.size == (1, 1) && y.size != (1, 1)
+    x = repmat(x, y.size[1], y.size[2])
+  end
+
   vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
   constant = x.constant + vec(y)
-  this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, sz)
-  this.evaluate = ()->x.evaluate() .+ y.evaluate()
+  this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, x.size)
+  this.evaluate = ()->x.evaluate() + y.evaluate()
   return this
 end
 
-function .+(x::Constant, y::AffineExpr)
-  return y .+ x
+function +(x::Constant, y::AffineExpr)
+  return y + x
 end
 
-function .+(x::AffineExpr, y::AffineExpr)
-  x, y, sz = promote_size(x, y)
+function +(x::AffineExpr, y::AffineExpr)
+  if x.size != (1, 1) && y.size != (1, 1) && x.size != y.size
+    error ("Cannot add two expressions with sizes $(x.size) and $(y.size)")
+  end
+
+  if x.size == (1, 1) && y.size != (1, 1)
+    x = repmat(x, y.size[1], y.size[2])
+  elseif y.size == (1, 1) && x.size != (1, 1)
+    y = repmat(y, x.size[1], x.size[2])
+  end
+
   vars_to_coeffs_map = copy(x.vars_to_coeffs_map)
   for (v, c) in y.vars_to_coeffs_map
     if haskey(vars_to_coeffs_map, v)
@@ -59,49 +66,27 @@ function .+(x::AffineExpr, y::AffineExpr)
       vars_to_coeffs_map[v] = c
     end
   end
-  constant = x.constant .+ y.constant
-  this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, sz)
-  this.evaluate = ()->x.evaluate() .+ y.evaluate()
+  constant = x.constant + y.constant
+  this = AffineExpr(:+, (x, y), vars_to_coeffs_map, constant, x.size)
+  this.evaluate = ()->x.evaluate() + y.evaluate()
   return this
 end
 
-function +(x::AffineOrConstant, y::AffineOrConstant)
-  if x.size != y.size
-    warn("x + y is deprecated if sizes do not match. Use x .+ y instead.")
-  end
-  return x .+ y
-end
-
-.+(x::AffineExpr, y::Value) = .+(x, Constant(y))
-.+(x::Value, y::AffineExpr) = .+(y, Constant(x))
-+(x::AffineExpr, y::Value) = +(x, Constant(y))
-+(x::Value, y::AffineExpr) = +(y, Constant(x))
++(x::AffineExpr, y::Numeric) = +(x, convert(Constant, y))
++(x::Numeric, y::AffineExpr) = +(y, convert(Constant, x))
 
 
-function .+(x::SumSquaresExpr, y::SumSquaresExpr)
+function +(x::SumSquaresExpr, y::SumSquaresExpr)
   affines = copy(x.affines)
   append!(affines, y.affines)
   this = SumSquaresExpr(:+, affines)
   return this
 end
 
-+(x::SumSquaresExpr, y::SumSquaresExpr) = .+(x, y)
 
 # Binary Subtraction
-
-
-function -(x::AffineOrConstant, y::AffineOrConstant)
-  if x.size != y.size
-    warn("x - y is deprecated if sizes do not match. Use x .- y instead.")
-  end
-  return x .- y
-end
-
-.-(x::AffineExpr, y::AffineExpr) = .+(x, -y)
-.-(x::AffineExpr, y::Constant) = .+(x, -y)
-.-(x::Constant, y::AffineExpr) = .+(-y, x)
-.-(x::AffineExpr, y::Value) = .-(x, Constant(y))
-.-(x::Value, y::AffineExpr) = .-(Constant(x), y)
-
--(x::AffineExpr, y::Value) = -(x, Constant(y))
--(x::Value, y::AffineExpr) = -(Constant(x), y)
+-(x::AffineExpr, y::AffineExpr) = +(x, -y)
+-(x::AffineExpr, y::Constant) = +(x, -y)
+-(x::Constant, y::AffineExpr) = +(-y, x)
+-(x::AffineExpr, y::Numeric) = -(x, convert(Constant, y))
+-(x::Numeric, y::AffineExpr) = -(convert(Constant, x), y)

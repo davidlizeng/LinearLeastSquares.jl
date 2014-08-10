@@ -5,26 +5,24 @@ export *, .*, /, ./
 
 
 function .*(x::Constant, y::AffineExpr)
-  if x.size == (1, 1)
-    x = repmat(x, y.size[1], y.size[2])
-  elseif y.size == (1, 1)
-    y = repmat(y, x.size[1], x.size[2])
-  end
-  if x.size == y.size
-    vec_x = Constant(vec(x.value))
-
-    vars_to_coeffs_map = Dict{Uint64, Constant}()
-    for (v, c) in y.vars_to_coeffs_map
-      vars_to_coeffs_map[v] = vec_x .* c
-    end
-    constant = vec_x .* y.constant
-
-    this = AffineExpr(:*, (x, y), vars_to_coeffs_map, constant, x.size)
-    this.evaluate = ()->x.evaluate() .* y.evaluate()
-    return this
-  else
+  if x.size != (1, 1) && y.size != (1, 1) && x.size != y.size
     error("Cannot dot multiply two expressions of sizes $(x.size) and $(y.size)")
   end
+
+  if y.size == (1, 1) && x.size != (1, 1)
+    y = repmat(y, x.size[1], x.size[2])
+  end
+
+  vec_x = vec(x)
+  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  for (v, c) in y.vars_to_coeffs_map
+    vars_to_coeffs_map[v] = vec_x .* c
+  end
+  constant = vec_x .* y.constant
+
+  this = AffineExpr(:.*, (x, y), vars_to_coeffs_map, constant, x.size)
+  this.evaluate = ()->x.evaluate() .* y.evaluate()
+  return this
 end
 
 .*(x::AffineExpr, y::Constant) = y .* x
@@ -35,7 +33,7 @@ function *(x::Constant, y::AffineExpr)
     return x .* y
   # matrix multiplication
   elseif x.size[2] == y.size[1]
-    x_kron = Constant(kron(eye(y.size[2]), x.value))
+    x_kron = Constant(kron(speye(y.size[2]), x.value))
 
     # Build the coefficient map for x * y
     vars_to_coeffs_map = Dict{Uint64, Constant}()
@@ -57,7 +55,7 @@ function *(x::AffineExpr, y::Constant)
     return y .* x
   # matrix multiplication
   elseif x.size[2] == y.size[1]
-    y_kron = Constant(kron(y.value', eye(x.size[1])))
+    y_kron = Constant(kron(y.value', speye(x.size[1])))
     vars_to_coeffs_map = Dict{Uint64, Constant}()
     for (v, c) in x.vars_to_coeffs_map
       vars_to_coeffs_map[v] = y_kron * c
@@ -71,25 +69,33 @@ function *(x::AffineExpr, y::Constant)
   end
 end
 
-*(x::Value, y::AffineExpr) = *(Constant(x), y)
-*(x::AffineExpr, y::Value) = *(x, Constant(y))
-.*(x::Value, y::AffineExpr) = .*(Constant(x), y)
-.*(x::AffineExpr, y::Value) = .*(x, Constant(y))
+*(x::Numeric, y::AffineExpr) = *(convert(Constant, x), y)
+*(x::AffineExpr, y::Numeric) = *(x, convert(Constant, y))
+.*(x::Numeric, y::AffineExpr) = .*(convert(Constant, x), y)
+.*(x::AffineExpr, y::Numeric) = .*(x, convert(Constant, y))
 
 function ./(x::AffineExpr, y::Constant)
-  if y.size != (1, 1)
-    error("Cannot divide by an expression whose size is not 1 by 1")
+  if y.size != (1, 1) && x.size != (1, 1) && y.size != x.size
+    error("Cannot dot divide two expressions of sizes $(x.size) and $(y.size)")
   end
   return Constant(1 ./ y.value) .* x
 end
 
-./(x::AffineExpr, y::Value) = ./(x, Constant(y))
-/(x::AffineExpr, y::Constant) = ./(x, y)
-/(x::AffineExpr, y::Value) = /(x, Constant(y))
+# Only support scalar division
+function /(x::AffineExpr, y::Constant)
+  if y.size == (1, 1)
+    return x ./ y
+  else
+    error("Cannot divide by an expression whose size is not 1 by 1")
+  end
+end
+
+./(x::AffineExpr, y::Numeric) = ./(x, convert(Constant, y))
+/(x::AffineExpr, y::Numeric) = /(x, convert(Constant, y))
 
 
 function *(x::Constant, y::SumSquaresExpr)
-  if x.size != (1, 1) || all(x.value .< 0)
+  if x.size != (1, 1) || x.value < 0
     error("Sum Squares expressions can only be multiplied by nonegative scalars")
   end
   x_sqrt = Constant(sqrt(x.value))
@@ -99,8 +105,8 @@ function *(x::Constant, y::SumSquaresExpr)
 end
 
 *(x::SumSquaresExpr, y::Constant) = *(y, x)
-*(x::SumSquaresExpr, y::Value) = *(x, Constant(y))
-*(x::Value, y::SumSquaresExpr) = *(Constant(x), y)
+*(x::SumSquaresExpr, y::Numeric) = *(x, convert(Constant, y))
+*(x::Numeric, y::SumSquaresExpr) = *(convert(Constant, x), y)
 
 function /(x::SumSquaresExpr, y::Constant)
   if y.size != (1, 1) || all(y.value .<= 0)
@@ -109,4 +115,4 @@ function /(x::SumSquaresExpr, y::Constant)
   return Constant(1 ./ y.value) * x
 end
 
-/(x::SumSquaresExpr, y::Value) = /(x, Constant(y))
+/(x::SumSquaresExpr, y::Numeric) = /(x, convert(Constant, y))

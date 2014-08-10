@@ -14,7 +14,7 @@ function diag(x::AffineExpr, num::Int64)
   end
   len = min(x.size[1] - start_row + 1, x.size[2] - start_col + 1)
   start_ind = (start_col - 1) * x.size[1] + start_row
-  indexer = Constant(zeros(len, x.size[1] * x.size[2]))
+  indexer = Constant(spzeros(len, x.size[1] * x.size[2]))
   for i = 1 : len
     indexer.value[i, start_ind + (i - 1) * (x.size[1] + 1)] = 1
   end
@@ -25,7 +25,7 @@ function diag(x::AffineExpr, num::Int64)
   end
   constant = indexer * x.constant
   this = AffineExpr(:diag, (x,), vars_to_coeffs_map, constant, (len, 1))
-  this.evaluate = ()->diag(x.evaluate(), num)
+  this.evaluate = ()->diag(full(x.evaluate()), num)
   return this
 end
 
@@ -35,7 +35,7 @@ function diagm(x::AffineExpr)
   if x.size[2] != 1
     error("Can only call diagm on column vectors")
   end
-  indexer = Constant(zeros(x.size[1] * x.size[1], x.size[1]))
+  indexer = Constant(spzeros(x.size[1] * x.size[1], x.size[1]))
   for i = 1 : x.size[1]
     indexer.value[1 + (i - 1) * (x.size[1] + 1), i] = 1
   end

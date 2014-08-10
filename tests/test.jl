@@ -1,4 +1,4 @@
-using LSQ
+using LinearLeastSquares
 
 TOLERANCE = 1e-4;
 

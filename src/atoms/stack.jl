@@ -14,13 +14,13 @@ function vcat(args::AffineExpr...)
 
   vars_to_coeffs_map = Dict{Uint64, Constant}()
   vec_sz = num_rows * num_cols
-  constant = Constant(zeros(vec_sz, 1))
+  constant = Constant(spzeros(vec_sz, 1))
   index_start = 0
 
   for i = 1:length(args)
     for (v, c) in args[i].vars_to_coeffs_map
       if !haskey(vars_to_coeffs_map, v)
-        vars_to_coeffs_map[v] = Constant(zeros(vec_sz, c.size[2]))
+        vars_to_coeffs_map[v] = Constant(spzeros(vec_sz, c.size[2]))
       end
       for j in 1 : num_cols
         index = index_start + (j - 1) * num_rows
@@ -56,7 +56,7 @@ function hcat(args::AffineExpr...)
 
   vars_to_coeffs_map = Dict{Uint64, Constant}()
   vec_sz = num_rows * num_cols
-  constant = Constant(zeros(vec_sz, 1))
+  constant = Constant(spzeros(vec_sz, 1))
   index = 0
 
   for i = 1:length(args)
@@ -64,7 +64,7 @@ function hcat(args::AffineExpr...)
 
     for (v, c) in args[i].vars_to_coeffs_map
       if !haskey(vars_to_coeffs_map, v)
-        vars_to_coeffs_map[v] = Constant(zeros(vec_sz, c.size[2]))
+        vars_to_coeffs_map[v] = Constant(spzeros(vec_sz, c.size[2]))
       end
       vars_to_coeffs_map[v].value[index + 1 : index + arg_vec_sz, :] = c.value
     end

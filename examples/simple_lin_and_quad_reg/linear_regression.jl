@@ -1,8 +1,8 @@
 # Simple Linear Regression
 # Originally written by Keegan Go for lsqpy
-# Translated into LSQ.jl by Karanveer Mohan and David Zeng
+# Translated into LinearLeastSquares.jl by Karanveer Mohan and David Zeng
 
-using LSQ
+using LinearLeastSquares
 # Set the random seed to get consistent data
 srand(1)
 

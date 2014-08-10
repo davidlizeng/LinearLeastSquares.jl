@@ -1,10 +1,13 @@
-import Base.size, Base.endof, Base.ndims
+import Base.size, Base.endof, Base.ndims, Base.convert
 export Constant, AffineExpr, AffineConstant, Variable, SumSquaresExpr
-export Value, AffineOrValue, AffineOrConstant
+export Value, Numeric, AffineOrConstant
+export convert
 export sum_squares
 export endof, size, ndims
 
-Value = Union(Number, AbstractArray)
+Value = Union(Float64, SparseMatrixCSC{Float64, Int64})
+Numeric = Union(Number, AbstractArray)
+
 ValueOrNothing = Union(Value, Nothing)
 
 abstract AffineOrConstant
@@ -24,6 +27,14 @@ type Constant <: AffineOrConstant
   end
 end
 
+function convert(::Type{Constant}, value::Number)
+  return Constant(convert(Float64, value))
+end
+
+function convert(::Type{Constant}, value::AbstractArray)
+  return Constant(convert(SparseMatrixCSC{Float64, Int64}, sparse(value)))
+end
+
 type AffineExpr <: AffineOrConstant
   head::Symbol
   value::ValueOrNothing
@@ -41,8 +52,6 @@ type AffineExpr <: AffineOrConstant
   end
 end
 
-AffineOrValue = Union(AffineExpr, Value)
-
 function AffineConstant(value::Value)
   constant = Constant(value)
   this = AffineExpr(:constant, (), Dict{Uint64, Constant}(), constant, constant.size)
@@ -53,8 +62,8 @@ end
 
 function Variable(size::(Int64, Int64))
   vec_sz = size[1]*size[2]
-  this = AffineExpr(:variable, (), Dict{Uint64, Constant}(), Constant(zeros(vec_sz, 1)), size)
-  this.vars_to_coeffs_map[this.uid] = Constant(eye(vec_sz))
+  this = AffineExpr(:variable, (), Dict{Uint64, Constant}(), Constant(spzeros(vec_sz, 1)), size)
+  this.vars_to_coeffs_map[this.uid] = Constant(speye(vec_sz))
   this.evaluate = ()->this.value == nothing ? error("value of the variable is yet to be calculated") : this.value
   return this
 end

@@ -6,7 +6,7 @@ getindex{T <: Real}(x::Constant, inds::AbstractArray{T, 1}) = Constant(getindex(
 getindex{T <: Real}(x::Constant, rows::AbstractArray{T, 1}, cols::AbstractArray{T, 1}) = Constant(getindex(x.value, rows, cols))
 
 function getindex{T <: Real}(x::AffineExpr, inds::AbstractArray{T, 1})
-  indexer = Constant(zeros(length(inds), x.size[1] * x.size[2]))
+  indexer = Constant(spzeros(length(inds), x.size[1] * x.size[2]))
   k = 1
   for i in inds
     indexer.value[k, i] = 1
@@ -28,7 +28,7 @@ function getindex{T <: Real}(x::AffineExpr, rows::AbstractArray{T, 1}, cols::Abs
   num_rows_coeff = length(rows) * length(cols)
   num_cols_coeff = x.size[1] * x.size[2]
 
-  indexer = Constant(zeros(num_rows_coeff, num_cols_coeff))
+  indexer = Constant(spzeros(num_rows_coeff, num_cols_coeff))
 
   # Create the indexing matrix such that indexer * vec(x) = vec(x[rows, cols])
   k = 1

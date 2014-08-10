@@ -1,4 +1,4 @@
-using LSQ
+using LinearLeastSquares
 
 line_mat_x = readdlm("tux_sparse_x.txt");
 line_mat_y = readdlm("tux_sparse_y.txt");

@@ -4,6 +4,7 @@ export minimize!, satisfy!
 # For now, backslash is the only supported method.
 function solve!(problem_type::Symbol, objective::SumSquaresExpr, constraints::Array{EqConstraint})
   p = Problem(problem_type, objective, constraints)
+  # return backslash_solve!(p)
   backslash_solve!(p)
   if p.status == "infeasible"
     println("Problem was infeasible")

@@ -1,6 +1,6 @@
 # Regression problem
 # Originally written by Keegan Go for lsqpy
-# Translated into LSQ.jl by Karanveer Mohan and David Zeng
+# Translated into LinearLeastSquares.jl by Karanveer Mohan and David Zeng
 
 """
 Fit a large polynomial to some given data
@@ -9,7 +9,7 @@ Question: Why does increasing regularization not help very much
 near the end of the polynomial (farther from zero)?
 """
 
-using LSQ
+using LinearLeastSquares
 import PyPlot.plt
 
 # Set the random seed to get consistent data

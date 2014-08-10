@@ -1,4 +1,4 @@
-module LSQ
+module LinearLeastSquares
 
 include("types/expressions.jl")
 include("types/constraints.jl")

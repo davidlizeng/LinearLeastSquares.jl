@@ -6,7 +6,7 @@ ctranspose(x::Constant) = transpose(x)
 
 function transpose(x::AffineExpr)
   vec_sz = x.size[1] * x.size[2]
-  perm_matrix = zeros(vec_sz, vec_sz)
+  perm_matrix = spzeros(vec_sz, vec_sz)
   num_rows = x.size[1]
   num_cols = x.size[2]
 

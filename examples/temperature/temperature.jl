@@ -3,7 +3,7 @@ Reads a temperature data file as taken from
 http://www.cru.uea.ac.uk/cru/data/temperature/
 """
 import PyPlot.plt
-using LSQ
+using LinearLeastSquares
 
 data = readdlm("CRUTEM4v-gl.dat", ' ');
 

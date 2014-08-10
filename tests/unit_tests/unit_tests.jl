@@ -1,5 +1,5 @@
 # Run all unit tests
-using LSQ
+using LinearLeastSquares
 
 include("helpers.jl")
 include("add_subtract.jl")

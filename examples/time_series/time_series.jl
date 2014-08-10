@@ -1,4 +1,4 @@
-using LSQ
+using LinearLeastSquares
 import PyPlot.plt
 temps = readdlm("melbourne_temps.txt", ',');
 plt.figure(0)

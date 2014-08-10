@@ -48,8 +48,8 @@ end
 
 function coalesce_affine_exprs(vars_to_ranges_map::Dict{Uint64, (Int64, Int64)}, num_vars::Int64, affines::Array{AffineExpr})
   num_rows = get_num_rows(affines)
-  coefficient = zeros(num_rows, num_vars)
-  constant = zeros(num_rows, 1)
+  coefficient = spzeros(num_rows, num_vars)
+  constant = spzeros(num_rows, 1)
   row = 0
   for affine in affines
     row_sz = affine.size[1] * affine.size[2]
@@ -63,22 +63,34 @@ function coalesce_affine_exprs(vars_to_ranges_map::Dict{Uint64, (Int64, Int64)},
   return coefficient, constant
 end
 
-# TODO: Julia 0.2 does not support A\b for sparse A,b
 function build_kkt_system(A, b, C, d)
-  sz = size(A, 2) + size(C, 1)
-  coefficient = zeros(sz, sz)
-  coefficient[1 : size(A, 2), 1 : size(A, 2)] = 2 * A' * A
-  coefficient[size(A, 2) + 1 : end, 1 : size(C, 2)] = C
-  coefficient[1 : size(C, 2), size(A, 2) + 1 : end] = C'
-  constant = zeros(sz, 1)
-  constant[1 : size(A, 2)] = -2 * A' * b
-  constant[size(A, 2) + 1 : end] = -d
+  if size(A, 1) == 0
+    sz = size(C, 1)
+  else
+    sz = size(A, 2) + size(C, 1)
+  end
+
+  coefficient = spzeros(sz, sz)
+  constant = spzeros(sz, 1)
+
+  if size(A, 1) != 0
+    coefficient[1 : size(A, 2), 1 : size(A, 2)] = 2 * A' * A
+    constant[1 : size(A, 2)] = -2 * A' * b
+    if size(C, 1) != 0
+      coefficient[1 : size(C, 2), size(A, 2) + 1 : end] = C'
+    end
+  end
+  if size(C, 1) != 0
+    coefficient[size(A, 2) + 1 : end, 1 : size(C, 2)] = C
+    constant[size(A, 2) + 1 : end] = -d
+  end
+
   return coefficient, constant
 end
 
 function populate_vars!(unique_vars_map::Dict{Uint64, AffineExpr}, vars_to_ranges_map::Dict{Uint64, (Int64, Int64)}, solution)
   for (id, var) in unique_vars_map
-    var.value = zeros(var.size)
+    var.value = spzeros(var.size...)
     var.value[:] = solution[vars_to_ranges_map[id][1] : vars_to_ranges_map[id][2]]
   end
 end
@@ -92,13 +104,13 @@ function backslash_solve!(p::Problem)
     push!(canon_forms, constraint.canon_form)
   end
   C, d = coalesce_affine_exprs(vars_to_ranges_map, num_vars, canon_forms)
+  # return A, b, C, d
   coefficient, constant = build_kkt_system(A, b, C, d)
   solution = nothing
   try
-    solution = coefficient\constant
-  # TODO: Only catch specific error
+    solution = coefficient\full(constant)
   catch
-    println("Could not solve KKT system")
+    println("KKT system is singular")
   end
   if solution == nothing
     p.status = "infeasible"
