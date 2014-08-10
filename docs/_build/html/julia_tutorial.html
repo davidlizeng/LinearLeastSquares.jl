@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LSQ.jl Tutorial &mdash; LSQ 0.1 documentation</title>
+    <title>LinearLeastSquares.jl Tutorial &mdash; LLS 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="LSQ 0.1 documentation" href="index.html" />
-    <link rel="next" title="LSQ.jl Examples" href="lsqjl_examples.html" />
-    <link rel="prev" title="The Math Behind LSQ" href="math.html" /> 
+    <link rel="top" title="LLS 0.1 documentation" href="index.html" />
+    <link rel="next" title="LineaLeastSquares.jl Examples" href="julia_examples.html" />
+    <link rel="prev" title="The Math Behind LLS" href="math.html" /> 
   </head>
   <body>
     <div class="related">
@@ -36,12 +36,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="lsqjl_examples.html" title="LSQ.jl Examples"
+          <a href="julia_examples.html" title="LineaLeastSquares.jl Examples"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="math.html" title="The Math Behind LSQ"
+          <a href="math.html" title="The Math Behind LLS"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">LSQ 0.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLS 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -50,35 +50,37 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="lsq-jl-tutorial">
-<h1>LSQ.jl Tutorial<a class="headerlink" href="#lsq-jl-tutorial" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="installing-lsq-jl">
-<h2>Installing LSQ.jl<a class="headerlink" href="#installing-lsq-jl" title="Permalink to this headline">¶</a></h2>
-<p>LSQ.jl requires <a class="reference external" href="http://julialang.org/downloads/">Julia 0.3</a> or higher.
+  <div class="section" id="linearleastsquares-jl-tutorial">
+<h1>LinearLeastSquares.jl Tutorial<a class="headerlink" href="#linearleastsquares-jl-tutorial" title="Permalink to this headline">¶</a></h1>
+<p>The Julia package that implements LLS goes by the name of LinearLeastSquares.jl.
+We&#8217;ll refer to LinearLeastSquares.jl as LLS throughout this tutorial.</p>
+<div class="section" id="installing-lls">
+<h2>Installing LLS<a class="headerlink" href="#installing-lls" title="Permalink to this headline">¶</a></h2>
+<p>LLS requires <a class="reference external" href="http://julialang.org/downloads/">Julia 0.3</a> or higher.
 For those new to Julia, the <a class="reference external" href="http://docs.julialang.org/en/release-0.2/">official Julia docs</a>
 are a good way to get acquainted with the language.</p>
-<p>To install LSQ.jl, simply open up the Julia shell and run the command:</p>
-<div class="highlight-none"><div class="highlight"><pre>Pkg.clone(&quot;git@github.com:davidlizeng/LSQ.jl.git&quot;)
+<p>To install LLS, simply open up the Julia shell and run the command:</p>
+<div class="highlight-none"><div class="highlight"><pre>Pkg.clone(&quot;https://github.com/davidlizeng/LinearLeastSquares.jl.git&quot;)
 </pre></div>
 </div>
-<p>To use LSQ.jl in Julia, run the following command to import the library:</p>
-<div class="highlight-none"><div class="highlight"><pre>using LSQ
+<p>To use LLS in Julia, run the following command to import the library:</p>
+<div class="highlight-none"><div class="highlight"><pre>using LinearLeastSquares
 </pre></div>
 </div>
-<p>The same line of code can also be used in Julia scripts to import the LSQ.jl
-library.</p>
+<p>The same line of code can also be used in Julia scripts to import the LinearLeastSquares.jl
+package.</p>
 </div>
 <div class="section" id="variables-and-constants">
 <h2>Variables and Constants<a class="headerlink" href="#variables-and-constants" title="Permalink to this headline">¶</a></h2>
-<p>To declare variables in LSQ, use the following syntax to specify their size:</p>
+<p>To declare variables in LLS, use the following syntax to specify their size:</p>
 <div class="highlight-none"><div class="highlight"><pre>x = Variable();      # A scalar variable
 y = Variable(3);     # Create a vector variable with 3 rows and 1 columns
 z = Variable(10, 4); # A matrix variable that has 10 rows and 4 columns
 </pre></div>
 </div>
-<p>LSQ currently only supports variables up to 2 dimensions in size, i.e.,
+<p>LLS currently only supports variables up to 2 dimensions in size, i.e.,
 scalars, vector, and matrices. Variables
-have no value upon creation, but after solving a problem, LSQ will populate
+have no value upon creation, but after solving a problem, LLS will populate
 all variables in the problem with optimal values. These values can be accessed in the
 following ways:</p>
 <div class="highlight-none"><div class="highlight"><pre># x is a variable with value populated
@@ -175,7 +177,7 @@ mean_of_rows = mean(X, 2);
 </div>
 <div class="section" id="linear-equality-constraints">
 <h2>Linear Equality Constraints<a class="headerlink" href="#linear-equality-constraints" title="Permalink to this headline">¶</a></h2>
-<p>In LSQ, a linear equality constraint is formed between an affine expression and a constant,
+<p>In LLS, a linear equality constraint is formed between an affine expression and a constant,
 or two affine expressions, using the <tt class="docutils literal"><span class="pre">==</span></tt> operator.
 Note that the <tt class="docutils literal"><span class="pre">==</span></tt> operator has been overloaded to no longer return a boolean,
 but rather an object representing the linear equality constraint.
@@ -197,7 +199,7 @@ constraint_list += x[3] == 1.6;
 </div>
 <div class="section" id="the-solve-method">
 <h2>The <tt class="docutils literal"><span class="pre">solve!</span></tt> Method<a class="headerlink" href="#the-solve-method" title="Permalink to this headline">¶</a></h2>
-<p>LSQ can solve a system of linear equations using the <tt class="docutils literal"><span class="pre">solve!</span></tt> method. The
+<p>LLS can solve a system of linear equations using the <tt class="docutils literal"><span class="pre">solve!</span></tt> method. The
 exclamation point after <tt class="docutils literal"><span class="pre">solve</span></tt> is a Julia convention signifying that this
 method will have side effects; specifically, it will assign values to
 variables after solving. After that, the values of the variables, and any
@@ -211,15 +213,15 @@ println(evaluate(y));
 </div>
 <p>The arguments to the <tt class="docutils literal"><span class="pre">solve!</span></tt> method are either one linear equality constraint
 or a list of linear equality constraints. Only systems with unique solutions can
-be solved by LSQ; see the <a class="reference internal" href="math.html#solving-lcls"><em>Solving LCLS</em></a> section for detailed conditions.
+be solved by LLS; see the <a class="reference internal" href="math.html#solving-lcls"><em>Solving LCLS</em></a> section for detailed conditions.
 The <tt class="docutils literal"><span class="pre">solve!</span></tt> method will issue an error if these conditions are not satisfied.</p>
 </div>
 <div class="section" id="sum-of-squares-expressions">
 <h2>Sum of Squares Expressions<a class="headerlink" href="#sum-of-squares-expressions" title="Permalink to this headline">¶</a></h2>
-<p>In LSQ, a sum of sqaures expression is the sum of squares of the entries of a scalar, vector,
+<p>In LLS, a sum of sqaures expression is the sum of squares of the entries of a scalar, vector,
 or matrix. The most basic way to create such an expression is to call the <tt class="docutils literal"><span class="pre">sum_squares</span></tt> function
 on an affine expression argument.
-For example, <tt class="docutils literal"><span class="pre">sum_squares(A</span> <span class="pre">*</span> <span class="pre">x</span> <span class="pre">-</span> <span class="pre">b)</span></tt> is the LSQ representation of <span class="math">\(\|Ax - b\|_2^2\)</span>.
+For example, <tt class="docutils literal"><span class="pre">sum_squares(A</span> <span class="pre">*</span> <span class="pre">x</span> <span class="pre">-</span> <span class="pre">b)</span></tt> is the LLS representation of <span class="math">\(\|Ax - b\|_2^2\)</span>.
 To create other sum of squares expressions, the <tt class="docutils literal"><span class="pre">+</span></tt> and <tt class="docutils literal"><span class="pre">*</span></tt> operators can be used in
 conjunction with the following rules:</p>
 <ol class="arabic simple">
@@ -227,7 +229,7 @@ conjunction with the following rules:</p>
 <li>A sum of squares expression can be multiplied or divided by a postive, scalar constant.</li>
 </ol>
 <p>Note that sum of squares expression cannot be subtracted from each other,
-or multiplied or divided by a negative number. LSQ will issue an error message if
+or multiplied or divided by a negative number. LLS will issue an error message if
 the user attempts any of these.
 Here are some examples of building sum of squares expressions:</p>
 <div class="highlight-none"><div class="highlight"><pre>A = randn(4, 3);
@@ -256,7 +258,7 @@ variance = var(X);
 </div>
 <div class="section" id="the-minimize-method">
 <h2>The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Method<a class="headerlink" href="#the-minimize-method" title="Permalink to this headline">¶</a></h2>
-<p>LSQ can also solve a linearly constrained least squares problem using the
+<p>LLS can also solve a linearly constrained least squares problem using the
 <tt class="docutils literal"><span class="pre">minimize!</span></tt> method:</p>
 <div class="highlight-none"><div class="highlight"><pre>A = randn(3, 2);
 b = randn(2, 1);
@@ -306,8 +308,8 @@ an error these conditions are not satisfied.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">LSQ.jl Tutorial</a><ul>
-<li><a class="reference internal" href="#installing-lsq-jl">Installing LSQ.jl</a></li>
+<li><a class="reference internal" href="#">LinearLeastSquares.jl Tutorial</a><ul>
+<li><a class="reference internal" href="#installing-lls">Installing LLS</a></li>
 <li><a class="reference internal" href="#variables-and-constants">Variables and Constants</a></li>
 <li><a class="reference internal" href="#affine-expressions">Affine Expressions</a></li>
 <li><a class="reference internal" href="#linear-equality-constraints">Linear Equality Constraints</a></li>
@@ -320,13 +322,13 @@ an error these conditions are not satisfied.</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="math.html"
-                        title="previous chapter">The Math Behind LSQ</a></p>
+                        title="previous chapter">The Math Behind LLS</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="lsqjl_examples.html"
-                        title="next chapter">LSQ.jl Examples</a></p>
+  <p class="topless"><a href="julia_examples.html"
+                        title="next chapter">LineaLeastSquares.jl Examples</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/lsqjl.txt"
+    <li><a href="_sources/julia_tutorial.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -353,16 +355,16 @@ an error these conditions are not satisfied.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="lsqjl_examples.html" title="LSQ.jl Examples"
+          <a href="julia_examples.html" title="LineaLeastSquares.jl Examples"
              >next</a> |</li>
         <li class="right" >
-          <a href="math.html" title="The Math Behind LSQ"
+          <a href="math.html" title="The Math Behind LLS"
              >previous</a> |</li>
-        <li><a href="index.html">LSQ 0.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">LLS 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, Keegan Go, Karanveer Mohan, David Zeng.
+        &copy; Copyright 2014, David Zeng, Keegan Go, Karanveer Mohan.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>

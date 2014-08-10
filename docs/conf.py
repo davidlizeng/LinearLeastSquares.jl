@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# LSQ documentation build configuration file, created by
+# LLS documentation build configuration file, created by
 # sphinx-quickstart on Mon Jun 30 22:44:30 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -45,8 +45,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'LSQ'
-copyright = u'2014, Keegan Go, Karanveer Mohan, David Zeng'
+project = u'LLS'
+copyright = u'2014, David Zeng, Keegan Go, Karanveer Mohan'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -178,7 +178,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'LSQdoc'
+htmlhelp_basename = 'LLSdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -198,8 +198,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'LSQ.tex', u'LSQ Documentation',
-   u'Keegan Go, Karanveer Mohan, David Zeng', 'manual'),
+  ('index', 'LLS.tex', u'LLS Documentation',
+   u'David Zeng, Keegan Go, Karanveer Mohan', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -228,8 +228,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'lsq', u'LSQ Documentation',
-     [u'Keegan Go, Karanveer Mohan, David Zeng'], 1)
+    ('index', 'lls', u'LLS Documentation',
+     [u'David Zeng, Keegan Go, Karanveer Mohan'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -242,8 +242,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'LSQ', u'LSQ Documentation',
-   u'Keegan Go, Karanveer Mohan, David Zeng', 'LSQ', 'One line description of project.',
+  ('index', 'LLS', u'LLS Documentation',
+   u'David Zeng, Keegan Go, Karanveer Mohan', 'LLS', 'One line description of project.',
    'Miscellaneous'),
 ]
 

@@ -1,33 +1,36 @@
-===============
-LSQ.jl Tutorial
-===============
+==============================
+LinearLeastSquares.jl Tutorial
+==============================
 
-Installing LSQ.jl
-=================
-LSQ.jl requires `Julia 0.3 <http://julialang.org/downloads/>`_ or higher.
+The Julia package that implements LLS goes by the name of LinearLeastSquares.jl.
+We'll refer to LinearLeastSquares.jl as LLS throughout this tutorial.
+
+Installing LLS
+==============
+LLS requires `Julia 0.3 <http://julialang.org/downloads/>`_ or higher.
 For those new to Julia, the `official Julia docs <http://docs.julialang.org/en/release-0.2/>`_
 are a good way to get acquainted with the language.
 
-To install LSQ.jl, simply open up the Julia shell and run the command:
+To install LLS, simply open up the Julia shell and run the command:
 
 .. code-block:: none
 
-  Pkg.clone("git@github.com:davidlizeng/LSQ.jl.git")
+  Pkg.clone("https://github.com/davidlizeng/LinearLeastSquares.jl.git")
 
-To use LSQ.jl in Julia, run the following command to import the library:
+To use LLS in Julia, run the following command to import the library:
 
 .. code-block:: none
 
-  using LSQ
+  using LinearLeastSquares
 
-The same line of code can also be used in Julia scripts to import the LSQ.jl
-library.
+The same line of code can also be used in Julia scripts to import the LinearLeastSquares.jl
+package.
 
 .. TODO: plotting library instructions.
 
 Variables and Constants
 =======================
-To declare variables in LSQ, use the following syntax to specify their size:
+To declare variables in LLS, use the following syntax to specify their size:
 
 .. code-block:: none
 
@@ -35,9 +38,9 @@ To declare variables in LSQ, use the following syntax to specify their size:
   y = Variable(3);     # Create a vector variable with 3 rows and 1 columns
   z = Variable(10, 4); # A matrix variable that has 10 rows and 4 columns
 
-LSQ currently only supports variables up to 2 dimensions in size, i.e.,
+LLS currently only supports variables up to 2 dimensions in size, i.e.,
 scalars, vector, and matrices. Variables
-have no value upon creation, but after solving a problem, LSQ will populate
+have no value upon creation, but after solving a problem, LLS will populate
 all variables in the problem with optimal values. These values can be accessed in the
 following ways:
 
@@ -149,7 +152,7 @@ The sum and mean of the entries of an affine expression can be constructed:
 
 Linear Equality Constraints
 ===========================
-In LSQ, a linear equality constraint is formed between an affine expression and a constant,
+In LLS, a linear equality constraint is formed between an affine expression and a constant,
 or two affine expressions, using the ``==`` operator.
 Note that the ``==`` operator has been overloaded to no longer return a boolean,
 but rather an object representing the linear equality constraint.
@@ -175,7 +178,7 @@ to a list using the ``+`` operator.
 
 The ``solve!`` Method
 =====================
-LSQ can solve a system of linear equations using the ``solve!`` method. The
+LLS can solve a system of linear equations using the ``solve!`` method. The
 exclamation point after ``solve`` is a Julia convention signifying that this
 method will have side effects; specifically, it will assign values to
 variables after solving. After that, the values of the variables, and any
@@ -191,16 +194,16 @@ expressions that depend on them, can be accessed.
 
 The arguments to the ``solve!`` method are either one linear equality constraint
 or a list of linear equality constraints. Only systems with unique solutions can
-be solved by LSQ; see the :ref:`solving-lcls` section for detailed conditions.
+be solved by LLS; see the :ref:`solving-lcls` section for detailed conditions.
 The ``solve!`` method will issue an error if these conditions are not satisfied.
 
 
 Sum of Squares Expressions
 ==========================
-In LSQ, a sum of sqaures expression is the sum of squares of the entries of a scalar, vector,
+In LLS, a sum of sqaures expression is the sum of squares of the entries of a scalar, vector,
 or matrix. The most basic way to create such an expression is to call the ``sum_squares`` function
 on an affine expression argument.
-For example, ``sum_squares(A * x - b)`` is the LSQ representation of :math:`\|Ax - b\|_2^2`.
+For example, ``sum_squares(A * x - b)`` is the LLS representation of :math:`\|Ax - b\|_2^2`.
 To create other sum of squares expressions, the ``+`` and ``*`` operators can be used in
 conjunction with the following rules:
 
@@ -208,7 +211,7 @@ conjunction with the following rules:
 #. A sum of squares expression can be multiplied or divided by a postive, scalar constant.
 
 Note that sum of squares expression cannot be subtracted from each other,
-or multiplied or divided by a negative number. LSQ will issue an error message if
+or multiplied or divided by a negative number. LLS will issue an error message if
 the user attempts any of these.
 Here are some examples of building sum of squares expressions:
 
@@ -243,7 +246,7 @@ can be used to directly create this sum of squares expression for variance.
 
 The ``minimize!`` Method
 ========================
-LSQ can also solve a linearly constrained least squares problem using the
+LLS can also solve a linearly constrained least squares problem using the
 ``minimize!`` method:
 
 .. code-block:: none

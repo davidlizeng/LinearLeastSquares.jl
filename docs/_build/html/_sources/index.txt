@@ -1,8 +1,8 @@
 ==============
-Welcome to LSQ
+Welcome to LLS
 ==============
-LSQ is a library that makes it easy to formulate and solve least squares
-optimization problems with linear equality constraints. With LSQ, these types
+LLS is a library that makes it easy to formulate and solve least squares
+optimization problems with linear equality constraints. With LLS, these types
 of problems can be created using a natural syntax that mirrors standard
 mathematical notation.
 
@@ -11,7 +11,7 @@ underdetermined system can be easily setup and solved with the following code:
 
 .. code-block:: none
 
-  using LSQ
+  using LinearLeastSquares
 
   # Problem data
   p = 20;
@@ -27,7 +27,7 @@ underdetermined system can be easily setup and solved with the following code:
   # Solve the problem
   optimal_value = minimize!(objective, constraint)
 
-This example showcases the Julia implementation of LSQ; other
+This example showcases the Julia implementation of LLS; other
 implementations include Python and Matlab.
 
 
@@ -37,8 +37,8 @@ In Depth Docs
   :maxdepth: 2
 
   The Math <math>
-  Tutorial <lsqjl>
-  Examples <lsqjl_examples>
+  Tutorial <julia_tutorial>
+  Examples <julia_examples>
   Credits <credits>
 
 

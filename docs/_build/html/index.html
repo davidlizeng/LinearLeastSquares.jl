@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to LSQ &mdash; LSQ 0.1 documentation</title>
+    <title>Welcome to LLS &mdash; LLS 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="LSQ 0.1 documentation" href="#" />
-    <link rel="next" title="The Math Behind LSQ" href="math.html" /> 
+    <link rel="top" title="LLS 0.1 documentation" href="#" />
+    <link rel="next" title="The Math Behind LLS" href="math.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,9 +35,9 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="math.html" title="The Math Behind LSQ"
+          <a href="math.html" title="The Math Behind LLS"
              accesskey="N">next</a> |</li>
-        <li><a href="#">LSQ 0.1 documentation</a> &raquo;</li> 
+        <li><a href="#">LLS 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -46,15 +46,15 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="welcome-to-lsq">
-<h1>Welcome to LSQ<a class="headerlink" href="#welcome-to-lsq" title="Permalink to this headline">¶</a></h1>
-<p>LSQ is a library that makes it easy to formulate and solve least squares
-optimization problems with linear equality constraints. With LSQ, these types
+  <div class="section" id="welcome-to-lls">
+<h1>Welcome to LLS<a class="headerlink" href="#welcome-to-lls" title="Permalink to this headline">¶</a></h1>
+<p>LLS is a library that makes it easy to formulate and solve least squares
+optimization problems with linear equality constraints. With LLS, these types
 of problems can be created using a natural syntax that mirrors standard
 mathematical notation.</p>
 <p>For example, the classic problem of finding the least norm solution to an
 underdetermined system can be easily setup and solved with the following code:</p>
-<div class="highlight-none"><div class="highlight"><pre>using LSQ
+<div class="highlight-none"><div class="highlight"><pre>using LinearLeastSquares
 
 # Problem data
 p = 20;
@@ -71,7 +71,7 @@ constraint = C * x == d;
 optimal_value = minimize!(objective, constraint)
 </pre></div>
 </div>
-<p>This example showcases the Julia implementation of LSQ; other
+<p>This example showcases the Julia implementation of LLS; other
 implementations include Python and Matlab.</p>
 <div class="section" id="in-depth-docs">
 <h2>In Depth Docs<a class="headerlink" href="#in-depth-docs" title="Permalink to this headline">¶</a></h2>
@@ -82,22 +82,22 @@ implementations include Python and Matlab.</p>
 <li class="toctree-l2"><a class="reference internal" href="math.html#solving-lcls">Solving LCLS</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="lsqjl.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl.html#installing-lsq-jl">Installing LSQ.jl</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl.html#variables-and-constants">Variables and Constants</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl.html#affine-expressions">Affine Expressions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl.html#linear-equality-constraints">Linear Equality Constraints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl.html#the-solve-method">The <tt class="docutils literal"><span class="pre">solve!</span></tt> Method</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl.html#sum-of-squares-expressions">Sum of Squares Expressions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl.html#the-minimize-method">The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="julia_tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="julia_tutorial.html#installing-lls">Installing LLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia_tutorial.html#variables-and-constants">Variables and Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia_tutorial.html#affine-expressions">Affine Expressions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia_tutorial.html#linear-equality-constraints">Linear Equality Constraints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia_tutorial.html#the-solve-method">The <tt class="docutils literal"><span class="pre">solve!</span></tt> Method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia_tutorial.html#sum-of-squares-expressions">Sum of Squares Expressions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia_tutorial.html#the-minimize-method">The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Method</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="lsqjl_examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl_examples.html#regression">Regression</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl_examples.html#control">Control</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl_examples.html#image-processing">Image Processing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl_examples.html#machine-learning">Machine Learning</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lsqjl_examples.html#time-series-analysis">Time Series Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="julia_examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="julia_examples.html#regression">Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia_examples.html#control">Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia_examples.html#image-processing">Image Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia_examples.html#machine-learning">Machine Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia_examples.html#time-series-analysis">Time Series Analysis</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="credits.html">Credits</a></li>
@@ -114,7 +114,7 @@ implementations include Python and Matlab.</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to LSQ</a><ul>
+<li><a class="reference internal" href="#">Welcome to LLS</a><ul>
 <li><a class="reference internal" href="#in-depth-docs">In Depth Docs</a></li>
 </ul>
 </li>
@@ -122,7 +122,7 @@ implementations include Python and Matlab.</p>
 
   <h4>Next topic</h4>
   <p class="topless"><a href="math.html"
-                        title="next chapter">The Math Behind LSQ</a></p>
+                        title="next chapter">The Math Behind LLS</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -152,13 +152,13 @@ implementations include Python and Matlab.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="math.html" title="The Math Behind LSQ"
+          <a href="math.html" title="The Math Behind LLS"
              >next</a> |</li>
-        <li><a href="#">LSQ 0.1 documentation</a> &raquo;</li> 
+        <li><a href="#">LLS 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2014, Keegan Go, Karanveer Mohan, David Zeng.
+        &copy; Copyright 2014, David Zeng, Keegan Go, Karanveer Mohan.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>

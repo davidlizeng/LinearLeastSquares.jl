@@ -29,7 +29,7 @@ trainClasses[trainClasses .== holdClass] = 1;
 testClasses[testClasses .!= holdClass] = -1;
 testClasses[testClasses .== holdClass] = 1;
 
-# build the problem and solve with LSQ
+# build the problem and solve with LLS
 lambda = 100;
 w = Variable(size(A, 2));
 v = Variable();

@@ -1,10 +1,10 @@
 ===================
-The Math Behind LSQ
+The Math Behind LLS
 ===================
 
 Linearly Constrained Least Squares
 ==================================
-LSQ solves **linearly constrained least squares** (or LCLS) problems,
+LLS solves **linearly constrained least squares** (or LCLS) problems,
 which have the form:
 
 .. math::
@@ -17,7 +17,7 @@ where the unknown variable :math:`x` is a vector of size :math:`n`. The values f
 :math:`A`, :math:`b`, :math:`C`, and :math:`d` are given and have sizes
 :math:`m\times n`, :math:`m`, :math:`p\times n`, and :math:`p`,
 respectively.
-LSQ finds a value for :math:`x` that satisfies the linear equality
+LLS finds a value for :math:`x` that satisfies the linear equality
 constraints :math:`Cx = d` and minimizes the objective, the sum of the squares of
 the entries of :math:`Ax - b`.
 
@@ -61,6 +61,6 @@ columns of :math:`A` are independent.
 When the objective is absent, the system of linear equations :math:`Cx = d` has
 a unique solution if and only if :math:`C` is invertible.
 
-LSQ allows you to specify an LCLS problem in a natural way.  It translates your
+LLS allows you to specify an LCLS problem in a natural way.  It translates your
 specification into the general form in this section, and then solves the
 appropriate set of linear equations.
