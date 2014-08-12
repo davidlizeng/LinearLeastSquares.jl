@@ -42,7 +42,7 @@ f = open("largeCorpusfeatures.txt");
 for i = 1:length(w.value)
   push!(words, readline(f))
 end
-indices = sortperm(vec(w.value));
+indices = sortperm(vec(full(w.value)));
 for i = 1:5
   print(words[indices[i]])
 end

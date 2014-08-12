@@ -18,8 +18,8 @@ type EqConstraint
 end
 
 ==(lhs::AffineOrConst, rhs::AffineOrConst) = EqConstraint(lhs, rhs)
-==(lhs::Value, rhs::AffineExpr) = ==(Constant(lhs), rhs)
-==(lhs::AffineExpr, rhs::Value) = ==(lhs, Constant(rhs))
+==(lhs::Numeric, rhs::AffineExpr) = ==(convert(Constant, lhs), rhs)
+==(lhs::AffineExpr, rhs::Numeric) = ==(lhs, convert(Constant, rhs))
 
 +(constraints::Array{EqConstraint}, new_constraints::Array{EqConstraint}) = append!(constraints, new_constraints)
 +(constraints::Array{EqConstraint}, new_constraint::EqConstraint) = push!(constraints, new_constraint)
