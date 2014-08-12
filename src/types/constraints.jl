@@ -12,7 +12,7 @@ type EqConstraint
     if lhs.head == :Constant && rhs.head == :Constant
       error ("Equality constraints between two constants are not allowed")
     end
-    this = new(:(==), lhs, rhs, lhs .- rhs)
+    this = new(:(==), lhs, rhs, lhs - rhs)
     return this
   end
 end

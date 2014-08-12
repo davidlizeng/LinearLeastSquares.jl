@@ -33,7 +33,7 @@ testClasses[testClasses .== holdClass] = 1;
 lambda = 100;
 w = Variable(size(A, 2));
 v = Variable();
-objective = sum_squares(trainDocuments * w .+ v - trainClasses) + lambda * sum_squares(w);
+objective = sum_squares(trainDocuments * w + v - trainClasses) + lambda * sum_squares(w);
 optval = minimize!(objective);
 
 # print out the 5 words most indicative of sports and nonsports

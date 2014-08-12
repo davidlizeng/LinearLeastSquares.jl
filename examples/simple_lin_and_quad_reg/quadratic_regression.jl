@@ -25,7 +25,7 @@ offset = Variable();
 x_squared = x_data .^ 2;
 
 # Solve the problem
-optval = minimize!(sum_squares(offset .+ x_data * slope + x_squared * quadratic - y_data));
+optval = minimize!(sum_squares(offset + x_data * slope + x_squared * quadratic - y_data));
 
 # Create some evenly spaced points for plotting, again replicate powers
 t = reshape([0 : 0.1 : 5], length([0 : 0.1 : 5]), 1);
