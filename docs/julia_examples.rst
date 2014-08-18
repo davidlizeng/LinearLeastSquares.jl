@@ -72,7 +72,7 @@ We can now frame this problem in Julia code and solve our problem using LLS:
 
   slope = Variable();
   offset = Variable();
-  line = offset .+ x_data * slope;
+  line = offset + x_data * slope;
   residuals = line - y_data;
   error = sum_squares(residuals);
   optval = minimize!(error);
@@ -80,7 +80,7 @@ We can now frame this problem in Julia code and solve our problem using LLS:
   # plot the data and the line
   t = [0; 5; 0.1];
   plt.plot(x_data, y_data, "ro");
-  plt.plot(t, slope.value .* t .+ offset.value);
+  plt.plot(t, evaluate(slope) * t + evaluate(offset));
   plt.xlabel("x");
   plt.ylabel("y");
   plt.show();
@@ -113,9 +113,9 @@ Here is the Julia code to solve this problem using LLS and plot the quadratic:
   quadratic_coeff = Variable();
   slope = Variable();
   offset = Variable();
-  quadratic = offset .+ x_data * slope + quadratic_coeff * x_data .^ 2;
+  quadratic = offset + x_data * slope + quadratic_coeff * x_data .^ 2;
   residuals = quadratic - y_data;
-  error = sum_squares(error);
+  error = sum_squares(residuals);
   optval = minimize!(error);
 
   # Create some evenly spaced points for plotting, again replicate powers
@@ -124,7 +124,7 @@ Here is the Julia code to solve this problem using LLS and plot the quadratic:
 
   # Plot our regressed function
   plt.plot(x_data, y_data, "ro")
-  plt.plot(t, offset.value .+  t .* slope.value .+ t_squared * quadratic.value, "b")
+  plt.plot(t, evaluate(offset) + t * evaluate(slope) + t_squared * evaluate(quadratic_coeff), "b")
   plt.xlabel("x")
   plt.ylabel("y")
   plt.show()
@@ -254,8 +254,8 @@ outcome:
   optval = minimize!(mu * sum_squares(velocity) + sum_squares(force), constraints);
 
 
-  plt.plot(position.value[1, 1:2:T]', position.value[2, 1:2:T]', "r-", linewidth=1.5)
-  plt.quiver(position.value[1, 1:4:T], position.value[2, 1:4:T], force.value[1, 1:4:T-1]/2, force.value[2, 1:4:T-1]/2, width=0.002)
+  plt.plot(evaluate(position)[1, 1:2:T]', evaluate(position)[2, 1:2:T]', "r-", linewidth=1.5)
+  plt.quiver(evaluate(position)[1, 1:4:T], evaluate(position)[2, 1:4:T], evaluate(force)[1, 1:4:T-1]/2, evaluate(force)[2, 1:4:T-1]/2, width=0.002)
   plt.plot(0, 0, "bo", markersize=10)
   plt.plot(final_position[1], final_position[2], "go", markersize=10)
   plt.xlim([-5, 15])
@@ -334,7 +334,7 @@ The code and data for this example can be found `here <https://github.com/davidl
   objective = sum_squares(line_mat * x - line_vals);
   optval = minimize!(objective);
 
-  plt.imshow(reshape(x.value, img_size,img_size), cmap = get_cmaps()[29])
+  plt.imshow(reshape(evaluate(x), img_size,img_size), cmap = get_cmaps()[29])
 
 The final result of the tomography will look something like
 
@@ -427,10 +427,10 @@ Here is the LLS code:
   # print out the 5 words most indicative of sports and nonsports
   words = String[];
   f = open("largeCorpusfeatures.txt");
-  for i = 1:length(w.value)
+  for i = 1:length(evaluate(w))
     push!(words, readline(f))
   end
-  indices = sortperm(vec(w.value));
+  indices = sortperm(vec(evaluate(w)));
   for i = 1:5
     print(words[indices[i]])
   end
@@ -506,7 +506,7 @@ The following code uses LLS to find and plot the model:
   smoothing = 100;
   smooth_objective = sum_squares(yearly[1 : n - 1] - yearly[2 : n]);
   optval = minimize!(sum_squares(temps - yearly) + smoothing * smooth_objective, eq_constraints);
-  residuals = temps - yearly.value;
+  residuals = temps - evaluate(yearly);
 
   # Plot smooth fit
   plt.figure(1)
@@ -561,7 +561,7 @@ against the actual residual temperatures:
   # plot autoregressive fit of daily fluctuations for first few days
   plt.figure(3)
   plt.plot(residuals[ar_len + 1 : ar_len + 100], color="g")
-  plt.plot(residuals_mat[1:100, :] * ar_coef.value, color="r")
+  plt.plot(residuals_mat[1:100, :] * evaluate(ar_coef), color="r")
   plt.title("Autoregressive Fit of Residuals")
 
 
@@ -576,8 +576,8 @@ Melbourne:
   # plot final fit of data
   plt.figure(4)
   plt.plot(temps)
-  total_estimate = yearly.value
-  total_estimate[ar_len + 1 : end] += residuals_mat * ar_coef.value
+  total_estimate = evaluate(yearly)
+  total_estimate[ar_len + 1 : end] += residuals_mat * evaluate(ar_coef)
   plt.plot(total_estimate, color="r", alpha=0.5)
   plt.title("Total Fit of Data")
   plt.xlim([0, n])

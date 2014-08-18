@@ -17,12 +17,12 @@ end
 smoothing = 100;
 smooth_objective = sum_squares(yearly[1 : n - 1] - yearly[2 : n]);
 optval = minimize!(sum_squares(temps - yearly) + smoothing * smooth_objective, eq_constraints);
-residuals = temps - yearly.value;
+residuals = temps - evaluate(yearly);
 
 # Plot smooth fit
 plt.figure(1)
 plt.plot(temps)
-plt.plot(yearly.value, color="r")
+plt.plot(evaluate(yearly), color="r")
 plt.title("Smooth Fit of Data")
 plt.xlim([0, n])
 
@@ -44,14 +44,14 @@ optval2 = minimize!(sum_squares(residuals_mat * ar_coef - residuals[ar_len + 1 :
 # plot autoregressive fit of daily fluctuations for first few days
 plt.figure(3)
 plt.plot(residuals[ar_len + 1 : ar_len + 100], color="g")
-plt.plot(residuals_mat[1:100, :] * ar_coef.value, color="r")
+plt.plot(residuals_mat[1:100, :] * evaluate(ar_coef), color="r")
 plt.title("Autoregressive Fit of Residuals")
 
 # plot final fit of data
 plt.figure(4)
 plt.plot(temps)
-total_estimate = yearly.value
-total_estimate[ar_len + 1 : end] += residuals_mat * ar_coef.value
+total_estimate = evaluate(yearly)
+total_estimate[ar_len + 1 : end] += residuals_mat * evaluate(ar_coef)
 plt.plot(total_estimate, color="r", alpha=0.5)
 plt.title("Total Fit of Data")
 plt.xlim([0, n])

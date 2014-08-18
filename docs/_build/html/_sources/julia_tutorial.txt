@@ -15,7 +15,7 @@ To install LLS, simply open up the Julia shell and run the command:
 
 .. code-block:: none
 
-  Pkg.clone("https://github.com/davidlizeng/LinearLeastSquares.jl.git")
+  Pkg.add("LinearLeastSquares")
 
 To use LLS in Julia, run the following command to import the library:
 

@@ -5,6 +5,7 @@ include("types/constraints.jl")
 include("types/problems.jl")
 
 include("utils/utilities.jl")
+include("utils/display.jl")
 
 include("atoms/repmat.jl")
 include("atoms/reshape.jl")

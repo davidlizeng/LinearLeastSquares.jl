@@ -28,4 +28,4 @@ optval = minimize!(objective);
 import PyPlot.plt
 import PyPlot.cm
 using PyPlot
-plt.imshow(reshape(x.value, img_size,img_size), cmap = get_cmaps()[29])
+plt.imshow(reshape(evaluate(x), img_size,img_size), cmap = get_cmaps()[29])

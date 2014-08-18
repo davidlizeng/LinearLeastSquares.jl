@@ -49,8 +49,8 @@ constraints += velocity[:, T] == 0;
 optval = minimize!(mu * sum_squares(velocity) + sum_squares(force), constraints);
 
 
-plt.plot(position.value[1, 1:2:T]', position.value[2, 1:2:T]', "r-", linewidth=1.5)
-plt.quiver(position.value[1, 1:4:T], position.value[2, 1:4:T], force.value[1, 1:4:T-1]/2, force.value[2, 1:4:T-1]/2, width=0.002)
+plt.plot(evaluate(position)[1, 1:2:T]', evaluate(position)[2, 1:2:T]', "r-", linewidth=1.5)
+plt.quiver(evaluate(position)[1, 1:4:T], evaluate(position)[2, 1:4:T], evaluate(force)[1, 1:4:T-1]/2, evaluate(force)[2, 1:4:T-1]/2, width=0.002)
 plt.plot(0, 0, "bo", markersize=10)
 plt.plot(final_position[1], final_position[2], "go", markersize=10)
 plt.xlim([-5, 15])

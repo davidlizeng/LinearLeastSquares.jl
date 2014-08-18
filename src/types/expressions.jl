@@ -1,6 +1,7 @@
 import Base.size, Base.endof, Base.ndims, Base.convert
 export Constant, AffineExpr, AffineConstant, Variable, SumSquaresExpr
 export Value, Numeric, AffineOrConstant
+export evaluate
 export convert
 export sum_squares
 export endof, size, ndims
@@ -10,7 +11,17 @@ Numeric = Union(Number, AbstractArray)
 
 ValueOrNothing = Union(Value, Nothing)
 
-abstract AffineOrConstant
+abstract AbstractExpr
+
+function evaluate(x::AbstractExpr)
+  if x.size == (1, 1)
+    return (x.evaluate())[1]
+  else
+    return full(x.evaluate())
+  end
+end
+
+abstract AffineOrConstant <: AbstractExpr
 
 type Constant <: AffineOrConstant
   head::Symbol
@@ -64,7 +75,15 @@ function Variable(size::(Int64, Int64))
   vec_sz = size[1]*size[2]
   this = AffineExpr(:variable, (), Dict{Uint64, Constant}(), Constant(spzeros(vec_sz, 1)), size)
   this.vars_to_coeffs_map[this.uid] = Constant(speye(vec_sz))
-  this.evaluate = ()->this.value == nothing ? error("value of the variable is yet to be calculated") : this.value
+  this.evaluate = ()->begin
+    if this.value == nothing
+      error("value of the variable is yet to be calculated")
+    elseif this.size == (1, 1)
+      return this.value[1]
+    else
+      return this.value
+    end
+  end
   return this
 end
 
@@ -72,7 +91,7 @@ Variable(size...) = Variable(size)
 Variable() = Variable((1, 1))
 Variable(size::Integer) = Variable((size, 1))
 
-type SumSquaresExpr
+type SumSquaresExpr <: AbstractExpr
   head::Symbol
   value::ValueOrNothing
   affines::Array{AffineExpr}

@@ -39,10 +39,10 @@ optval = minimize!(objective);
 # print out the 5 words most indicative of sports and nonsports
 words = String[];
 f = open("largeCorpusfeatures.txt");
-for i = 1:length(w.value)
+for i = 1:length(evaluate(w))
   push!(words, readline(f))
 end
-indices = sortperm(vec(full(w.value)));
+indices = sortperm(vec(evaluate(w)));
 for i = 1:5
   print(words[indices[i]])
 end
@@ -51,9 +51,9 @@ for i = 0:4
 end
 
 # calculate training error
-yhat = sign(trainDocuments * w.value .+ v.value);
+yhat = sign(trainDocuments * evaluate(w) + evaluate(v));
 trainCE =  1/size(trainClasses,1)*sum(trainClasses .!= yhat)
 
 # calculate performance of our classifier on the test set
-yhat2 = sign(testDocuments * w.value .+ v.value);
+yhat2 = sign(testDocuments * evaluate(w) + evaluate(v));
 testCE = 1/size(testClasses,1)*sum(testClasses .!= yhat2)

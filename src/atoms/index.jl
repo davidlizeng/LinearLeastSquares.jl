@@ -18,7 +18,7 @@ function getindex{T <: Real}(x::AffineExpr, inds::AbstractArray{T, 1})
     vars_to_coeffs_map[v] = indexer * c
   end
   constant = indexer * x.constant
-  this = AffineExpr(:getindex, (x,), vars_to_coeffs_map, constant, (length(inds), 1))
+  this = AffineExpr(:index, (x,), vars_to_coeffs_map, constant, (length(inds), 1))
   this.evaluate = ()->x.evaluate()[inds]
   return this
 end
@@ -46,7 +46,7 @@ function getindex{T <: Real}(x::AffineExpr, rows::AbstractArray{T, 1}, cols::Abs
     vars_to_coeffs_map[v] = indexer * c
   end
   constant = indexer * x.constant
-  this = AffineExpr(:getindex, (x,), vars_to_coeffs_map, constant, (length(rows), length(cols)))
+  this = AffineExpr(:index, (x,), vars_to_coeffs_map, constant, (length(rows), length(cols)))
   this.evaluate = ()->x.evaluate()[rows, cols]
   return this
 end

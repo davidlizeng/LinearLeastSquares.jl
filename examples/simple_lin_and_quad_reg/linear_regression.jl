@@ -3,6 +3,7 @@
 # Translated into LinearLeastSquares.jl by Karanveer Mohan and David Zeng
 
 using LinearLeastSquares
+import PyPlot.plt
 # Set the random seed to get consistent data
 srand(1)
 
@@ -19,14 +20,15 @@ y_data = x_data_expanded * true_coeffs + 0.5 * rand(n, 1);
 
 slope = Variable();
 offset = Variable();
-optval = minimize!(sum_squares(offset + x_data * slope - y_data));
-println("Slope = $(slope.value[1, 1]), offset = $(offset.value[1, 1])");
+line = offset + x_data * slope;
+residuals = line - y_data;
+error = sum_squares(residuals);
+optval = minimize!(error);
 
-import PyPlot.plt
-# Print results and plot
+# plot the data and the line
 t = [0; 5; 0.1];
 plt.plot(x_data, y_data, "ro");
-plt.plot(t, slope.value[1, 1] * t .+ offset.value[1, 1]);
+plt.plot(t, evaluate(slope) .* t .+ evaluate(offset));
 plt.xlabel("x");
 plt.ylabel("y");
 plt.show();
