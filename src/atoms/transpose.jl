@@ -6,19 +6,22 @@ ctranspose(x::Constant) = transpose(x)
 
 function transpose(x::AffineExpr)
   vec_sz = x.size[1] * x.size[2]
-  perm_matrix = spzeros(vec_sz, vec_sz)
   num_rows = x.size[1]
   num_cols = x.size[2]
 
+  I = Array(Int64, vec_sz)
+  J = Array(Int64, vec_sz)
+
+  k = 1
   for r = 1:num_rows
     for c = 1:num_cols
-      i = (c - 1) * num_rows + r
-      j = (r - 1) * num_cols + c
-      perm_matrix[i, j] = 1.0
+      J[k] = (c - 1) * num_rows + r
+      I[k] = (r - 1) * num_cols + c
+      k += 1
     end
   end
 
-  perm_constant = Constant(perm_matrix)
+  perm_constant = Constant(sparse(I, J, 1.0))
 
   vars_to_coeffs_map = Dict{Uint64, Constant}()
   for (v, c) in x.vars_to_coeffs_map
@@ -26,7 +29,7 @@ function transpose(x::AffineExpr)
   end
   constant = perm_constant * x.constant
 
-  this = AffineExpr(:transpose, (x,), vars_to_coeffs_map, constant, (x.size[2], x.size[1]))
+  this = AffineExpr(:transpose, (x,), vars_to_coeffs_map, constant, (num_cols, num_rows))
   this.evaluate = ()->x.evaluate()'
   return this
 end

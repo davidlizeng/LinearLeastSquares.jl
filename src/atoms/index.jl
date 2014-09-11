@@ -6,19 +6,17 @@ getindex{T <: Real}(x::Constant, inds::AbstractArray{T, 1}) = Constant(getindex(
 getindex{T <: Real}(x::Constant, rows::AbstractArray{T, 1}, cols::AbstractArray{T, 1}) = Constant(getindex(x.value, rows, cols))
 
 function getindex{T <: Real}(x::AffineExpr, inds::AbstractArray{T, 1})
-  indexer = Constant(spzeros(length(inds), x.size[1] * x.size[2]))
-  k = 1
-  for i in inds
-    indexer.value[k, i] = 1
-    k += 1
-  end
+  # number of rows/cols in the coefficient for x in our canonical form
+  num_rows_coeff = length(inds)
+  num_cols_coeff = x.size[1] * x.size[2]
+  indexer = Constant(sparse(1:length(inds), inds, 1.0, num_rows_coeff, num_cols_coeff))
 
   vars_to_coeffs_map = Dict{Uint64, Constant}()
   for (v, c) in x.vars_to_coeffs_map
     vars_to_coeffs_map[v] = indexer * c
   end
   constant = indexer * x.constant
-  this = AffineExpr(:index, (x,), vars_to_coeffs_map, constant, (length(inds), 1))
+  this = AffineExpr(:index, (x,), vars_to_coeffs_map, constant, (num_rows_coeff, 1))
   this.evaluate = ()->x.evaluate()[inds]
   return this
 end
@@ -28,18 +26,17 @@ function getindex{T <: Real}(x::AffineExpr, rows::AbstractArray{T, 1}, cols::Abs
   num_rows_coeff = length(rows) * length(cols)
   num_cols_coeff = x.size[1] * x.size[2]
 
-  indexer = Constant(spzeros(num_rows_coeff, num_cols_coeff))
-
   # Create the indexing matrix such that indexer * vec(x) = vec(x[rows, cols])
+  J = Array(Int64, num_rows_coeff)
   k = 1
   num_rows = x.size[1]
   for c in cols
     for r in rows
-      idx = num_rows * (convert(Int64, c) - 1) + convert(Int64, r)
-      indexer.value[k, idx] = 1
+      J[k] = num_rows * (convert(Int64, c) - 1) + convert(Int64, r)
       k += 1
     end
   end
+  indexer = Constant(sparse(1:num_rows_coeff, J, 1.0, num_rows_coeff, num_cols_coeff))
 
   vars_to_coeffs_map = Dict{Uint64, Constant}()
   for (v, c) in x.vars_to_coeffs_map

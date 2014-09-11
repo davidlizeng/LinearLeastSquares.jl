@@ -1,5 +1,6 @@
 # Run all unit tests
 using LinearLeastSquares
+using Base.Test
 
 include("helpers.jl")
 include("add_subtract.jl")
@@ -8,3 +9,9 @@ include("stack.jl")
 include("diag.jl")
 include("repmat.jl")
 include("index.jl")
+include("reshape.jl")
+include("transpose.jl")
+include("sum_squares.jl")
+include("compound.jl")
+include("constraints.jl")
+include("problems.jl")

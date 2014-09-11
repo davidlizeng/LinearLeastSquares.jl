@@ -12,16 +12,17 @@ Numeric = Union(Number, AbstractArray)
 ValueOrNothing = Union(Value, Nothing)
 
 abstract AbstractExpr
+abstract AffineOrConstant <: AbstractExpr
 
 function evaluate(x::AbstractExpr)
   if x.size == (1, 1)
     return (x.evaluate())[1]
+  elseif x.size[2] == 1
+    return vec(full(x.evaluate()))
   else
     return full(x.evaluate())
   end
 end
-
-abstract AffineOrConstant <: AbstractExpr
 
 type Constant <: AffineOrConstant
   head::Symbol
@@ -72,6 +73,9 @@ function AffineConstant(value::Value)
 end
 
 function Variable(size::(Int64, Int64))
+  if (size[1] < 1 || size[2] < 1)
+    error("invalid variable size")
+  end
   vec_sz = size[1]*size[2]
   this = AffineExpr(:variable, (), Dict{Uint64, Constant}(), Constant(spzeros(vec_sz, 1)), size)
   this.vars_to_coeffs_map[this.uid] = Constant(speye(vec_sz))
@@ -95,18 +99,19 @@ type SumSquaresExpr <: AbstractExpr
   head::Symbol
   value::ValueOrNothing
   affines::Array{AffineExpr}
+  multipliers::Array{Float64}
   uid::Uint64
   evaluate::Function
 
-  function SumSquaresExpr(head::Symbol, affines::Array{AffineExpr})
-    this = new(head, nothing, affines)
+  function SumSquaresExpr(head::Symbol, affines::Array{AffineExpr}, multipliers::Array{Float64})
+    this = new(head, nothing, affines, multipliers)
     this.uid = object_id(this)
     this.evaluate = ()->begin
-      sum = 0
-      for affine in affines
-        sum += norm(vec(affine.evaluate()))^2
+      value = 0
+      for i in 1:length(this.affines)
+        value += multipliers[i] * sum((this.affines[i].evaluate()).^2)
       end
-      return sum
+      return value
     end
     return this
   end
@@ -115,7 +120,11 @@ end
 function sum_squares(affine::AffineExpr)
   affines = AffineExpr[]
   push!(affines, affine)
-  this = SumSquaresExpr(:sum_squares, affines)
+  this = SumSquaresExpr(:sum_squares, affines, ones(length(affines)))
+end
+
+function evaluate(x::SumSquaresExpr)
+  return (x.evaluate())[1]
 end
 
 endof(x::AffineOrConstant) = x.size[1]*x.size[2]

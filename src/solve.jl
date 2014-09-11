@@ -1,4 +1,4 @@
-export minimize!, satisfy!
+export minimize!, solve!
 
 # Eventually, this can take in arguments to specify solving method.
 # For now, backslash is the only supported method.
@@ -6,9 +6,8 @@ function solve!(problem_type::Symbol, objective::SumSquaresExpr, constraints::Ar
   p = Problem(problem_type, objective, constraints)
   # return backslash_solve!(p)
   backslash_solve!(p)
-  if p.status == "infeasible"
-    println("Problem was infeasible")
-    return nothing
+  if p.status == "KKT singular"
+    error("KKT system is singular. No unique solution")
   elseif p.status == "solved"
     return p.optval
   else
@@ -19,8 +18,9 @@ end
 
 minimize!(objective::SumSquaresExpr, constraints::Array{EqConstraint}) = solve!(:minimize, objective, constraints)
 minimize!(objective::SumSquaresExpr, constraint::EqConstraint) = minimize!(objective, [constraint])
+minimize!(objective::SumSquaresExpr, constraints::EqConstraint...) = minimize!(objective, [constraints...])
 minimize!(objective::SumSquaresExpr) = minimize!(objective, EqConstraint[])
 
-solve!(constraints::Array{EqConstraint}) = solve!(:satisfy, SumSquaresExpr(:empty, AffineExpr[]), constraints)
-solve!(constraint::EqConstraint) = satisfy!([constraint])
-solve!(constraints::EqConstraint...) = satisfy!([constraints...])
+solve!(constraints::Array{EqConstraint}) = solve!(:solve, SumSquaresExpr(:empty, AffineExpr[], Float64[]), constraints)
+solve!(constraint::EqConstraint) = solve!([constraint])
+solve!(constraints::EqConstraint...) = solve!([constraints...])

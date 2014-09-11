@@ -1,34 +1,39 @@
 using LinearLeastSquares
-import PyPlot.plt
-temps = readdlm("melbourne_temps.txt", ',');
-plt.figure(0)
-plt.plot(temps, color="b")
-plt.title("Melbourne Daily Temperature")
-n = size(temps, 1);
-plt.xlim([0, n])
+using Gadfly
+
+temps = readdlm("melbourne_temps.txt", ',')
+n = size(temps)[1]
+p = plot(
+  x=1:1500, y=temps[1:1500], Geom.line,
+  Theme(panel_fill=color("white"))
+)
+# draw(PNG("melbourne.png", 16cm, 12cm), p)
 
 yearly = Variable(n)
-
 eq_constraints = EqConstraint[]
 for i in 365 + 1 : n
-  eq_constraints += yearly[i] == yearly[i - 365];
+  eq_constraints += yearly[i] == yearly[i - 365]
 end
 
-smoothing = 100;
-smooth_objective = sum_squares(yearly[1 : n - 1] - yearly[2 : n]);
-optval = minimize!(sum_squares(temps - yearly) + smoothing * smooth_objective, eq_constraints);
-residuals = temps - evaluate(yearly);
+smoothing = 100
+smooth_objective = sum_squares(yearly[1 : n - 1] - yearly[2 : n])
+optval = minimize!(sum_squares(temps - yearly) + smoothing * smooth_objective, eq_constraints)
+residuals = temps - evaluate(yearly)
 
 # Plot smooth fit
-plt.figure(1)
-plt.plot(temps)
-plt.plot(evaluate(yearly), color="r")
-plt.title("Smooth Fit of Data")
-plt.xlim([0, n])
+p = plot(
+  layer(x=1:1500, y=evaluate(yearly)[1:1500], Geom.line, Theme(default_color=color("red"), line_width=2px)),
+  layer(x=1:1500, y=temps[1:1500], Geom.line),
+  Theme(panel_fill=color("white"))
+)
+# draw(PNG("yearly_fit.png", 16cm, 12cm), p)
 
 # Plot residuals for a few days
-plt.figure(2)
-plt.plot(residuals[1:100], color="g")
+p = plot(
+  x=1:100, y=residuals[1:100], Geom.line,
+  Theme(default_color=color("green"), panel_fill=color("white"))
+)
+# draw(PNG("residuals.png", 16cm, 12cm), p)
 
 # Generate the residuals matrix
 ar_len = 5
@@ -41,19 +46,25 @@ end
 ar_coef = Variable(ar_len)
 optval2 = minimize!(sum_squares(residuals_mat * ar_coef - residuals[ar_len + 1 : end]))
 
-# plot autoregressive fit of daily fluctuations for first few days
-plt.figure(3)
-plt.plot(residuals[ar_len + 1 : ar_len + 100], color="g")
-plt.plot(residuals_mat[1:100, :] * evaluate(ar_coef), color="r")
-plt.title("Autoregressive Fit of Residuals")
+# plot autoregressive fit of daily fluctuations for a few days
+ar_range = 1:145
+day_range = ar_range + ar_len
+p = plot(
+  layer(x=day_range, y=residuals[day_range], Geom.line, Theme(default_color=color("green"))),
+  layer(x=day_range, y=residuals_mat[ar_range, :] * evaluate(ar_coef), Geom.line, Theme(default_color=color("red"))),
+  Theme(panel_fill=color("white"))
+)
+# draw(PNG("ar_fit.png", 16cm, 12cm), p)
 
-# plot final fit of data
-plt.figure(4)
-plt.plot(temps)
+
 total_estimate = evaluate(yearly)
 total_estimate[ar_len + 1 : end] += residuals_mat * evaluate(ar_coef)
-plt.plot(total_estimate, color="r", alpha=0.5)
-plt.title("Total Fit of Data")
-plt.xlim([0, n])
 
-plt.show()
+# plot final fit of data
+p = plot(
+  layer(x=1:1500, y=total_estimate[1:1500], Geom.line, Theme(default_color=color("red"))),
+  layer(x=1:1500, y=temps[1:1500], Geom.line),
+  Theme(panel_fill=color("white"))
+)
+# draw(PNG("total_fit.png", 16cm, 12cm), p)
+

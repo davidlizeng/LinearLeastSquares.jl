@@ -92,38 +92,40 @@ end
 
 # Only support scalar division
 function /(x::AffineExpr, y::Constant)
-  if y.size == (1, 1)
-    return x ./ y
+  if y.value == 0
+    error("Cannot divide an affine expression by 0")
   else
-    error("Cannot divide by an expression whose size is not 1 by 1")
+    return x ./ y
   end
 end
 
-./(x::AffineExpr, y::Numeric) = ./(x, convert(Constant, y))
-/(x::AffineExpr, y::Numeric) = /(x, convert(Constant, y))
+/(x::AffineExpr, y::Number) = /(x, convert(Constant, y))
 
 
 ## Sum of squares expressions
 
-function *(x::Constant, y::SumSquaresExpr)
-  if x.size != (1, 1) || x.value < 0
+function *(x::Number, y::SumSquaresExpr)
+  try
+    x = convert(Float64, x)
+  catch
+    error("Sum Squares expressions can only be multiplied by real numbers")
+  end
+  if x < 0
     error("Sum Squares expressions can only be multiplied by nonegative scalars")
   end
-  x_sqrt = Constant(sqrt(x.value))
-  affines = [x_sqrt * affine for affine in y.affines]
-  this = SumSquaresExpr(:*, affines)
-  return this
+  return SumSquaresExpr(:*, y.affines, x * y.multipliers)
 end
 
-*(x::SumSquaresExpr, y::Constant) = *(y, x)
-*(x::SumSquaresExpr, y::Numeric) = *(x, convert(Constant, y))
-*(x::Numeric, y::SumSquaresExpr) = *(convert(Constant, x), y)
+*(x::SumSquaresExpr, y::Number) = *(y, x)
 
-function /(x::SumSquaresExpr, y::Constant)
-  if y.size != (1, 1) || all(y.value .<= 0)
+function /(x::SumSquaresExpr, y::Number)
+  try
+    y = convert(Float64, y)
+  catch
+    error("Sum Squares expressions can only be divided by real numbers")
+  end
+  if y <= 0
     error("Sum Squares expressions can only be divided by positive scalars")
   end
-  return Constant(1 ./ y.value) * x
+  return SumSquaresExpr(:/, x.affines, x.multipliers / y)
 end
-
-/(x::SumSquaresExpr, y::Numeric) = /(x, convert(Constant, y))

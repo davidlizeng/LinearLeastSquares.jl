@@ -79,5 +79,11 @@ function hcat(args::AffineExpr...)
 end
 
 function hvcat(rows::(Int64...), args::AffineExpr...)
-  error("hvcat not yet implemented")
+  row_exprs = AffineExpr[]
+  index = 0
+  for row_size in rows
+    push!(row_exprs, hcat(args[index + 1 : index + row_size]...))
+    index += row_size
+  end
+  return vcat(row_exprs...)
 end

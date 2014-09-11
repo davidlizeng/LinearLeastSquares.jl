@@ -14,10 +14,16 @@ function diag(x::AffineExpr, num::Int64)
   end
   len = min(x.size[1] - start_row + 1, x.size[2] - start_col + 1)
   start_ind = (start_col - 1) * x.size[1] + start_row
-  indexer = Constant(spzeros(len, x.size[1] * x.size[2]))
-  for i = 1 : len
-    indexer.value[i, start_ind + (i - 1) * (x.size[1] + 1)] = 1
-  end
+
+  indexer = Constant(
+    sparse(
+      1 : len,
+      start_ind : x.size[1] + 1 : start_ind + (len - 1) * (x.size[1] + 1),
+      1.0,
+      len,
+      x.size[1] * x.size[2]
+    )
+  )
 
   vars_to_coeffs_map = Dict{Uint64, Constant}()
   for (v, c) in x.vars_to_coeffs_map
@@ -35,10 +41,16 @@ function diagm(x::AffineExpr)
   if x.size[2] != 1
     error("Can only call diagm on column vectors")
   end
-  indexer = Constant(spzeros(x.size[1] * x.size[1], x.size[1]))
-  for i = 1 : x.size[1]
-    indexer.value[1 + (i - 1) * (x.size[1] + 1), i] = 1
-  end
+
+  indexer = Constant(
+    sparse(
+      1 : x.size[1] + 1 : 1 + (x.size[1] - 1) * (x.size[1] + 1),
+      1 : x.size[1],
+      1.0,
+      x.size[1] * x.size[1],
+      x.size[1]
+    )
+  )
 
   vars_to_coeffs_map = Dict{Uint64, Constant}()
   for (v, c) in x.vars_to_coeffs_map

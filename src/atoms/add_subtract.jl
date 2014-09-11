@@ -12,7 +12,7 @@ function -(x::AffineExpr)
     vars_to_coeffs_map[v] = -c
   end
   this = AffineExpr(:-, (x,), vars_to_coeffs_map, -x.constant, x.size)
-  this.evaluate = ()-> -this.value;
+  this.evaluate = ()->(-x.evaluate())
   return this
 end
 
@@ -78,8 +78,10 @@ end
 
 function +(x::SumSquaresExpr, y::SumSquaresExpr)
   affines = copy(x.affines)
+  multipliers = copy(x.multipliers)
   append!(affines, y.affines)
-  this = SumSquaresExpr(:+, affines)
+  append!(multipliers, y.multipliers)
+  this = SumSquaresExpr(:+, affines, multipliers)
   return this
 end
 

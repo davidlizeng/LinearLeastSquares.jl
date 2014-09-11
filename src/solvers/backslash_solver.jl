@@ -1,4 +1,4 @@
-export backslash_solve!
+export backslash_solve!, build_kkt_system
 
 function reset_value_and_add_vars!(x::AffineOrConstant, unique_vars_map::Dict{Uint64, AffineExpr})
   if x.head != :constant
@@ -78,11 +78,14 @@ function build_kkt_system(A, b, C, d)
     constant[1 : size(A, 2)] = -2 * A' * b
     if size(C, 1) != 0
       coefficient[1 : size(C, 2), size(A, 2) + 1 : end] = C'
+      coefficient[size(A, 2) + 1 : end, 1 : size(C, 2)] = C
+      constant[size(A, 2) + 1 : end] = -d
     end
-  end
-  if size(C, 1) != 0
-    coefficient[size(A, 2) + 1 : end, 1 : size(C, 2)] = C
-    constant[size(A, 2) + 1 : end] = -d
+  elseif size(C, 1) != 0
+    coefficient[:, 1 : size(C, 2)] = C
+    constant = -d
+  else
+    error("KKT system should not be empty")
   end
 
   return coefficient, constant
@@ -104,19 +107,24 @@ function backslash_solve!(p::Problem)
     push!(canon_forms, constraint.canon_form)
   end
   C, d = coalesce_affine_exprs(vars_to_ranges_map, num_vars, canon_forms)
-  # return A, b, C, d
-  coefficient, constant = build_kkt_system(A, b, C, d)
   solution = nothing
-  try
-    solution = coefficient\full(constant)
-  catch
-    println("KKT system is singular")
+  # return A, b, C, d
+  if size(A, 1) > 0 || size(C, 1) > 0
+    coefficient, constant = build_kkt_system(A, b, C, d)
+    try
+      # sparse solver doesnt error out some 2x2 singular KKT systems
+      solution = coefficient\full(constant)
+    end
   end
   if solution == nothing
-    p.status = "infeasible"
+    p.status = "KKT singular"
   else
     p.status = "solved"
-    p.optval = norm(A*solution[1:num_vars] + b)^2
+    if size(A, 1) > 0
+      p.optval = sum((A*solution[1:num_vars] + b).^2)
+    else
+      p.optval = 0.0
+    end
     populate_vars!(unique_vars_map, vars_to_ranges_map, solution)
   end
   return p.optval
