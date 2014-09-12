@@ -6,53 +6,57 @@
 # In this control problem, the object starts from the origin
 
 using LinearLeastSquares
-import PyPlot.plt
+using Gadfly
 
 # Some constraints on our motion
 # The object should start from the origin, and end at rest
-initial_velocity = [4; 20];
-final_position = [10; 10];
+initial_velocity = [-20; 100]
+final_position = [100; 100]
 
-T = 100; # The number of timesteps
-h = 0.1; # The time between time intervals
-mass = 1; # Mass of object
-drag = 0.01; # Drag on object
-g = [0, -1]; # Gravity on object
+T = 100 # The number of timesteps
+h = 0.1 # The time between time intervals
+mass = 1 # Mass of object
+drag = 0.1 # Drag on object
+g = [0, -9.8] # Gravity on object
 
 # Declare the variables we need
-position = Variable(2, T);
-velocity = Variable(2, T);
-force = Variable(2, T - 1);
+position = Variable(2, T)
+velocity = Variable(2, T)
+force = Variable(2, T - 1)
 
 # Create a problem instance
-mu = 1;
-constraints = EqConstraint[];
+mu = 1
+constraints = EqConstraint[]
 
 # Add constraints on our variables
 for i in 1 : T - 1
-  constraints += position[:, i + 1] == position[:, i] + h * velocity[:, i];
+  constraints += position[:, i + 1] == position[:, i] + h * velocity[:, i]
 end
 
 for i in 1 : T - 1
-  constraints += velocity[:, i + 1] == velocity[:, i] + h / mass * force[:, i] + h * g - drag * velocity[:, i];
+  acceleration = force[:, i]/mass + g - drag * velocity[:, i]
+  constraints += velocity[:, i + 1] == velocity[:, i] + h * acceleration
 end
 
 # Add position constraints
-constraints += position[:, 1] == 0;
-constraints += position[:, T] == final_position;
+constraints += position[:, 1] == 0
+constraints += position[:, T] == final_position
 
 # Add velocity constraints
-constraints += velocity[:, 1] == initial_velocity;
-constraints += velocity[:, T] == 0;
+constraints += velocity[:, 1] == initial_velocity
+constraints += velocity[:, T] == 0
 
 # Solve the problem
-optval = minimize!(mu * sum_squares(velocity) + sum_squares(force), constraints);
+optval = minimize!(sum_squares(force), constraints)
 
+pos = evaluate(position)
+p = plot(
+  layer(x=[pos[1, 1]], y=[pos[2, 1]], Geom.point, Theme(default_color=color("blue"))),
+  layer(x=[pos[1, T]], y=[pos[2, T]], Geom.point, Theme(default_color=color("green"))),
+  layer(x=pos[1, :], y=pos[2, :], Geom.line(preserve_order=true)),
+  Theme(panel_fill=color("white"))
+)
+#draw(PNG("position.png", 16cm, 12cm), p)
 
-plt.plot(evaluate(position)[1, 1:2:T]', evaluate(position)[2, 1:2:T]', "r-", linewidth=1.5)
-plt.quiver(evaluate(position)[1, 1:4:T], evaluate(position)[2, 1:4:T], evaluate(force)[1, 1:4:T-1]/2, evaluate(force)[2, 1:4:T-1]/2, width=0.002)
-plt.plot(0, 0, "bo", markersize=10)
-plt.plot(final_position[1], final_position[2], "go", markersize=10)
-plt.xlim([-5, 15])
-plt.ylim([-20, 20])
-plt.show()
+p = plot(x=1:T, y=sum(evaluate(force).^2, 1), Geom.line, Theme(panel_fill=color("white")))
+#draw(PNG("force.png", 16cm, 12cm), p)

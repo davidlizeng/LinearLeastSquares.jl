@@ -39,6 +39,4 @@ p = plot(
   x=rows, y=cols, color=reshape(evaluate(x), img_size, img_size), Geom.rectbin,
   Scale.ContinuousColorScale(Scale.lab_gradient(color("black"), color("white")))
 )
-draw(PNG("tomography.png", 16cm, 14cm), p)
-
-# plt.imshow(reshape(evaluate(x), img_size, img_size), cmap = get_cmaps()[29])
+#draw(PNG("tomography.png", 16cm, 14cm), p)

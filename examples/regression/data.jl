@@ -19,4 +19,4 @@ p = plot(
   x=x_data, y=y_data, Geom.point,
   Theme(panel_fill=color("white"))
 )
-draw(PNG("data.png", 16cm, 12cm), p)
+# draw(PNG("data.png", 16cm, 12cm), p)
