@@ -14,7 +14,7 @@ To install Gadfly, run the following command in a Julia shell
 
   Pkg.add("Gadfly")
 
-
+Some of the examples will also use data files, which can all be found `here <https://github.com/davidlizeng/LinearLeastSquares.jl/tree/master/examples/>`_.
 
 Regression
 ==========
@@ -315,8 +315,6 @@ Therefore it makes sense to try to minimize
 
 This is simply an unconstrained least squares problem; something we can
 readily solve in LLS!
-
-The data files for this example can be found `here <https://github.com/davidlizeng/LinearLeastSquares.jl/tree/master/examples/tomography>`_.
 
 .. code-block:: none
 

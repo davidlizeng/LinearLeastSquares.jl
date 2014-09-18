@@ -1,10 +1,10 @@
-==============
-Welcome to LLS
-==============
-LLS is a library that makes it easy to formulate and solve least squares
-optimization problems with linear equality constraints. With LLS, these types
-of problems can be created using a natural syntax that mirrors standard
-mathematical notation.
+=============================
+Welcome to LinearLeastSquares
+=============================
+LinearLeastSquares, or LLS for short, is a library that makes it easy to
+formulate and solve least squares optimization problems with linear equality
+constraints. With LLS, these types of problems can be created using a
+natural syntax that mirrors standard mathematical notation.
 
 For example, the classic problem of finding the least norm solution to an
 underdetermined system can be easily setup and solved with the following code:

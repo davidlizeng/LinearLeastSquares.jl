@@ -57,9 +57,9 @@ We&#8217;ll refer to LinearLeastSquares.jl as LLS throughout this tutorial.</p>
 <div class="section" id="installing-lls">
 <h2>Installing LLS<a class="headerlink" href="#installing-lls" title="Permalink to this headline">¶</a></h2>
 <p>LLS requires <a class="reference external" href="http://julialang.org/downloads/">Julia 0.3</a> or higher.
-For those new to Julia, the <a class="reference external" href="http://docs.julialang.org/en/release-0.2/">official Julia docs</a>
+For those new to Julia, the <a class="reference external" href="http://docs.julialang.org/en/release-0.3/">official Julia docs</a>
 are a good way to get acquainted with the language.</p>
-<p>To install LLS, simply open up the Julia shell and run the command:</p>
+<p>To install LLS, simply open up a Julia terminal and run the command:</p>
 <div class="highlight-none"><div class="highlight"><pre>Pkg.add(&quot;LinearLeastSquares&quot;)
 </pre></div>
 </div>
@@ -73,19 +73,18 @@ package.</p>
 <div class="section" id="variables-and-constants">
 <h2>Variables and Constants<a class="headerlink" href="#variables-and-constants" title="Permalink to this headline">¶</a></h2>
 <p>To declare variables in LLS, use the following syntax to specify their size:</p>
-<div class="highlight-none"><div class="highlight"><pre>x = Variable();      # A scalar variable
-y = Variable(3);     # Create a vector variable with 3 rows and 1 columns
-z = Variable(10, 4); # A matrix variable that has 10 rows and 4 columns
+<div class="highlight-none"><div class="highlight"><pre>x = Variable()      # A scalar variable
+y = Variable(3)     # Create a vector variable with 3 rows and 1 columns
+z = Variable(10, 4) # A matrix variable that has 10 rows and 4 columns
 </pre></div>
 </div>
 <p>LLS currently only supports variables up to 2 dimensions in size, i.e.,
 scalars, vector, and matrices. Variables
 have no value upon creation, but after solving a problem, LLS will populate
 all variables in the problem with optimal values. These values can be accessed in the
-following ways:</p>
+following way:</p>
 <div class="highlight-none"><div class="highlight"><pre># x is a variable with value populated
 println(evaluate(x)) # evaluate function
-println(x.value)     # value attribute
 </pre></div>
 </div>
 <p>Constants refer to any numerical scalars, vectors, or matrices of fixed value.
@@ -105,16 +104,16 @@ supported:</p>
 <li>Division of an affine expression by a scalar, nonzero constant.</li>
 </ol>
 <p>Here are some examples of using binary operators to construct affine expressions:</p>
-<div class="highlight-none"><div class="highlight"><pre>w = Variable();     # scalar
-x = Variable(3);    # 3-by-1 vector
-Y = Variable(2, 3); # 2-by-3 matrix
-z = Variable();     # scalar
-b = [1 2 3];        # 1-by-3 vector
-C = randn(3, 4);    # 3-by-4 matrix
+<div class="highlight-none"><div class="highlight"><pre>w = Variable()     # scalar
+x = Variable(3)    # 3-by-1 vector
+Y = Variable(2, 3) # 2-by-3 matrix
+z = Variable()     # scalar
+b = [1 2 3]        # 1-by-3 vector
+C = randn(3, 4)    # 3-by-4 matrix
 
-affine1 = w + b * x / 1.3 - 6.1;   # scalar
-affine2 = (affine1 - Y) * C;       # 2-by-4 matrix
-affine3 = affine2 - affine1;       # 2-by-4 matrix
+affine1 = w + b * x / 1.3 - 6.1   # scalar
+affine2 = (affine1 - Y) * C       # 2-by-4 matrix
+affine3 = affine2 - affine1       # 2-by-4 matrix
 </pre></div>
 </div>
 <p>An affine expression can be evaluated to a numerical value if all variables the affine
@@ -125,53 +124,53 @@ and <tt class="docutils literal"><span class="pre">x</span></tt> have been popul
 </pre></div>
 </div>
 <p>Affine expressions support indexing and slicing using Julia&#8217;s native syntax:</p>
-<div class="highlight-none"><div class="highlight"><pre>x = Variable(4);
-a = x[3];              # third component of x
-y = x[1:2];            # first two components of x
-X = Variable(4, 5);
-Y = X[3:4, 4:5];       # bottom right 2-by-2 submatrix of X
-T = X[1:2, :];         # first two rows of X
-Z = 2 * x[1] + X;
-b = Z[1, 2]            # entry in first row and second column of Z
+<div class="highlight-none"><div class="highlight"><pre>x = Variable(4)
+a = x[3]              # third component of x
+y = x[1:2]            # first two components of x
+X = Variable(4, 5)
+Y = X[3:4, 4:5]       # bottom right 2-by-2 submatrix of X
+T = X[2:end, :]       # all but the first row of X
+Z = 2 * x[1] + X
+b = Z[1, 2]           # entry in first row and second column of Z
 </pre></div>
 </div>
 <p>Affine expressions may also be stacked vertically and horizontally using Julia&#8217;s
 native syntax:</p>
-<div class="highlight-none"><div class="highlight"><pre>x = Variable();
-y = Variable(1, 3);
-z = Variable(3, 1);
-T = Variable(3, 3);
-horizontal_stack = [x y];  # 1-by-4 vector
-vertical_stack = [z; x];   # 4-by-1 vector
-horizontal_and_vertical_stack = [x y; z T];  # 4-by-4 matrix
+<div class="highlight-none"><div class="highlight"><pre>x = Variable()
+y = Variable(1, 3)
+z = Variable(3)
+T = Variable(3, 3)
+horizontal_stack = [x y]  # 1-by-4 vector
+vertical_stack = [z; x]   # 4-by-1 vector
+horizontal_and_vertical_stack = [x y; z T]  # 4-by-4 matrix
 </pre></div>
 </div>
 <p>A few other functions also alter the shapes and sizes of
 affine expressions:</p>
-<div class="highlight-none"><div class="highlight"><pre>x = Variable(3, 1);
-T = Variable(4, 4);
+<div class="highlight-none"><div class="highlight"><pre>x = Variable(3, 1)
+T = Variable(4, 4)
 
-y = x&#39;; # transpose of x
+y = x&#39; # transpose of x
 
-X = diagm(x);     # create a diagonal matrix from a vector x
-t = diag(T);      # extract the main diagonal of T as a column vector
-t1 = diag(T, 1);  # extract the diagonal one right of the main diagonal of T
-t2 = diag(T, -1); # extract the diagonal one left of the main diagonal of T
+X = diagm(x)     # create a diagonal matrix from a vector x
+t = diag(T)      # extract the main diagonal of T as a column vector
+t1 = diag(T, 1)  # extract the diagonal one right of the main diagonal of T
+t2 = diag(T, -1) # extract the diagonal one left of the main diagonal of T
 
-S = reshape(T, 8, 2); # reshape T as an 8-by-2 matrix
-s = vec(S);           # reshape S as a 16-by-1 vector
+S = reshape(T, 8, 2) # reshape T as an 8-by-2 matrix
+s = vec(S)           # reshape S as a 16-by-1 vector
 
-x_rep = repmat(x, 2, 3); # tiles x twice vertically and three times horizontally to form a 6-by-3 matrix
+x_rep = repmat(x, 2, 3) # tiles x twice vertically and three times horizontally to form a 6-by-3 matrix
 </pre></div>
 </div>
 <p>The sum and mean of the entries of an affine expression can be constructed:</p>
-<div class="highlight-none"><div class="highlight"><pre>X = Variable(2, 3);
-sum_of_entries = sum(X);    # sums all entries of X
-sum_of_columns = sum(X, 1); # sums along the first dimension of X, creating a row vector
-sum_of_rows = sum(X, 2);    # sums along the second dimension of X, creating a column vector
-mean_of_entries = mean(X);
-mean_of_columns = mean(X, 1);
-mean_of_rows = mean(X, 2);
+<div class="highlight-none"><div class="highlight"><pre>X = Variable(2, 3)
+sum_of_entries = sum(X)    # sums all entries of X
+sum_of_columns = sum(X, 1) # sums along the first dimension of X, creating a row vector
+sum_of_rows = sum(X, 2)    # sums along the second dimension of X, creating a column vector
+mean_of_entries = mean(X)
+mean_of_columns = mean(X, 1)
+mean_of_rows = mean(X, 2)
 </pre></div>
 </div>
 </div>
@@ -184,45 +183,50 @@ but rather an object representing the linear equality constraint.
 A linear equality constraint is only valid if the left hand side and the right hand side
 of the <tt class="docutils literal"><span class="pre">==</span></tt> have the same size, or if one is scalar. Here are some examples of
 linear equality constraints</p>
-<div class="highlight-none"><div class="highlight"><pre>x = Variable(3);
-A = randn(4, 3);
-constraint1 = A * x == randn(4, 1);
-constraint2 = 3 == x[1:2];
+<div class="highlight-none"><div class="highlight"><pre>x = Variable(3)
+A = randn(4, 3)
+constraint1 = A * x == randn(4, 1)
+constraint2 = 3 == x[1:2]
 </pre></div>
 </div>
 <p>Lists of constraints can also be created. Additional constraints can be appended
 to a list using the <tt class="docutils literal"><span class="pre">+</span></tt> operator.</p>
-<div class="highlight-none"><div class="highlight"><pre>constraint_list = [A * x == randn(4, 1), 3 == x[1:2]];
-constraint_list += x[3] == 1.6;
+<div class="highlight-none"><div class="highlight"><pre>constraint_list = [A * x == randn(4, 1), 3 == x[1:2]]
+constraint_list += x[3] == 1.6
+</pre></div>
+</div>
+<p>An empty list of constraints can be created with</p>
+<div class="highlight-none"><div class="highlight"><pre>empty_list = EqConstraint[]
 </pre></div>
 </div>
 </div>
-<div class="section" id="the-solve-method">
-<h2>The <tt class="docutils literal"><span class="pre">solve!</span></tt> Method<a class="headerlink" href="#the-solve-method" title="Permalink to this headline">¶</a></h2>
-<p>LLS can solve a system of linear equations using the <tt class="docutils literal"><span class="pre">solve!</span></tt> method. The
+<div class="section" id="the-solve-function">
+<h2>The <tt class="docutils literal"><span class="pre">solve!</span></tt> Function<a class="headerlink" href="#the-solve-function" title="Permalink to this headline">¶</a></h2>
+<p>LLS can solve a system of linear equations using the <tt class="docutils literal"><span class="pre">solve!</span></tt> funciton. The
 exclamation point after <tt class="docutils literal"><span class="pre">solve</span></tt> is a Julia convention signifying that this
-method will have side effects; specifically, it will assign values to
+function will have side effects; specifically, it will assign values to
 variables after solving. After that, the values of the variables, and any
 expressions that depend on them, can be accessed.</p>
-<div class="highlight-none"><div class="highlight"><pre>x = Variable();
-y = Variable();
-solve!([x + 3 * y == 2, x - y == 1]);
-println(evaluate(x));
-println(evaluate(y));
+<div class="highlight-none"><div class="highlight"><pre>x = Variable()
+y = Variable()
+solve!(x + 3 * y == 2, x - y == 1)
+println(evaluate(x))
+println(evaluate(y))
 </pre></div>
 </div>
-<p>The arguments to the <tt class="docutils literal"><span class="pre">solve!</span></tt> method are either one linear equality constraint
-or a list of linear equality constraints. Only systems with unique solutions can
+<p>The arguments to the <tt class="docutils literal"><span class="pre">solve!</span></tt> function are either one or more comma separated
+linear equality constraints or a list of linear equality constraints.
+Only systems with unique solutions can
 be solved by LLS; see the <a class="reference internal" href="math.html#solving-lcls"><em>Solving LCLS</em></a> section for detailed conditions.
-The <tt class="docutils literal"><span class="pre">solve!</span></tt> method will issue an error if these conditions are not satisfied.</p>
+The <tt class="docutils literal"><span class="pre">solve!</span></tt> function will issue an error if these conditions are not satisfied.</p>
 </div>
 <div class="section" id="sum-of-squares-expressions">
 <h2>Sum of Squares Expressions<a class="headerlink" href="#sum-of-squares-expressions" title="Permalink to this headline">¶</a></h2>
-<p>In LLS, a sum of sqaures expression is the sum of squares of the entries of a scalar, vector,
+<p>In LLS, a sum of squares expression is the sum of squares of the entries of a scalar, vector,
 or matrix. The most basic way to create such an expression is to call the <tt class="docutils literal"><span class="pre">sum_squares</span></tt> function
 on an affine expression argument.
 For example, <tt class="docutils literal"><span class="pre">sum_squares(A</span> <span class="pre">*</span> <span class="pre">x</span> <span class="pre">-</span> <span class="pre">b)</span></tt> is the LLS representation of <span class="math">\(\|Ax - b\|_2^2\)</span>.
-To create other sum of squares expressions, the <tt class="docutils literal"><span class="pre">+</span></tt> and <tt class="docutils literal"><span class="pre">*</span></tt> operators can be used in
+To create other sum of squares expressions, the <tt class="docutils literal"><span class="pre">+</span></tt>, <tt class="docutils literal"><span class="pre">*</span></tt>, and <tt class="docutils literal"><span class="pre">/</span></tt> operators can be used in
 conjunction with the following rules:</p>
 <ol class="arabic simple">
 <li>Two sum of squares expressions can be added</li>
@@ -232,10 +236,10 @@ conjunction with the following rules:</p>
 or multiplied or divided by a negative number. LLS will issue an error message if
 the user attempts any of these.
 Here are some examples of building sum of squares expressions:</p>
-<div class="highlight-none"><div class="highlight"><pre>A = randn(4, 3);
-b = randn(4, 1);
-x = Variable(3);
-c = 0.1;
+<div class="highlight-none"><div class="highlight"><pre>A = randn(4, 3)
+b = randn(4, 1)
+x = Variable(3)
+c = 0.1
 reg_least_squares = sum_squares(A * x - b) + c * sum_squares(x)
 </pre></div>
 </div>
@@ -251,51 +255,51 @@ assuming <tt class="docutils literal"><span class="pre">x</span></tt> has been p
 <tt class="docutils literal"><span class="pre">sum_squares(mean(X)</span> <span class="pre">-</span> <span class="pre">X)</span> <span class="pre">/</span> <span class="pre">(m</span> <span class="pre">*</span> <span class="pre">n)</span></tt>, where <tt class="docutils literal"><span class="pre">m</span></tt> and <tt class="docutils literal"><span class="pre">n</span></tt> are the number of rows
 and number of columns of <tt class="docutils literal"><span class="pre">X</span></tt>, respectively. For convenience, the function <tt class="docutils literal"><span class="pre">var</span></tt>
 can be used to directly create this sum of squares expression for variance.</p>
-<div class="highlight-none"><div class="highlight"><pre>X = Variable(3, 4);
-variance = var(X);
+<div class="highlight-none"><div class="highlight"><pre>X = Variable(3, 4)
+variance = var(X)
 </pre></div>
 </div>
 </div>
-<div class="section" id="the-minimize-method">
-<h2>The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Method<a class="headerlink" href="#the-minimize-method" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="the-minimize-function">
+<h2>The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Function<a class="headerlink" href="#the-minimize-function" title="Permalink to this headline">¶</a></h2>
 <p>LLS can also solve a linearly constrained least squares problem using the
-<tt class="docutils literal"><span class="pre">minimize!</span></tt> method:</p>
-<div class="highlight-none"><div class="highlight"><pre>A = randn(3, 2);
-b = randn(2, 1);
-x = Variable(3);
-objective = sum_squares(x);
-constraint = A * x == b;
-optimal_value = minimize!(objective, constraint);
-println(evaluate(x));
+<tt class="docutils literal"><span class="pre">minimize!</span></tt> function:</p>
+<div class="highlight-none"><div class="highlight"><pre>A = randn(3, 2)
+b = randn(2, 1)
+x = Variable(3)
+objective = sum_squares(x)
+constraint = A * x == b
+optimal_value = minimize!(objective, constraint)
+println(evaluate(x))
 </pre></div>
 </div>
 <p>The first argument, or objective, of <tt class="docutils literal"><span class="pre">minimize!</span></tt> must be a sum of squares expression.
-The second argument is for constraints, and can be empty, a single linear equality
-constraint, or a list of linear equality constraints.
+The remaining arguments are for constraints, and can be zero or more comma separated
+linear equality constraints, or a list of linear equality constraints.
 The <tt class="docutils literal"><span class="pre">minimize!</span></tt> function
 will return the optimal value of the sum of squares expression, while
 populating all variables with optimal values.
 Here are some usage examples:</p>
-<div class="highlight-none"><div class="highlight"><pre>x = Variable(3);
-C = randn(2, 3);
-d = randn(2, 1);
-A = randn(4, 3);
-b = randn(4, 1);
+<div class="highlight-none"><div class="highlight"><pre>x = Variable(3)
+C = randn(2, 3)
+d = randn(2)
+A = randn(4, 3)
+b = randn(4)
 
 # list of constraints
-objective1 = sum_squares(x);
-constraints = [C * x == d, x[1] == 0];
-optimum_value_1 = minimize!(objective1, constraints);
-println(evaluate(x));
+objective1 = sum_squares(x)
+constraints = [C * x == d, x[1] == 0]
+optimum_value_1 = minimize!(objective1, constraints)
+println(evaluate(x))
 
 # no constraints
 objective2 = sum_squares(A * x - b)
-optimum_value_2 = minimize!(objective2);
-println(evaluate(x));
+optimum_value_2 = minimize!(objective2)
+println(evaluate(x))
 </pre></div>
 </div>
 <p>A linearly constrained least squares can only be solved if it satisfies the
-conditions in the <a class="reference internal" href="math.html#solving-lcls"><em>Solving LCLS</em></a> section. The <tt class="docutils literal"><span class="pre">minimize!</span></tt> method will issue
+conditions in the <a class="reference internal" href="math.html#solving-lcls"><em>Solving LCLS</em></a> section. The <tt class="docutils literal"><span class="pre">minimize!</span></tt> function will issue
 an error these conditions are not satisfied.</p>
 </div>
 </div>
@@ -313,9 +317,9 @@ an error these conditions are not satisfied.</p>
 <li><a class="reference internal" href="#variables-and-constants">Variables and Constants</a></li>
 <li><a class="reference internal" href="#affine-expressions">Affine Expressions</a></li>
 <li><a class="reference internal" href="#linear-equality-constraints">Linear Equality Constraints</a></li>
-<li><a class="reference internal" href="#the-solve-method">The <tt class="docutils literal"><span class="pre">solve!</span></tt> Method</a></li>
+<li><a class="reference internal" href="#the-solve-function">The <tt class="docutils literal"><span class="pre">solve!</span></tt> Function</a></li>
 <li><a class="reference internal" href="#sum-of-squares-expressions">Sum of Squares Expressions</a></li>
-<li><a class="reference internal" href="#the-minimize-method">The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Method</a></li>
+<li><a class="reference internal" href="#the-minimize-function">The <tt class="docutils literal"><span class="pre">minimize!</span></tt> Function</a></li>
 </ul>
 </li>
 </ul>

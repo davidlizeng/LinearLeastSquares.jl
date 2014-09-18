@@ -44,6 +44,10 @@ function convert(::Type{Constant}, value::Number)
 end
 
 function convert(::Type{Constant}, value::AbstractArray)
+  sparse_value = sparse(value)
+  if size(sparse_value) == (1, 1)
+    return Constant(convert(Float64, value[1]))
+  end
   return Constant(convert(SparseMatrixCSC{Float64, Int64}, sparse(value)))
 end
 
