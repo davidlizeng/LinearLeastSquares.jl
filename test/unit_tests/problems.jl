@@ -1,30 +1,32 @@
 TOLERANCE = 0.0001
 
 x = Variable()
+y = Variable()
 solve!(x == 3)
-@assert evaluate(x) == 3
+@test evaluate(x) == 3
+@test_throws ErrorException solve!(x + 3 * y == 2)
 
 y = Variable(3, 1)
 A = rand(3, 3)
 solve!(x == 3, A*y == 4)
-@assert evaluate(x) == 3
-@assert all(abs(A*evaluate(y) - 4) .<= TOLERANCE)
+@test evaluate(x) == 3
+@test all(abs(A*evaluate(y) - 4) .<= TOLERANCE)
 
 solve!([x == 5, y == 7])
-@assert evaluate(x) == 5
-@assert all(evaluate(y) .== 7)
+@test evaluate(x) == 5
+@test all(evaluate(y) .== 7)
 
 x = Variable(3)
 y = sum_squares(x)
 optval = minimize!(y)
-@assert abs(optval - 0) < TOLERANCE
-@assert all(abs(evaluate(x)) .<= TOLERANCE)
+@test abs(optval - 0) < TOLERANCE
+@test all(abs(evaluate(x)) .<= TOLERANCE)
 
 x = Variable(3)
 y = sum_squares(x)
 optval = minimize!(y, x == 3)
-@assert abs(optval - 27) < TOLERANCE
-@assert all(abs(evaluate(x) .- 3) .<= TOLERANCE)
+@test abs(optval - 27) < TOLERANCE
+@test all(abs(evaluate(x) .- 3) .<= TOLERANCE)
 
 x = Variable(2)
 A = [1 0; 1 0]
@@ -41,7 +43,7 @@ for i = 1:5
   constraints += y[:, i] == b[:, i]
 end
 optval = minimize!(sum_squares(x), constraints)
-@assert abs(sum(x_real.^2) - optval) <= TOLERANCE
-@assert all(abs(evaluate(x) .- x_real) .<= TOLERANCE)
+@test abs(sum(x_real.^2) - optval) <= TOLERANCE
+@test all(abs(evaluate(x) .- x_real) .<= TOLERANCE)
 
 info("All solve/minimize tests passed")

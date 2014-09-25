@@ -65,13 +65,14 @@ end
 
 function build_kkt_system(A, b, C, d)
   if size(A, 1) == 0
-    sz = size(C, 1)
+    num_rows = size(C, 1)
+    num_cols = size(C, 2)
   else
-    sz = size(A, 2) + size(C, 1)
+    num_rows = num_cols = size(A, 2) + size(C, 1)
   end
 
-  coefficient = spzeros(sz, sz)
-  constant = spzeros(sz, 1)
+  coefficient = spzeros(num_rows, num_cols)
+  constant = spzeros(num_rows, 1)
 
   if size(A, 1) != 0
     coefficient[1 : size(A, 2), 1 : size(A, 2)] = 2 * A' * A

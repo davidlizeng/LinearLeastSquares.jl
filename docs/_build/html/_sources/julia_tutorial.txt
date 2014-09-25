@@ -11,10 +11,11 @@ LLS requires `Julia 0.3 <http://julialang.org/downloads/>`_ or higher.
 For those new to Julia, the `official Julia docs <http://docs.julialang.org/en/release-0.3/>`_
 are a good way to get acquainted with the language.
 
-To install LLS, simply open up a Julia terminal and run the command:
+To install LLS, simply open up a Julia terminal and run the commands:
 
 .. code-block:: none
 
+  Pkg.update()
   Pkg.add("LinearLeastSquares")
 
 To use LLS in Julia, run the following command to import the library:
