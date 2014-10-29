@@ -28,7 +28,7 @@ underdetermined system can be easily setup and solved with the following code:
   optimal_value = minimize!(objective, constraint)
 
 This example showcases the Julia implementation of LLS; other
-implementations include Python and Matlab.
+implementations include Python.
 
 
 In Depth Docs

@@ -192,7 +192,7 @@ are known as waypoint constraints. Often, the input and state of the system will
 have physical meaning, so we often want to find a sequence inputs that also
 minimizes a least squares objective like the following:</p>
 <div class="math">
-\[\sum_{t = 1}^T \|Fx(t)\|^2_2 + \|Gu(t)\|^2_2,\]</div>
+\[\sum_{t = 0}^T \|Fx(t)\|^2_2 + \sum_{t = 1}^T\|Gu(t)\|^2_2,\]</div>
 <p>where <span class="math">\(F\)</span> and <span class="math">\(G\)</span> are numerical matrices.</p>
 <p>We&#8217;ll now apply the basic format of the control problem to an example of controlling
 the motion of an object in a fluid over <span class="math">\(T\)</span> intervals, each of <span class="math">\(h\)</span> seconds.

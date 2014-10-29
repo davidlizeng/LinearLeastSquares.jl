@@ -172,7 +172,7 @@ have physical meaning, so we often want to find a sequence inputs that also
 minimizes a least squares objective like the following:
 
 .. math::
-  \sum_{t = 1}^T \|Fx(t)\|^2_2 + \|Gu(t)\|^2_2,
+  \sum_{t = 0}^T \|Fx(t)\|^2_2 + \sum_{t = 1}^T\|Gu(t)\|^2_2,
 
 where :math:`F` and :math:`G` are numerical matrices.
 
