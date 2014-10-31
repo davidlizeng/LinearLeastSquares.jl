@@ -36,19 +36,19 @@ To declare variables in LLS, use the following syntax to specify their size:
 .. code-block:: none
 
   x = Variable()      # A scalar variable
-  y = Variable(3)     # Create a vector variable with 3 rows and 1 columns
+  y = Variable(3)     # A vector variable with 3 rows and 1 column
   z = Variable(10, 4) # A matrix variable that has 10 rows and 4 columns
 
 LLS currently only supports variables up to 2 dimensions in size, i.e.,
-scalars, vector, and matrices. Variables
+scalars, vectors, and matrices. Variables
 have no value upon creation, but after solving a problem, LLS will populate
-all variables in the problem with optimal values. These values can be accessed in the
-following way:
+all variables in the problem with optimal values.
+These values can be accessed using the evaluate function:
 
 .. code-block:: none
 
   # x is a variable with value populated
-  println(evaluate(x)) # evaluate function
+  x_value = evaluate(x)
 
 Constants refer to any numerical scalars, vectors, or matrices of fixed value.
 Together with variables, they serve as the building blocks for more complex expressions.
@@ -75,7 +75,7 @@ Here are some examples of using binary operators to construct affine expressions
   x = Variable(3)    # 3-by-1 vector
   Y = Variable(2, 3) # 2-by-3 matrix
   z = Variable()     # scalar
-  b = [1 2 3]        # 1-by-3 vector
+  b = [1 2 3]        # 1-by-3 matrix
   C = randn(3, 4)    # 3-by-4 matrix
 
   affine1 = w + b * x / 1.3 - 6.1   # scalar
@@ -113,7 +113,7 @@ native syntax:
   y = Variable(1, 3)
   z = Variable(3)
   T = Variable(3, 3)
-  horizontal_stack = [x y]  # 1-by-4 vector
+  horizontal_stack = [x y]  # 1-by-4 matrix
   vertical_stack = [z; x]   # 4-by-1 vector
   horizontal_and_vertical_stack = [x y; z T]  # 4-by-4 matrix
 
@@ -158,7 +158,7 @@ Note that the ``==`` operator has been overloaded to no longer return a boolean,
 but rather an object representing the linear equality constraint.
 A linear equality constraint is only valid if the left hand side and the right hand side
 of the ``==`` have the same size, or if one is scalar. Here are some examples of
-linear equality constraints
+linear equality constraints:
 
 .. code-block:: none
 
@@ -282,16 +282,17 @@ Here are some usage examples:
   A = randn(4, 3)
   b = randn(4)
 
+  # no constraints
+  objective2 = sum_squares(A * x - b)
+  optimum_value_2 = minimize!(objective2)
+  println(evaluate(x))
+
   # list of constraints
   objective1 = sum_squares(x)
   constraints = [C * x == d, x[1] == 0]
   optimum_value_1 = minimize!(objective1, constraints)
   println(evaluate(x))
 
-  # no constraints
-  objective2 = sum_squares(A * x - b)
-  optimum_value_2 = minimize!(objective2)
-  println(evaluate(x))
 
 A linearly constrained least squares can only be solved if it satisfies the
 conditions in the :ref:`solving-lcls` section. The ``minimize!`` function will issue
