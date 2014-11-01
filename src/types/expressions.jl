@@ -51,6 +51,8 @@ function convert(::Type{Constant}, value::AbstractArray)
   return Constant(convert(SparseMatrixCSC{Float64, Int64}, sparse(value)))
 end
 
+Constant(value) = convert(Constant, value)
+
 type AffineExpr <: AffineOrConstant
   head::Symbol
   value::ValueOrNothing

@@ -24,7 +24,12 @@ function .*(x::Constant, y::AffineExpr)
   vec_x = vec(x)
   vars_to_coeffs_map = Dict{Uint64, Constant}()
   for (v, c) in y.vars_to_coeffs_map
-    vars_to_coeffs_map[v] = vec_x .* c
+    if vec_x.size != (1, 1) && c.size[2] > 1
+      rep_x = repmat(vec_x, 1, c.size[2])
+      vars_to_coeffs_map[v] = rep_x .* c
+    else
+      vars_to_coeffs_map[v] = vec_x .* c
+    end
   end
   constant = vec_x .* y.constant
 
