@@ -102,7 +102,12 @@ end
 function backslash_solve!(p::Problem)
   unique_vars_map = reset_values_and_get_vars!(p)
   vars_to_ranges_map, num_vars = get_var_ranges_and_num_vars(unique_vars_map)
-  A, b = coalesce_affine_exprs(vars_to_ranges_map, num_vars, p.objective.affines)
+  num_objectives = length(p.objective.affines)
+  scaled_obj_affines = Array(AffineExpr, num_objectives)
+  for i in 1:num_objectives
+    scaled_obj_affines[i] = sqrt(p.objective.multipliers[i]) * p.objective.affines[i]
+  end
+  A, b = coalesce_affine_exprs(vars_to_ranges_map, num_vars, scaled_obj_affines)
   canon_forms = AffineExpr[]
   for constraint in p.constraints
     push!(canon_forms, constraint.canon_form)
