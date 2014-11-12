@@ -118,7 +118,7 @@ function *(x::Number, y::SumSquaresExpr)
   if x < 0
     error("Sum Squares expressions can only be multiplied by nonegative scalars")
   end
-  return SumSquaresExpr(:*, y.affines, x * y.multipliers)
+  return SumSquaresExpr(:*, y.affines, x * y.multipliers, x * y.scalar)
 end
 
 *(x::SumSquaresExpr, y::Number) = *(y, x)
@@ -132,5 +132,5 @@ function /(x::SumSquaresExpr, y::Number)
   if y <= 0
     error("Sum Squares expressions can only be divided by positive scalars")
   end
-  return SumSquaresExpr(:/, x.affines, x.multipliers / y)
+  return SumSquaresExpr(:/, x.affines, x.multipliers / y, x.scalar / y)
 end

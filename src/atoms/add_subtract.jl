@@ -81,9 +81,24 @@ function +(x::SumSquaresExpr, y::SumSquaresExpr)
   multipliers = copy(x.multipliers)
   append!(affines, y.affines)
   append!(multipliers, y.multipliers)
-  this = SumSquaresExpr(:+, affines, multipliers)
+  this = SumSquaresExpr(:+, affines, multipliers, x.scalar + y.scalar)
   return this
 end
+
+function +(x::Number, y::SumSquaresExpr)
+  try
+    x = convert(Float64, x)
+  catch
+    error("Only real scalars can be added to Sum Squares expressions")
+  end
+  if x < 0
+    error("Only nonnegative scalars can be added to Sum Squares expressions")
+  end
+  this = SumSquaresExpr(:+, y.affines, y.multipliers, y.scalar + x)
+  return this
+end
+
++(x::SumSquaresExpr, y::Number) = +(y, x)
 
 
 # Binary Subtraction

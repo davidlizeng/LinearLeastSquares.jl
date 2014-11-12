@@ -26,7 +26,7 @@ force = Variable(2, T - 1)
 
 # Create a problem instance
 mu = 1
-constraints = EqConstraint[]
+constraints = []
 
 # Add constraints on our variables
 for i in 1 : T - 1

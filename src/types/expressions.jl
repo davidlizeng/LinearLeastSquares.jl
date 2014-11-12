@@ -106,34 +106,51 @@ type SumSquaresExpr <: AbstractExpr
   value::ValueOrNothing
   affines::Array{AffineExpr}
   multipliers::Array{Float64}
+  scalar::Float64
   uid::Uint64
   evaluate::Function
 
-  function SumSquaresExpr(head::Symbol, affines::Array{AffineExpr}, multipliers::Array{Float64})
-    this = new(head, nothing, affines, multipliers)
+  function SumSquaresExpr(head::Symbol, affines::Array{AffineExpr}, multipliers::Array{Float64}, scalar::Float64)
+    this = new(head, nothing, affines, multipliers, scalar)
     this.uid = object_id(this)
     this.evaluate = ()->begin
       value = 0
       for i in 1:length(this.affines)
         value += multipliers[i] * sum((this.affines[i].evaluate()).^2)
       end
-      return value
+      return value + this.scalar
     end
     return this
   end
 end
 
+function sum_squares()
+  this = SumSquaresExpr(:sum_squares, AffineExpr[], Float64[], 0.0)
+end
+
+function sum_squares(num::Number)
+  try
+    num = convert(Float64, num)
+  catch
+    error("Sum Squares expressions can only be constructed from real numbers")
+  end
+  if num < 0
+    error("Sum Squares expressions can only be constructed from nonnegative scalars")
+  end
+  this = SumSquaresExpr(:sum_squares, AffineExpr[], Float64[], num^2)
+end
+
 function sum_squares(affine::AffineExpr)
   affines = AffineExpr[]
   push!(affines, affine)
-  this = SumSquaresExpr(:sum_squares, affines, ones(length(affines)))
+  this = SumSquaresExpr(:sum_squares, affines, ones(length(affines)), 0.0)
 end
 
 function evaluate(x::SumSquaresExpr)
   return (x.evaluate())[1]
 end
 
-endof(x::AffineOrConstant) = x.size[1]*x.size[2]
+endof(x::AffineOrConstant) = x.size[1] * x.size[2]
 function size(x::AffineOrConstant, dim::Integer)
   if dim < 1
     error("dimension out of range")

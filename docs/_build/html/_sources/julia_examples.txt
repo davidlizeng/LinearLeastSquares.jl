@@ -238,7 +238,7 @@ The following code builds and solves our control example:
 
   # Create a problem instance
   mu = 1
-  constraints = EqConstraint[]
+  constraints = []
 
   # Add constraints on our variables
   for i in 1 : T - 1
@@ -462,8 +462,8 @@ indicative of sports articles and which were most indicative of nonsports.
     print(words[indices[length(words) - i]])
   end
 
-The 5 strings with largest positive weights were "play", "peopl", "olymp", "nativ", and "fan".
-The 5 strings with largest negative weights were "get", "ml", "issu", "professor", and "student".
+Each run will yield different words, but it'll be clear which words
+come from sports articles.
 
 
 Time Series Analysis
@@ -518,7 +518,7 @@ The following code uses LLS to find and plot the model:
   # draw(PNG("melbourne.png", 16cm, 12cm), p)
 
   yearly = Variable(n)
-  eq_constraints = EqConstraint[]
+  eq_constraints = []
   for i in 365 + 1 : n
     eq_constraints += yearly[i] == yearly[i - 365]
   end

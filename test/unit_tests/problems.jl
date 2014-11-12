@@ -38,7 +38,7 @@ x_real = randn(5, 5)
 x = Variable(5, 5)
 y = A * x
 b = A * x_real
-constraints = EqConstraint[]
+constraints = []
 for i = 1:5
   constraints += y[:, i] == b[:, i]
 end

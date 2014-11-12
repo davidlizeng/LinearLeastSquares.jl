@@ -126,10 +126,9 @@ function backslash_solve!(p::Problem)
     p.status = "KKT singular"
   else
     p.status = "solved"
+    p.optval = p.objective.scalar
     if size(A, 1) > 0
-      p.optval = sum((A*solution[1:num_vars] + b).^2)
-    else
-      p.optval = 0.0
+      p.optval += sum((A*solution[1:num_vars] + b).^2)
     end
     populate_vars!(unique_vars_map, vars_to_ranges_map, solution)
   end

@@ -10,7 +10,7 @@ p = plot(
 # draw(PNG("melbourne.png", 16cm, 12cm), p)
 
 yearly = Variable(n)
-eq_constraints = EqConstraint[]
+eq_constraints = []
 for i in 365 + 1 : n
   eq_constraints += yearly[i] == yearly[i - 365]
 end

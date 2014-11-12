@@ -175,11 +175,13 @@ to a list using the ``+`` operator.
   constraint_list = [A * x == randn(4, 1), 3 == x[1:2]]
   constraint_list += x[3] == 1.6
 
-An empty list of constraints can be created with
+An empty list of constraints can be created with ``[]``. You can add to an empty
+list with the same syntax.
 
 .. code-block:: none
 
-  empty_list = EqConstraint[]
+  new_list = []
+  new_list += x[2] == 1.2
 
 
 The ``solve!`` Function
@@ -216,6 +218,7 @@ conjunction with the following rules:
 
 #. Two sum of squares expressions can be added
 #. A sum of squares expression can be multiplied or divided by a postive, scalar constant.
+#. A nonnegative scalar constant may be added to a sum of squares expression.
 
 Note that sum of squares expression cannot be subtracted from each other,
 or multiplied or divided by a negative number. LLS will issue an error message if
@@ -239,6 +242,16 @@ assuming ``x`` has been populated with a value:
 .. code-block:: none
 
   println(evaluate(reg_least_squares))
+
+Often you'll find it useful to first initialize a sum of squares expression
+to ``0`` and then add on more sum of squares expressions in a for loop.
+
+.. code-block::none
+
+  error_term = 0
+  for i in 1:3
+    error_term += rand() * sum_squares(A[i, :] * x + b[i])
+  end
 
 The variance of the entries of an affine expression ``X`` can be expressed as
 ``sum_squares(mean(X) - X) / (m * n)``, where ``m`` and ``n`` are the number of rows

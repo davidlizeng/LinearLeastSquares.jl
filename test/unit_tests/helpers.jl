@@ -16,6 +16,7 @@ function eval_internals(x::SumSquaresExpr)
   for i in 1:length(x.affines)
     value += x.multipliers[i]*vecnorm(evaluate(x.affines[i]))^2
   end
+  value += x.scalar
   return value
 end
 

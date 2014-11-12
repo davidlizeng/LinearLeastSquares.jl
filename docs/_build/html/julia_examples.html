@@ -244,7 +244,7 @@ force = Variable(2, T - 1)
 
 # Create a problem instance
 mu = 1
-constraints = EqConstraint[]
+constraints = []
 
 # Add constraints on our variables
 for i in 1 : T - 1
@@ -439,8 +439,8 @@ for i = 0:4
 end
 </pre></div>
 </div>
-<p>The 5 strings with largest positive weights were &#8220;play&#8221;, &#8220;peopl&#8221;, &#8220;olymp&#8221;, &#8220;nativ&#8221;, and &#8220;fan&#8221;.
-The 5 strings with largest negative weights were &#8220;get&#8221;, &#8220;ml&#8221;, &#8220;issu&#8221;, &#8220;professor&#8221;, and &#8220;student&#8221;.</p>
+<p>Each run will yield different words, but it&#8217;ll be clear which words
+come from sports articles.</p>
 </div>
 </div>
 <div class="section" id="time-series-analysis">
@@ -483,7 +483,7 @@ p = plot(
 # draw(PNG(&quot;melbourne.png&quot;, 16cm, 12cm), p)
 
 yearly = Variable(n)
-eq_constraints = EqConstraint[]
+eq_constraints = []
 for i in 365 + 1 : n
   eq_constraints += yearly[i] == yearly[i - 365]
 end
