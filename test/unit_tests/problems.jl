@@ -26,7 +26,12 @@ x = Variable(3)
 y = sum_squares(x)
 optval = minimize!(y, x == 3)
 @test abs(optval - 27) < TOLERANCE
-@test all(abs(evaluate(x) .- 3) .<= TOLERANCE)
+@test all(abs(evaluate(x) - 3) .<= TOLERANCE)
+
+x = Variable(3)
+optval = minimize!(sum_squares(3), x == 3)
+@test abs(optval - 9) < TOLERANCE
+@test all(abs(evaluate(x) - 3) .<= TOLERANCE)
 
 x = Variable(2)
 A = [1 0; 1 0]
