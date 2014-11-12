@@ -22,8 +22,8 @@ slope = Variable()
 offset = Variable()
 line = offset + x_data * slope
 residuals = line - y_data
-error = sum_squares(residuals)
-optval = minimize!(error)
+fit_error = sum_squares(residuals)
+optval = minimize!(fit_error)
 
 # plot the data and the line
 t = [0; 5; 0.1]

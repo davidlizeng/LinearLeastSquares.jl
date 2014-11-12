@@ -23,8 +23,8 @@ slope = Variable()
 offset = Variable()
 quadratic = offset + x_data * slope + quadratic_coeff * x_data .^ 2
 residuals = quadratic - y_data
-error = sum_squares(residuals)
-optval = minimize!(error)
+fit_error = sum_squares(residuals)
+optval = minimize!(fit_error)
 
 # Create some evenly spaced points for plotting, again replicate powers
 t = reshape([0 : 0.1 : 5], length([0 : 0.1 : 5]), 1)

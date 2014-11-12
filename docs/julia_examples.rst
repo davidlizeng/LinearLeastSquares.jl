@@ -82,8 +82,8 @@ We can now frame this problem in Julia code and solve our problem using LLS:
   offset = Variable()
   line = offset + x_data * slope
   residuals = line - y_data
-  error = sum_squares(residuals)
-  optval = minimize!(error)
+  fit_error = sum_squares(residuals)
+  optval = minimize!(fit_error)
 
   # plot the data and the line
   t = [0; 5; 0.1]
@@ -124,8 +124,8 @@ Here is the Julia code to solve this problem using LLS and plot the quadratic:
   offset = Variable()
   quadratic = offset + x_data * slope + quadratic_coeff * x_data .^ 2
   residuals = quadratic - y_data
-  error = sum_squares(residuals)
-  optval = minimize!(error)
+  fit_error = sum_squares(residuals)
+  optval = minimize!(fit_error)
 
   # Create some evenly spaced points for plotting, again replicate powers
   t = reshape([0 : 0.1 : 5], length([0 : 0.1 : 5]), 1)
