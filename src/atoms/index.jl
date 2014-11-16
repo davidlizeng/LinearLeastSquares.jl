@@ -21,7 +21,22 @@ function getindex{T <: Real}(x::AffineExpr, inds::AbstractArray{T, 1})
   return this
 end
 
+function getindex{T <: Real}(x::AffineExpr, row::T, col::T)
+  position = x.size[1] * (convert(Int64, col) - 1) + convert(Int64, row)
+  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  for (v, c) in x.vars_to_coeffs_map
+    vars_to_coeffs_map[v] = c[position, :]
+  end
+  constant = x.constant[position, :]
+  this = AffineExpr(:index, (x,), vars_to_coeffs_map, constant, (1, 1))
+  this.evaluate = ()->x.evaluate()[row, col]
+  return this
+end
+
 function getindex{T <: Real}(x::AffineExpr, rows::AbstractArray{T, 1}, cols::AbstractArray{T, 1})
+  if length(rows) == 1 && length(cols) == 1
+    return getindex(x, rows[1], cols[1])
+  end
   # number of rows/cols in the coefficient for x in our canonical form
   num_rows_coeff = length(rows) * length(cols)
   num_cols_coeff = x.size[1] * x.size[2]
