@@ -257,6 +257,12 @@ assuming <tt class="docutils literal"><span class="pre">x</span></tt> has been p
 </div>
 <p>Often you&#8217;ll find it useful to first initialize a sum of squares expression
 to <tt class="docutils literal"><span class="pre">0</span></tt> and then add on more sum of squares expressions in a for loop.</p>
+<div class="highlight-none"><div class="highlight"><pre>error_term = 0
+for i in 1:3
+  error_term += rand() * sum_squares(A[i, :] * x + b[i])
+end
+</pre></div>
+</div>
 <p>The variance of the entries of an affine expression <tt class="docutils literal"><span class="pre">X</span></tt> can be expressed as
 <tt class="docutils literal"><span class="pre">sum_squares(mean(X)</span> <span class="pre">-</span> <span class="pre">X)</span> <span class="pre">/</span> <span class="pre">(m</span> <span class="pre">*</span> <span class="pre">n)</span></tt>, where <tt class="docutils literal"><span class="pre">m</span></tt> and <tt class="docutils literal"><span class="pre">n</span></tt> are the number of rows
 and number of columns of <tt class="docutils literal"><span class="pre">X</span></tt>, respectively. For convenience, the function <tt class="docutils literal"><span class="pre">var</span></tt>

@@ -246,7 +246,7 @@ assuming ``x`` has been populated with a value:
 Often you'll find it useful to first initialize a sum of squares expression
 to ``0`` and then add on more sum of squares expressions in a for loop.
 
-.. code-block::none
+.. code-block:: none
 
   error_term = 0
   for i in 1:3
