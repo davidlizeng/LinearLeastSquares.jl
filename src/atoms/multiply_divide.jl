@@ -1,3 +1,5 @@
+import Base.*, Base.(.*), Base./, Base.(./)
+
 export *, /
 
 ## Constants

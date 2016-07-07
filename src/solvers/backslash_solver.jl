@@ -1,6 +1,6 @@
 export backslash_solve!, build_kkt_system
 
-function reset_value_and_add_vars!(x::AffineOrConstant, unique_vars_map::Dict{Uint64, AffineExpr})
+function reset_value_and_add_vars!(x::AffineOrConstant, unique_vars_map::Dict{UInt64, AffineExpr})
   if x.head != :constant
     x.value = nothing
     if x.head == :variable
@@ -27,8 +27,8 @@ function reset_values_and_get_vars!(p::Problem)
   return unique_vars_map
 end
 
-function get_var_ranges_and_num_vars(unique_vars_map::Dict{Uint64, AffineExpr})
-  vars_to_ranges_map = Dict{Uint64, (Int64, Int64)}()
+function get_var_ranges_and_num_vars(unique_vars_map::Dict{UInt64, AffineExpr})
+  vars_to_ranges_map = Dict{UInt64, (Int64, Int64)}()
   num_vars = 0
   for (id, var) in unique_vars_map
     sz = var.size[1] * var.size[2]
@@ -46,7 +46,7 @@ function get_num_rows(affines::Array{AffineExpr})
   return num_rows
 end
 
-function coalesce_affine_exprs(vars_to_ranges_map::Dict{Uint64, (Int64, Int64)}, num_vars::Int64, affines::Array{AffineExpr})
+function coalesce_affine_exprs(vars_to_ranges_map::Dict{UInt64, Tuple{Int64, Int64}}, num_vars::Int64, affines::Array{AffineExpr})
   num_rows = get_num_rows(affines)
   coefficient = spzeros(num_rows, num_vars)
   constant = spzeros(num_rows, 1)
@@ -92,7 +92,7 @@ function build_kkt_system(A, b, C, d)
   return coefficient, constant
 end
 
-function populate_vars!(unique_vars_map::Dict{Uint64, AffineExpr}, vars_to_ranges_map::Dict{Uint64, (Int64, Int64)}, solution)
+function populate_vars!(unique_vars_map::Dict{UInt64, AffineExpr}, vars_to_ranges_map::Dict{UInt64, Tuple{Int64, Int64}}, solution)
   for (id, var) in unique_vars_map
     var.value = spzeros(var.size...)
     var.value[:] = solution[vars_to_ranges_map[id][1] : vars_to_ranges_map[id][2]]

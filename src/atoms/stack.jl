@@ -1,4 +1,4 @@
-import Base.vcat, Base.hcat, Base.hvcat
+import Base.vcat, Base.hcat, Base.hvcat, Base.start
 export vcat, hcat, hvcat
 
 function vcat(args::AffineExpr...)
@@ -78,7 +78,7 @@ function hcat(args::AffineExpr...)
   return this
 end
 
-function hvcat(rows::(Int64...), args::AffineExpr...)
+function hvcat(rows::Tuple{Vararg{Int64}}, args::AffineExpr...)
   row_exprs = AffineExpr[]
   index = 0
   for row_size in rows

@@ -6,10 +6,10 @@ export convert
 export sum_squares
 export endof, size, ndims
 
-Value = Union(Float64, SparseMatrixCSC{Float64, Int64})
-Numeric = Union(Number, AbstractArray)
+Value = Union{Float64, SparseMatrixCSC{Float64, Int64}}
+Numeric = Union{Number, AbstractArray}
 
-ValueOrNothing = Union(Value, Nothing)
+ValueOrVoid = Union{Value, Void}
 
 abstract AbstractExpr
 abstract AffineOrConstant <: AbstractExpr
@@ -26,9 +26,9 @@ end
 
 type Constant <: AffineOrConstant
   head::Symbol
-  value::ValueOrNothing
-  size::(Int64, Int64)
-  uid::Uint64
+  value::ValueOrVoid
+  size::Tuple{Int64, Int64}
+  uid::UInt64
   evaluate::Function
 
   function Constant(value::Value)
@@ -55,15 +55,15 @@ Constant(value) = convert(Constant, value)
 
 type AffineExpr <: AffineOrConstant
   head::Symbol
-  value::ValueOrNothing
+  value::ValueOrVoid
   children::Tuple
-  vars_to_coeffs_map::Dict{Uint64, Constant}
+  vars_to_coeffs_map::Dict{UInt64, Constant}
   constant::Constant
-  size::(Int64, Int64)
-  uid::Uint64
+  size::Tuple{Int64, Int64}
+  uid::UInt64
   evaluate::Function
 
-  function AffineExpr(head::Symbol, children::Tuple, vars_to_coeffs_map::Dict{Uint64, Constant}, constant::Constant, size::(Int64, Int64))
+  function AffineExpr(head::Symbol, children::Tuple, vars_to_coeffs_map::Dict{UInt64, Constant}, constant::Constant, size::Tuple{Int64, Int64})
     this = new(head, nothing, children, vars_to_coeffs_map, constant, size)
     this.uid = object_id(this)
     return this
@@ -72,18 +72,18 @@ end
 
 function AffineConstant(value::Value)
   constant = Constant(value)
-  this = AffineExpr(:constant, (), Dict{Uint64, Constant}(), constant, constant.size)
+  this = AffineExpr(:constant, (), Dict{UInt64, Constant}(), constant, constant.size)
   this.value = this.constant.value
   this.evaluate = ()->this.value
   return this
 end
 
-function Variable(size::(Int64, Int64))
+function Variable(size::Tuple{Int64, Int64})
   if (size[1] < 1 || size[2] < 1)
     error("invalid variable size")
   end
   vec_sz = size[1]*size[2]
-  this = AffineExpr(:variable, (), Dict{Uint64, Constant}(), Constant(spzeros(vec_sz, 1)), size)
+  this = AffineExpr(:variable, (), Dict{UInt64, Constant}(), Constant(spzeros(vec_sz, 1)), size)
   this.vars_to_coeffs_map[this.uid] = Constant(speye(vec_sz))
   this.evaluate = ()->begin
     if this.value == nothing
@@ -103,11 +103,11 @@ Variable(size::Integer) = Variable((size, 1))
 
 type SumSquaresExpr <: AbstractExpr
   head::Symbol
-  value::ValueOrNothing
+  value::ValueOrVoid
   affines::Array{AffineExpr}
   multipliers::Array{Float64}
   scalar::Float64
-  uid::Uint64
+  uid::UInt64
   evaluate::Function
 
   function SumSquaresExpr(head::Symbol, affines::Array{AffineExpr}, multipliers::Array{Float64}, scalar::Float64)

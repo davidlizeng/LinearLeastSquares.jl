@@ -1,16 +1,16 @@
 export Problem
 
-Float64OrNothing = Union(Float64, Nothing)
-SumSquaresExprOrNothing = Union(SumSquaresExpr, Nothing)
+Float64OrVoid = Union{Float64, Void}
+SumSquaresExprOrVoid = Union{SumSquaresExpr, Void}
 
 type Problem
   head::Symbol
   objective::SumSquaresExpr
   constraints::Array{EqConstraint, 1}
   status::ASCIIString
-  optval::Float64OrNothing
+  optval::Float64OrVoid
 
-  function Problem(head::Symbol, objective::SumSquaresExprOrNothing, constraints::Array{EqConstraint, 1})
+  function Problem(head::Symbol, objective::SumSquaresExprOrVoid, constraints::Array{EqConstraint, 1})
     this = new(head, objective, constraints, "not yet solved", nothing)
     return this
   end

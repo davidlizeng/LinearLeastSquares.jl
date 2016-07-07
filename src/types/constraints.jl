@@ -1,6 +1,8 @@
+import Base.==, Base.+
+
 export ==, EqConstraint, +
 
-AffineOrConst = Union(AffineExpr, Constant)
+AffineOrConst = Union{AffineExpr, Constant}
 
 type EqConstraint
   head::Symbol
@@ -10,10 +12,10 @@ type EqConstraint
 
   function EqConstraint(lhs::AffineOrConst, rhs::AffineOrConst)
     if lhs.head == :Constant && rhs.head == :Constant
-      error ("Equality constraints between two constants are not allowed")
+      error("Equality constraints between two constants are not allowed")
     end
     if lhs.size != rhs.size && lhs.size != (1, 1) && rhs.size != (1, 1)
-      error ("LHS and RHS of constraints muust have the same size, or one needs to be scalar")
+      error("LHS and RHS of constraints muust have the same size, or one needs to be scalar")
     end
     this = new(:(==), lhs, rhs, lhs - rhs)
     return this
@@ -26,5 +28,5 @@ end
 
 +(constraints::Array{EqConstraint, 1}, new_constraints::Array{EqConstraint, 1}) = append!(constraints, new_constraints)
 +(constraints::Array{EqConstraint, 1}, new_constraint::EqConstraint) = push!(constraints, new_constraint)
-+(constraints::Array{None, 1}, new_constraints::Array{EqConstraint, 1}) = new_constraints
-+(constraints::Array{None, 1}, new_constraint::EqConstraint) = [new_constraint]
++(constraints::Array{Union{}, 1}, new_constraints::Array{EqConstraint, 1}) = new_constraints
++(constraints::Array{Union{}, 1}, new_constraint::EqConstraint) = [new_constraint]

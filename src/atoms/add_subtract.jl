@@ -1,3 +1,5 @@
+import Base.+, Base.-
+
 export +, -
 
 # Unary Negation
@@ -23,13 +25,13 @@ function +(x::Constant, y::Constant)
   if x.size == (1, 1) || y.size == (1, 1) || x.size == y.size
     return convert(Constant, x.value + y.value)
   else
-    error ("Cannot add two expressions with sizes $(x.size) and $(y.size)")
+    error("Cannot add two expressions with sizes $(x.size) and $(y.size)")
   end
 end
 
 function +(x::AffineExpr, y::Constant)
   if x.size != (1, 1) && y.size != (1, 1) && x.size != y.size
-    error ("Cannot add two expressions with sizes $(x.size) and $(y.size)")
+    error("Cannot add two expressions with sizes $(x.size) and $(y.size)")
   end
 
   if x.size == (1, 1) && y.size != (1, 1)
@@ -49,7 +51,7 @@ end
 
 function +(x::AffineExpr, y::AffineExpr)
   if x.size != (1, 1) && y.size != (1, 1) && x.size != y.size
-    error ("Cannot add two expressions with sizes $(x.size) and $(y.size)")
+    error("Cannot add two expressions with sizes $(x.size) and $(y.size)")
   end
 
   if x.size == (1, 1) && y.size != (1, 1)
