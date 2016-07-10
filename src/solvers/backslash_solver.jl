@@ -113,12 +113,23 @@ function backslash_solve!(p::Problem)
     push!(canon_forms, constraint.canon_form)
   end
   C, d = coalesce_affine_exprs(vars_to_ranges_map, num_vars, canon_forms)
+  if size(A, 1) == 0
+    if size(C, 1) < size(C, 2)
+      error("Underdetermined system of equations.")
+    elseif size(C, 2) < size(C, 1)
+      error("Overdetermined system of equaitons.")
+    end
+  end
   solution = nothing
   # return A, b, C, d
   if size(A, 1) > 0 || size(C, 1) > 0
     coefficient, constant = build_kkt_system(A, b, C, d)
+    # Julia 0.4 sparse backslash uses Cholesky decomposition
+    # and requires coefficient to be positive definite
+    if !isposdef(coefficient)
+      coefficient = full(coefficient)
+    end
     try
-      # sparse solver doesnt error out some 2x2 singular KKT systems
       solution = coefficient\full(constant)
     end
   end
