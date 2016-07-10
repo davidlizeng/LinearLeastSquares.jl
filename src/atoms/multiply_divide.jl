@@ -24,7 +24,7 @@ function .*(x::Constant, y::AffineExpr)
 
   # vec_x needs to be repmat'd for this to work for other forms of dot mult
   vec_x = vec(x)
-  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  vars_to_coeffs_map = Dict{UInt64, Constant}()
   for (v, c) in y.vars_to_coeffs_map
     if vec_x.size != (1, 1) && c.size[2] > 1
       rep_x = repmat(vec_x, 1, c.size[2])
@@ -51,7 +51,7 @@ function *(x::Constant, y::AffineExpr)
     x_kron = Constant(kron(speye(y.size[2]), x.value))
 
     # Build the coefficient map for x * y
-    vars_to_coeffs_map = Dict{Uint64, Constant}()
+    vars_to_coeffs_map = Dict{UInt64, Constant}()
     for (v, c) in y.vars_to_coeffs_map
       vars_to_coeffs_map[v] = x_kron * c
     end
@@ -71,7 +71,7 @@ function *(x::AffineExpr, y::Constant)
   # matrix multiplication
   elseif x.size[2] == y.size[1]
     y_kron = Constant(kron(y.value', speye(x.size[1])))
-    vars_to_coeffs_map = Dict{Uint64, Constant}()
+    vars_to_coeffs_map = Dict{UInt64, Constant}()
     for (v, c) in x.vars_to_coeffs_map
       vars_to_coeffs_map[v] = y_kron * c
     end

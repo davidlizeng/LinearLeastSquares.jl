@@ -25,7 +25,7 @@ function diag(x::AffineExpr, num::Int64)
     )
   )
 
-  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  vars_to_coeffs_map = Dict{UInt64, Constant}()
   for (v, c) in x.vars_to_coeffs_map
     vars_to_coeffs_map[v] = indexer * c
   end
@@ -52,7 +52,7 @@ function diagm(x::AffineExpr)
     )
   )
 
-  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  vars_to_coeffs_map = Dict{UInt64, Constant}()
   for (v, c) in x.vars_to_coeffs_map
     vars_to_coeffs_map[v] = indexer * c
   end

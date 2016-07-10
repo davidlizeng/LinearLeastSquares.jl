@@ -16,7 +16,7 @@ end
 function reset_values_and_get_vars!(p::Problem)
   p.status = "not yet solved"
   p.optval = nothing
-  unique_vars_map = Dict{Uint64, AffineExpr}()
+  unique_vars_map = Dict{UInt64, AffineExpr}()
   p.objective.value = nothing
   for affine in p.objective.affines
     reset_value_and_add_vars!(affine, unique_vars_map)
@@ -28,7 +28,7 @@ function reset_values_and_get_vars!(p::Problem)
 end
 
 function get_var_ranges_and_num_vars(unique_vars_map::Dict{UInt64, AffineExpr})
-  vars_to_ranges_map = Dict{UInt64, (Int64, Int64)}()
+  vars_to_ranges_map = Dict{UInt64, Tuple{Int64, Int64}}()
   num_vars = 0
   for (id, var) in unique_vars_map
     sz = var.size[1] * var.size[2]

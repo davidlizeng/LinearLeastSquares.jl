@@ -11,8 +11,8 @@ y = create_var(2, 3)
 z = create_var(3, 3)
 v = [x; y; z]
 test_expr(v, (x, y, z))
-v = [x, z, y]
-test_expr(v, (x, y, z))
+# v = [x, z, y]
+# test_expr(v, (x, y, z))
 
 # hvcat test
 hv = [x x; y y; z z]

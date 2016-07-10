@@ -12,7 +12,7 @@ function vcat(args::AffineExpr...)
     num_rows += arg.size[1]
   end
 
-  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  vars_to_coeffs_map = Dict{UInt64, Constant}()
   vec_sz = num_rows * num_cols
   constant = Constant(spzeros(vec_sz, 1))
   index_start = 0
@@ -54,7 +54,7 @@ function hcat(args::AffineExpr...)
     num_cols += arg.size[2]
   end
 
-  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  vars_to_coeffs_map = Dict{UInt64, Constant}()
   vec_sz = num_rows * num_cols
   constant = Constant(spzeros(vec_sz, 1))
   index = 0

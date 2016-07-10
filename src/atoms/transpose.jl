@@ -23,7 +23,7 @@ function transpose(x::AffineExpr)
 
   perm_constant = Constant(sparse(I, J, 1.0))
 
-  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  vars_to_coeffs_map = Dict{UInt64, Constant}()
   for (v, c) in x.vars_to_coeffs_map
     vars_to_coeffs_map[v] = perm_constant * c
   end

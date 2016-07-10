@@ -7,7 +7,7 @@ function repmat(x::Constant, m::Int64, n::Int64)
 end
 
 function repmat(x::AffineExpr, m::Int64, n::Int64)
-  vars_to_coeffs_map = Dict{Uint64, Constant}()
+  vars_to_coeffs_map = Dict{UInt64, Constant}()
   index_start = 0
   for (v, c) in x.vars_to_coeffs_map
     vars_to_coeffs_map[v] = Constant(spzeros(m * x.size[1] * x.size[2], c.size[2]))

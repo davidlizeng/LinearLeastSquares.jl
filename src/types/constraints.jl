@@ -28,5 +28,15 @@ end
 
 +(constraints::Array{EqConstraint, 1}, new_constraints::Array{EqConstraint, 1}) = append!(constraints, new_constraints)
 +(constraints::Array{EqConstraint, 1}, new_constraint::EqConstraint) = push!(constraints, new_constraint)
-+(constraints::Array{Union{}, 1}, new_constraints::Array{EqConstraint, 1}) = new_constraints
-+(constraints::Array{Union{}, 1}, new_constraint::EqConstraint) = [new_constraint]
++(constraints::Array{Any, 1}, new_constraints::Array{EqConstraint, 1}) =
+  if length(constraints) == 0
+    new_constraints
+  else
+    error("Cannot append equality constraint to arbitrary array.")
+  end
++(constraints::Array{Any, 1}, new_constraint::EqConstraint) =
+  if length(constraints) == 0
+    [new_constraint]
+  else
+    error("Cannot append equality constraint to arbitrary array.")
+  end

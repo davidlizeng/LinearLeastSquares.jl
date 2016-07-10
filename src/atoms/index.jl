@@ -9,7 +9,7 @@ function getindex{T <: Real}(x::AffineExpr, inds::AbstractArray{T, 1})
   if length(inds) == 1
     # select only one entry of x
     ind = convert(Int64, inds[1])
-    vars_to_coeffs_map = Dict{Uint64, Constant}()
+    vars_to_coeffs_map = Dict{UInt64, Constant}()
     for (v, c) in x.vars_to_coeffs_map
       vars_to_coeffs_map[v] = c[ind, :]
     end
@@ -20,7 +20,7 @@ function getindex{T <: Real}(x::AffineExpr, inds::AbstractArray{T, 1})
     num_cols_coeff = x.size[1] * x.size[2]
     indexer = Constant(sparse(1:length(inds), inds, 1.0, num_rows_coeff, num_cols_coeff))
 
-    vars_to_coeffs_map = Dict{Uint64, Constant}()
+    vars_to_coeffs_map = Dict{UInt64, Constant}()
     for (v, c) in x.vars_to_coeffs_map
       vars_to_coeffs_map[v] = indexer * c
     end
@@ -35,7 +35,7 @@ function getindex{T <: Real}(x::AffineExpr, rows::AbstractArray{T, 1}, cols::Abs
   if length(rows) == 1 && length(cols) == 1
     # select only one entry of x
     ind = x.size[1] * (convert(Int64, cols[1]) - 1) + convert(Int64, rows[1])
-    vars_to_coeffs_map = Dict{Uint64, Constant}()
+    vars_to_coeffs_map = Dict{UInt64, Constant}()
     for (v, c) in x.vars_to_coeffs_map
       vars_to_coeffs_map[v] = c[ind, :]
     end
@@ -44,7 +44,7 @@ function getindex{T <: Real}(x::AffineExpr, rows::AbstractArray{T, 1}, cols::Abs
     # build a range object to just select the part of a column in x
     ind = x.size[1] * (convert(Int64, cols[1]) - 1)
     ind_range = (ind + rows[1]) : (ind + rows[end])
-    vars_to_coeffs_map = Dict{Uint64, Constant}()
+    vars_to_coeffs_map = Dict{UInt64, Constant}()
 
     for (v, c) in x.vars_to_coeffs_map
       vars_to_coeffs_map[v] = c[ind_range, :]
@@ -56,7 +56,7 @@ function getindex{T <: Real}(x::AffineExpr, rows::AbstractArray{T, 1}, cols::Abs
     end_ind = x.size[1] * (cols[end] - 1)
     ind_range = (start_ind + rows[1]) : x.size[1] : (end_ind + rows[1])
 
-    vars_to_coeffs_map = Dict{Uint64, Constant}()
+    vars_to_coeffs_map = Dict{UInt64, Constant}()
     for (v, c) in x.vars_to_coeffs_map
       vars_to_coeffs_map[v] = c[ind_range, :]
     end
@@ -78,7 +78,7 @@ function getindex{T <: Real}(x::AffineExpr, rows::AbstractArray{T, 1}, cols::Abs
     end
     indexer = Constant(sparse(1:num_rows_coeff, J, 1.0, num_rows_coeff, num_cols_coeff))
 
-    vars_to_coeffs_map = Dict{Uint64, Constant}()
+    vars_to_coeffs_map = Dict{UInt64, Constant}()
     for (v, c) in x.vars_to_coeffs_map
       vars_to_coeffs_map[v] = indexer * c
     end
@@ -90,7 +90,13 @@ function getindex{T <: Real}(x::AffineExpr, rows::AbstractArray{T, 1}, cols::Abs
   return this
 end
 
+getindex(x::AffineOrConstant, ind::Colon) = getindex(x, 1:size(x,1)*size(x,2))
+getindex{T <: Real}(x::AffineOrConstant, rows::Colon, cols::AbstractArray{T, 1}) = getindex(x, 1:size(x, 1), cols)
+getindex{T <: Real}(x::AffineOrConstant, rows::AbstractArray{T, 1}, col::Colon) = getindex(x, rows, 1:size(x,2))
+
 getindex(x::AffineOrConstant, ind::Real) = getindex(x, ind:ind)
 getindex(x::AffineOrConstant, row::Real, col::Real) = getindex(x, row:row, col:col)
 getindex{T <: Real}(x::AffineOrConstant, row::Real, cols::AbstractArray{T, 1}) = getindex(x, row:row, cols)
 getindex{T <: Real}(x::AffineOrConstant, rows::AbstractArray{T, 1}, col::Real) = getindex(x, rows, col:col)
+getindex(x::AffineOrConstant, rows::Colon, col::Real) = getindex(x, 1:size(x,1), col:col)
+getindex(x::AffineOrConstant, row::Real, cols::Colon) = getindex(x, row:row, 1:size(x,2))
