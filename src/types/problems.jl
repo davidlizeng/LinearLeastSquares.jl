@@ -7,7 +7,7 @@ type Problem
   head::Symbol
   objective::SumSquaresExpr
   constraints::Array{EqConstraint, 1}
-  status::ASCIIString
+  status::String
   optval::Float64OrVoid
 
   function Problem(head::Symbol, objective::SumSquaresExprOrVoid, constraints::Array{EqConstraint, 1})

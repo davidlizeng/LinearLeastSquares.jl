@@ -1,5 +1,8 @@
 module LinearLeastSquares
 
+using Compat
+import Compat.String
+
 include("types/expressions.jl")
 include("types/constraints.jl")
 include("types/problems.jl")
