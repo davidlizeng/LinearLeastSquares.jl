@@ -31,13 +31,13 @@ end
 function test_expr(x::SumSquaresExpr)
   val1 = evaluate(x)
   val2 = eval_internals(x)
-  @assert abs(val1 .- val2) <= 0.0001
+  @assert abs.(val1 .- val2) <= 0.0001
 end
 
 function test_expr(x::AffineExpr, vars::Tuple)
   val1 = eval_internals(x, vars)
   val2 = evaluate(x)
-  @assert all(abs(val1 .- val2) .<= 0.0001)
+  @assert all(abs.(val1 .- val2) .<= 0.0001)
 end
 
 function create_var(m::Int64, n::Int64)
