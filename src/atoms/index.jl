@@ -67,7 +67,7 @@ function getindex{T <: Real}(x::AffineExpr, rows::AbstractArray{T, 1}, cols::Abs
     num_cols_coeff = x.size[1] * x.size[2]
 
     # Create the indexing matrix such that indexer * vec(x) = vec(x[rows, cols])
-    J = Array(Int64, num_rows_coeff)
+    J = Array{Int64}(num_rows_coeff)
     k = 1
     num_rows = x.size[1]
     for c in cols

@@ -9,8 +9,8 @@ function transpose(x::AffineExpr)
   num_rows = x.size[1]
   num_cols = x.size[2]
 
-  I = Array(Int64, vec_sz)
-  J = Array(Int64, vec_sz)
+  I = Array{Int64}(vec_sz)
+  J = Array(Int64}(vec_sz)
 
   k = 1
   for r = 1:num_rows

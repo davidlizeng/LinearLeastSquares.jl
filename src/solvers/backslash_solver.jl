@@ -103,7 +103,7 @@ function backslash_solve!(p::Problem)
   unique_vars_map = reset_values_and_get_vars!(p)
   vars_to_ranges_map, num_vars = get_var_ranges_and_num_vars(unique_vars_map)
   num_objectives = length(p.objective.affines)
-  scaled_obj_affines = Array(AffineExpr, num_objectives)
+  scaled_obj_affines = Array{AffineExpr}(num_objectives)
   for i in 1:num_objectives
     scaled_obj_affines[i] = sqrt(p.objective.multipliers[i]) * p.objective.affines[i]
   end
