@@ -11,8 +11,8 @@ Numeric = Union{Number, AbstractArray}
 
 ValueOrVoid = Union{Value, Void}
 
-abstract type AbstractExpr end
-abstract type AffineOrConstant <: AbstractExpr end
+@compat abstract type AbstractExpr end
+@compat abstract type AffineOrConstant <: AbstractExpr end
 
 function evaluate(x::AbstractExpr)
   if x.size == (1, 1)
