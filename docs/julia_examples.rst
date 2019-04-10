@@ -1,5 +1,5 @@
 =============================
-LineaLeastSquares.jl Examples
+LinearLeastSquares.jl Examples
 =============================
 
 This tutorial showcases LinearLeastSquares.jl through a few involved examples of linearly
