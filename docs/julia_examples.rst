@@ -1,5 +1,5 @@
 =============================
-LineaLeastSquares.jl Examples
+LinearLeastSquares.jl Examples
 =============================
 
 This tutorial showcases LinearLeastSquares.jl through a few involved examples of linearly
@@ -67,7 +67,7 @@ and our line is defined as
 .. math::
   r(x, y) = f(x) - y.
 
-One reasonable way to measure the how different line is from the data is to
+One reasonable way to measure how different the line is from the data is to
 sum the squares of the residuals between each point in the data and the line:
 
 .. math::
